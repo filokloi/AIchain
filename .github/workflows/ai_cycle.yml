@@ -1,0 +1,46 @@
+name: "AIchain — Intelligence Arbitration Cycle"
+
+on:
+  schedule:
+    # Run every 12 hours
+    - cron: "0 */12 * * *"
+  workflow_dispatch:
+    # Allow manual trigger from GitHub UI
+
+permissions:
+  contents: write
+
+jobs:
+  arbitrate:
+    name: "Global Model Arbitration"
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run arbitrator
+        env:
+          OPENROUTER_KEY: ${{ secrets.OPENROUTER_KEY }}
+          GEMINI_KEY: ${{ secrets.GEMINI_KEY }}
+          GROQ_KEY: ${{ secrets.GROQ_KEY }}
+        run: python arbitrator.py
+
+      - name: Commit and push updated routing table
+        run: |
+          git config user.name "AIchain Bot"
+          git config user.email "aichain-bot@users.noreply.github.com"
+          git add ai_routing_table.json
+          # Only commit if there are changes
+          git diff --cached --quiet || (
+            git commit -m "chore: update global routing table [$(date -u +%Y-%m-%dT%H:%M:%SZ)]"
+            git push
+          )
