@@ -480,6 +480,11 @@ def arbitrate() -> dict:
         if not model_id:
             continue
 
+        # ── Filter known placeholder models ──
+        if "gpt-oss" in model_id:
+            print(f"[AIchain] Skipping placeholder model: {model_id}")
+            continue
+
         provider = model_id.split("/")[0].replace("-", " ").title() if "/" in model_id else "Unknown"
         pricing = model.get("pricing", {})
         cost = parse_cost(pricing)
