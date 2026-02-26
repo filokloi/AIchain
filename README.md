@@ -2,7 +2,7 @@
 
 > *Maximum Intelligence. Zero Cost.*
 
-**AIchain** is the decentralized intelligence routing layer for [OpenClaw](https://github.com). It acts as a global "Value Maximizer" for AI models — objectively ranking every provider on the planet through the **Golden Quartet** metrics, without bias or discrimination.
+**AIchain** is the decentralized intelligence routing layer for [OpenClaw](https://github.com/openclaw/openclaw). It acts as a global "Value Maximizer" for AI models — objectively ranking every provider on the planet through the **Golden Quartet** metrics, without bias or discrimination.
 
 ---
 
@@ -59,7 +59,7 @@ python arbitrator.py
 ### Use in OpenClaw
 Copy the JSON URL from the dashboard and paste it into your OpenClaw Skill configuration:
 ```
-https://<your-username>.github.io/AIchain/ai_routing_table.json
+https://filokloi.github.io/AIchain/ai_routing_table.json
 ```
 
 ---

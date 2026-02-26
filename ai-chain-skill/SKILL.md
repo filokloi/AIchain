@@ -62,9 +62,11 @@ Error threshold, cooldown, and TTL are configurable in `bridge_config.json`.
 | File | Purpose |
 |------|---------|
 | `aichain.py` | Main entry point |
-| `bridge_config.json` | All configuration |
+| `bridge_config.json` | Runtime configuration |
+| `scripts/aichain_bridge.py` | Bridge orchestration helpers |
 | `scripts/controller.py` | State machine + circuit breaker |
 | `scripts/sync.py` | Routing table fetch + validation |
 | `scripts/health.py` | Health output for monitoring |
+| `scripts/discover.py` | Model/provider discovery helpers |
 | `install.ps1` | Automated installer |
 | `uninstall.ps1` | Clean removal |

@@ -4,7 +4,7 @@
 # Usage: powershell -ExecutionPolicy Bypass -File install.ps1
 
 param(
-    [string]$RoutingUrl = "https://raw.githubusercontent.com/filok94/AIchain/main/ai_routing_table.json"
+    [string]$RoutingUrl = "https://filokloi.github.io/AIchain/ai_routing_table.json"
 )
 
 $ErrorActionPreference = "Stop"
