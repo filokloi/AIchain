@@ -1,0 +1,38 @@
+name: Release Check
+
+on:
+  workflow_dispatch:
+
+jobs:
+  release-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install deps
+        run: pip install -r requirements.txt
+
+      - name: Compile check
+        run: |
+          python -m py_compile arbitrator.py aichain_bridge.py debug_sync.py
+          python -m py_compile ai-chain-skill/aichain.py ai-chain-skill/scripts/*.py ai-chain-skill/providers/*.py
+
+      - name: Validate JSON
+        run: |
+          python - << 'PY'
+          import json,glob,sys
+          files = glob.glob('*.json') + glob.glob('ai-chain-skill/*.json')
+          for f in files:
+              with open(f,'r',encoding='utf-8') as fh:
+                  json.load(fh)
+          print('JSON OK')
+          PY
+
+      - name: Production checklist presence
+        run: test -f PRODUCTION_CHECKLIST.md
