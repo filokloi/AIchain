@@ -1,72 +1,72 @@
 {
-    "routing_url": "https://filokloi.github.io/AIchain/ai_routing_table.json",
-    "openclaw_config": "~/.openclaw/openclaw.json",
-    "data_dir": "~/.openclaw/aichain",
-    "sync_interval_hours": 12,
-    "max_fallbacks": 5,
-    "max_backups": 3,
-    "controller": {
-        "error_threshold": 3,
-        "error_window_seconds": 300,
-        "escalation_ttl_minutes": 15,
-        "cooldown_seconds": 30,
-        "poll_interval_seconds": 3,
-        "max_escalations_per_hour": 5,
-        "routing_table_max_age_hours": 48
+  "routing_url": "https://filokloi.github.io/AIchain/ai_routing_table.json",
+  "openclaw_config": "~/.openclaw/openclaw.json",
+  "data_dir": "~/.openclaw/aichain",
+  "sync_interval_hours": 12,
+  "max_fallbacks": 5,
+  "max_backups": 3,
+  "controller": {
+    "error_threshold": 3,
+    "error_window_seconds": 300,
+    "escalation_ttl_minutes": 15,
+    "cooldown_seconds": 30,
+    "poll_interval_seconds": 3,
+    "max_escalations_per_hour": 5,
+    "routing_table_max_age_hours": 48
+  },
+  "specialist_pins": {
+    "vision": {
+      "triggers": [
+        "image_analysis",
+        "facial_recognition",
+        "ocr",
+        "screenshot",
+        "visual_analysis",
+        "photo"
+      ],
+      "model": "google/gemini-2.5-pro",
+      "ttl_minutes": 30
     },
-    "specialist_pins": {
-        "vision": {
-            "triggers": [
-                "image_analysis",
-                "facial_recognition",
-                "ocr",
-                "screenshot",
-                "visual_analysis",
-                "photo"
-            ],
-            "model": "google/gemini-2.5-pro",
-            "ttl_minutes": 30
-        },
-        "deep_research": {
-            "triggers": [
-                "deep_web_search",
-                "evidence_synthesis",
-                "data_correlation",
-                "intelligence_report",
-                "target_analysis"
-            ],
-            "model": "openai/o3-pro",
-            "ttl_minutes": 30
-        },
-        "code_engineering": {
-            "triggers": [
-                "refactor",
-                "system_architecture",
-                "reverse_engineer",
-                "exploit_analysis"
-            ],
-            "model": "openai/gpt-4.1",
-            "ttl_minutes": 30
-        },
-        "document_analysis": {
-            "triggers": [
-                "pdf_analysis",
-                "document_forensics",
-                "extract_text",
-                "contract_review",
-                "legal_analysis"
-            ],
-            "model": "anthropic/claude-sonnet-4",
-            "ttl_minutes": 30
-        }
+    "deep_research": {
+      "triggers": [
+        "deep_web_search",
+        "evidence_synthesis",
+        "data_correlation",
+        "intelligence_report",
+        "target_analysis"
+      ],
+      "model": "openai/o3-pro",
+      "ttl_minutes": 30
     },
-    "security": {
-        "key_source": "environment",
-        "log_redact_keys": true,
-        "integrity_check": true
+    "code_engineering": {
+      "triggers": [
+        "refactor",
+        "system_architecture",
+        "reverse_engineer",
+        "exploit_analysis"
+      ],
+      "model": "openai/gpt-4.1",
+      "ttl_minutes": 30
     },
-    "version_compat": {
-        "min_routing_table_version": "4.0",
-        "skill_version": "4.0.0"
+    "document_analysis": {
+      "triggers": [
+        "pdf_analysis",
+        "document_forensics",
+        "extract_text",
+        "contract_review",
+        "legal_analysis"
+      ],
+      "model": "anthropic/claude-sonnet-4",
+      "ttl_minutes": 30
     }
+  },
+  "security": {
+    "key_source": "environment",
+    "log_redact_keys": true,
+    "integrity_check": true
+  },
+  "version_compat": {
+    "min_routing_table_version": "4.0",
+    "skill_version": "4.0.0"
+  }
 }
