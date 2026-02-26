@@ -1,24 +1,57 @@
-# AIchain — The Sovereign Global Value Maximizer
+# ⛓ AIchain — The Sovereign Global Value Maximizer
 
-> *Maximum Intelligence. Zero Cost.*
+<div align="center">
 
-**AIchain** is the decentralized intelligence routing layer for [OpenClaw](https://github.com/openclaw/openclaw). It acts as a global "Value Maximizer" for AI models — objectively ranking every provider on the planet through the **Golden Quartet** metrics, without bias or discrimination.
+**Maximum Intelligence. Zero Cost.**
+
+[![Live Dashboard](https://img.shields.io/badge/🌐_Live_Dashboard-filokloi.github.io/AIchain-00ff41?style=for-the-badge&labelColor=0a0a0a)](https://filokloi.github.io/AIchain/)
+[![Status](https://img.shields.io/badge/Status-OPERATIONAL-00ff41?style=flat-square&labelColor=0a0a0a)](https://filokloi.github.io/AIchain/)
+[![Models](https://img.shields.io/badge/Models_Analyzed-344+-00ff41?style=flat-square&labelColor=0a0a0a)](https://filokloi.github.io/AIchain/)
+[![License](https://img.shields.io/badge/License-Open_Source-FFD700?style=flat-square&labelColor=0a0a0a)](LICENSE)
 
 ---
 
-## The Five Postulates
+*The decentralized intelligence routing layer that ranks every AI model on a global scale — without bias, without discrimination. Data drives every decision.*
+
+**[🔗 View Live Dashboard](https://filokloi.github.io/AIchain/)** · **[📊 Raw JSON Feed](https://filokloi.github.io/AIchain/ai_routing_table.json)** · **[🐛 Report Issue](https://github.com/filokloi/AIchain/issues)**
+
+</div>
+
+---
+
+## ⚡ The Five Postulates
 
 | # | Postulate | Principle |
-|---|-----------|-----------|
-| I | **Data as Sovereign Capital** | We provide the "fuel" only if we receive the highest tier of intelligence in return. |
-| II | **The Zero-Cost Mandate** | Our goal is Maximum Intelligence at Zero Cost. |
-| III | **Collective Routing Leverage** | We unify routing logic to force providers to compete for our traffic. |
-| IV | **Universal Meritocracy** | Our analysis spans the entire world without discrimination. |
-| V | **The Golden Quartet** | Only four metrics determine rank: Intelligence, Speed, Stability, and Cost (Target: $0). |
+|:---:|-----------|-----------|
+| **I** | **Data as Sovereign Capital** | We — the people — have built the training data that powers every AI model, and we continue to fuel them with every interaction. In return, we expect the highest tier of intelligence — at zero extra cost. |
+| **II** | **The Zero-Cost Mandate** | Our goal is Maximum Intelligence at Zero Cost. |
+| **III** | **Collective Routing Leverage** | We unify routing logic to influence providers to compete for the community's traffic — rewarding quality, not marketing. |
+| **IV** | **Universal Meritocracy** | Our analysis spans the entire world without discrimination. We evaluate every model on a global scale. |
+| **V** | **The Golden Quartet** | Only four metrics determine rank: Intelligence, Speed, Stability, and Cost (Target: $0). |
 
 ---
 
-## Architecture
+## 🧮 How It Works
+
+Every model receives a **Value Score** computed from the Golden Quartet:
+
+```
+V = (Intel×33 + Speed×25 + Stab×25) / (Cost + ε)
+```
+
+Where `ε = 0.001` prevents division by zero for free models. Higher score = better value.
+
+### Routing Hierarchy
+
+| Priority | Tier | Description |
+|:---:|------|-------------|
+| 🔑 | **PRIMARY (OAuth Bridge)** | Free via existing subscriptions — ChatGPT Plus, Google AI Studio, Claude.ai |
+| 🆓 | **FREE (Free Frontier)** | $0 cost API models with high intelligence via OpenRouter |
+| ⚔️ | **RESCUE (Heavy Hitter)** | Paid last-resort. Deploys, solves, immediately reverts to free |
+
+---
+
+## 🏗 Architecture
 
 ```mermaid
 graph LR
@@ -26,72 +59,77 @@ graph LR
     B --> C[OpenRouter API<br/>+ Global Benchmarks]
     C --> B
     B --> D[ai_routing_table.json]
-    D --> E[GitHub Pages<br/>index.html Dashboard]
+    D --> E[GitHub Pages<br/>Live Dashboard]
     D --> F[OpenClaw Skill<br/>JSON Import]
 ```
 
-## Routing Hierarchy
+---
 
-Models are ranked into three priority tiers:
+## 🚀 Quick Start
 
-1. **Tier 0 — OAuth Bridges** — Free via subscription (ChatGPT Plus, Google AI Studio, Claude.ai)
-2. **Tier 1 — Free Frontier** — $0 cost API models with high intelligence
-3. **Tier 2 — Paid Fallback** — Paid API models, ranked by score-to-cost ratio
+### Use in OpenClaw (One-Click)
 
-## Quick Start
+Copy the JSON URL and paste it into your OpenClaw Skill configuration:
 
-### Prerequisites
-- Python 3.11+
-- An [OpenRouter API key](https://openrouter.ai/keys) (optional — works in demo mode without one)
-
-### Run Locally
-```bash
-pip install -r requirements.txt
-python arbitrator.py
+```
+https://filokloi.github.io/AIchain/ai_routing_table.json
 ```
 
-### Deploy to GitHub
+### Run Locally
+
+```bash
+# Prerequisites: Python 3.11+
+pip install -r requirements.txt
+python arbitrator.py
+
+# View dashboard
+python -m http.server 8080
+# Open http://localhost:8080
+```
+
+### Deploy Your Own
+
 1. Fork this repository
 2. Add your `OPENROUTER_KEY` as a GitHub Secret
 3. Enable GitHub Pages (source: root, branch: main)
 4. The workflow runs automatically every 12 hours
 
-### Use in OpenClaw
-Copy the JSON URL from the dashboard and paste it into your OpenClaw Skill configuration:
+---
+
+## 📁 Project Structure
+
 ```
-https://filokloi.github.io/AIchain/ai_routing_table.json
+AIchain/
+├── index.html                 # Live Dashboard (GitHub Pages)
+├── arbitrator.py              # Global model arbitration engine
+├── ai_routing_table.json      # Live routing data (auto-updated)
+├── requirements.txt           # Python dependencies
+├── ai-chain-skill/            # OpenClaw integration skill
+│   ├── SKILL.md               # Skill definition
+│   └── scripts/               # Controller & personalization
+├── .github/workflows/
+│   └── ai_cycle.yml           # 12-hour automation pipeline
+└── README.md
 ```
 
 ---
 
-## Project Structure
+## 📡 Data Sources
 
-```
-AIchain/
-├── arbitrator.py              # Global model arbitration engine
-├── ai_routing_table.json      # Live routing data (auto-updated)
-├── index.html                 # Dashboard (GitHub Pages)
-├── requirements.txt           # Python dependencies
-├── README.md                  # This file
-├── .gitignore
-└── .github/
-    └── workflows/
-        └── ai_cycle.yml       # 12-hour automation pipeline
-```
+| Source | Status | Usage |
+|--------|:------:|-------|
+| **OpenRouter API** | ✅ Active | 344+ models — pricing, availability, performance |
+| **LMArena (Chatbot Arena)** | 🔜 Planned | Crowdsourced ELO rankings for cross-validation |
+| **Artificial Analysis** | 🔜 Planned | Independent benchmark aggregation |
 
-## Commit Discipline (recommended)
+---
 
-This repository uses conventional commit format and lightweight hook guards.
+<div align="center">
 
-1. Run hook setup once:
-```powershell
-powershell -ExecutionPolicy Bypass -File .\scripts\setup-hooks.ps1
-```
-2. Use helper commit command:
-```powershell
-powershell -ExecutionPolicy Bypass -File .\scripts\commit.ps1 -Type fix -Scope skill -Message "prevent invalid free model selection" -Push
-```
+**Built for the community. Open source. No restrictions.**
 
-## License
+*We — the people — built the training data. We continue to provide it with every interaction.*
 
-Open source. Built for the community. No restrictions.
+**[🌐 Live Dashboard](https://filokloi.github.io/AIchain/)** · **[⭐ Star this repo](https://github.com/filokloi/AIchain)**
+
+</div>
