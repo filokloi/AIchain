@@ -64,6 +64,56 @@ https://filokloi.github.io/AIchain/ai_routing_table.json
 
 ---
 
+## Understanding the Rankings
+
+### Value Score Formula
+
+Models are ranked by a composite **Value Score** that balances capability and cost:
+
+```
+ValueScore = (Intelligence / (Cost + ε)) × Stability × SpeedFactor
+```
+
+- **Intelligence** (1–100): Overall reasoning capability.
+- **Cost**: Price per token (USD). Free models have cost 0.
+- **Stability**: Reliability score (0–1).
+- **SpeedFactor**: Relative speed (higher = faster).
+- **ε** (epsilon): Small constant (0.01) preventing division by zero, giving free models a huge advantage.
+
+This formula naturally favors **high-intelligence free models** and penalizes expensive ones.
+
+### Column Reference
+
+| Column | Details |
+|--------|---------|
+| Model | Provider/model identifier (used in OpenClaw configuration). |
+| Tier | OAUTH_BRIDGE (free with subscription), FREE_FRONTIER ($0 API), HEAVY_HITTER (paid rescue). |
+| Intel | Intelligence score (1–100). Notable levels: 99 = exceptional, 96–98 = very high, 94–95 = high, 80–93 = good, <80 = moderate. |
+| Cost | Approx. cost per million tokens (USD). Free = $0.00. |
+| Value | Computed ranking metric; higher is better. |
+| Provider | Organization hosting the model. |
+| Stability | Reliability (0–1). Higher means more uptime. |
+| Speed | Relative latency factor; higher = lower latency. |
+
+### Usage Instructions
+
+1. Install the AIchain skill (run `install.ps1`).
+2. The skill fetches `https://filokloi.github.io/AIchain/ai_routing_table.json` automatically.
+3. OpenClaw routes queries to the optimal free model.
+4. Manual overrides:
+   - `--godmode <model>`: force a specific model
+   - `--auto`: return to automatic selection
+   - `--escalate`: immediately invoke Heavy Hitter
+   - `--revert`: go back to free primary
+
+Cron jobs maintain freshness:
+- 12-hour global ranking update
+- 6-hour health check
+
+For issues, see the [GitHub repo](https://github.com/filokloi/AIchain).
+
+---
+
 ## Project Structure
 
 ```
