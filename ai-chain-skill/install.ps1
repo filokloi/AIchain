@@ -1,4 +1,4 @@
-# AIchain — install.ps1
+# AIchain - install.ps1
 # Automated skill installation for Windows/OpenClaw
 # Run as Administrator for Task Scheduler setup
 # Usage: powershell -ExecutionPolicy Bypass -File install.ps1
@@ -13,7 +13,7 @@ $DataDir = "$env:USERPROFILE\.openclaw\aichain"
 $ConfigFile = Join-Path $SkillDir "bridge_config.json"
 
 Write-Host ""
-Write-Host "  AIchain v4.0 — Sovereign Skill Installer" -ForegroundColor Green
+Write-Host "  AIchain v4.0 - Sovereign Skill Installer" -ForegroundColor Green
 Write-Host "  =========================================" -ForegroundColor Green
 Write-Host ""
 
@@ -52,7 +52,7 @@ $syncResult = python (Join-Path $SkillDir "aichain.py") --sync 2>&1
 if ($LASTEXITCODE -eq 0) {
     Write-Host "        Sync OK" -ForegroundColor Green
 } else {
-    Write-Host "        Sync failed (non-critical — will retry on next cycle)" -ForegroundColor Yellow
+    Write-Host "        Sync failed (non-critical - will retry on next cycle)" -ForegroundColor Yellow
     Write-Host "        $syncResult" -ForegroundColor Gray
 }
 
@@ -63,10 +63,8 @@ $isAdmin = ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIde
 if ($isAdmin) {
     $taskName = "AIchain Ghost Watcher"
 
-    # Remove existing task if present
     schtasks /Delete /TN $taskName /F 2>$null
 
-    # Create via schtasks (simpler than XML)
     $pythonPath = (Get-Command python).Source
     $scriptPath = Join-Path $SkillDir "aichain.py"
     $action = "`"$pythonPath`" `"$scriptPath`" --watch"
@@ -85,7 +83,7 @@ if ($isAdmin) {
 }
 
 Write-Host ""
-Write-Host "  ✓ Installation complete" -ForegroundColor Green
+Write-Host "  Completed" -ForegroundColor Green
 Write-Host ""
 Write-Host "  Quick commands:" -ForegroundColor Cyan
 Write-Host "    python aichain.py --status   # Check status" -ForegroundColor Gray

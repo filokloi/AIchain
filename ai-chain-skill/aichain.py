@@ -85,6 +85,42 @@ def check_specialist_pin(text: str, cfg: dict) -> dict | None:
     return None
 
 
+def filter_supported_entries(table: dict, oc_config: dict, log: logging.Logger) -> dict:
+    """Keep only models that exist in OpenClaw allowed model list to avoid invalid model IDs."""
+    allowed = set((oc_config.get("agents", {})
+                   .get("defaults", {})
+                   .get("models", {}) or {}).keys())
+
+    # Safety net: include current primary/fallbacks from runtime config
+    model_cfg = (oc_config.get("agents", {})
+                 .get("defaults", {})
+                 .get("model", {}) or {})
+    if model_cfg.get("primary"):
+        allowed.add(model_cfg["primary"])
+    for fb in model_cfg.get("fallbacks", []) or []:
+        allowed.add(fb)
+
+    if not allowed:
+        log.warning("No OpenClaw allowlist models found; skipping support filter")
+        return table
+
+    filtered = []
+    for entry in table.get("routing_hierarchy", []):
+        rid = resolve_model_id(entry.get("model", ""))
+
+        # Guardrail: direct-provider "*:free" IDs frequently break OpenClaw runtime selection.
+        if rid.startswith(("openai/", "google/", "deepseek/")) and ":free" in rid:
+            continue
+
+        if rid in allowed:
+            filtered.append(entry)
+
+    new_table = dict(table)
+    new_table["routing_hierarchy"] = filtered
+    log.info(f"Supported-model filter: kept {len(filtered)}/{len(table.get('routing_hierarchy', []))} entries")
+    return new_table
+
+
 # ─────────────────────────────────────────
 # COMMANDS
 # ─────────────────────────────────────────
@@ -113,6 +149,13 @@ def cmd_sync(cfg: dict, ctrl: Controller, log: logging.Logger, dry_run: bool = F
 
     if not table:
         return False
+
+    oc_config = read_openclaw_config(paths["openclaw_config"])
+    if not oc_config:
+        log.error(f"Cannot read: {paths['openclaw_config']}")
+        return False
+
+    table = filter_supported_entries(table, oc_config, log)
 
     # Freshness check
     max_age = cfg.get("controller", {}).get("routing_table_max_age_hours", 48)
@@ -145,11 +188,6 @@ def cmd_sync(cfg: dict, ctrl: Controller, log: logging.Logger, dry_run: bool = F
         log.info("[DRY RUN] No changes written")
         return True
 
-    oc_config = read_openclaw_config(paths["openclaw_config"])
-    if not oc_config:
-        log.error(f"Cannot read: {paths['openclaw_config']}")
-        return False
-
     new_config = inject_model(oc_config, primary["model"], fallback_ids)
     changed = write_config(
         paths["openclaw_config"], new_config,
@@ -175,12 +213,18 @@ def cmd_escalate(cfg: dict, ctrl: Controller, log: logging.Logger, reason: str):
     if not table:
         return False
 
-    hh = get_heavy_hitter(table)
-    if not hh:
-        log.error("No Heavy Hitter available")
+    oc_config = read_openclaw_config(paths["openclaw_config"])
+    if not oc_config:
+        log.error(f"Cannot read: {paths['openclaw_config']}")
         return False
 
-    oc_config = read_openclaw_config(paths["openclaw_config"])
+    table = filter_supported_entries(table, oc_config, log)
+
+    hh = get_heavy_hitter(table)
+    if not hh:
+        log.error("No Heavy Hitter available after support filtering")
+        return False
+
     current_primary = oc_config.get("agents", {}).get("defaults", {}).get("model", {}).get("primary", "")
 
     hh_id = resolve_model_id(hh["model"])
