@@ -79,6 +79,19 @@ AIchain/
         └── ai_cycle.yml       # 12-hour automation pipeline
 ```
 
+## Commit Discipline (recommended)
+
+This repository uses conventional commit format and lightweight hook guards.
+
+1. Run hook setup once:
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\setup-hooks.ps1
+```
+2. Use helper commit command:
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\commit.ps1 -Type fix -Scope skill -Message "prevent invalid free model selection" -Push
+```
+
 ## License
 
 Open source. Built for the community. No restrictions.
