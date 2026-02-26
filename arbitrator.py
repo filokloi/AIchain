@@ -60,26 +60,42 @@ OAUTH_BRIDGES = {
 # These are baseline scores; live data from scraping overrides them.
 BENCHMARK_MAP = {
     # OpenAI
-    "openai/o3-pro": 99, "openai/gpt-4.1": 96, "openai/o4-mini": 94,
-    "openai/gpt-4o": 92, "openai/gpt-4.1-mini": 86, "openai/o3-mini": 90,
+    "openai/o3-pro": 99, "openai/gpt-4.1": 96, "openai/o4-mini": 94, "openai/o4-mini-high": 95,
+    "openai/gpt-4o": 92, "openai/gpt-4.1-mini": 86, "openai/o3-mini": 90, "openai/o3-mini-high": 91,
     "openai/codex-mini": 88, "openai/gpt-4.1-nano": 76,
+    "openai/gpt-5.3-codex": 97, "openai/gpt-5.2-codex": 96, "openai/gpt-5.1-codex-max": 95,
+    "openai/gpt-5-mini": 92, "openai/gpt-5": 97,
     # Google
     "google/gemini-2.5-pro": 97, "google/gemini-2.5-flash": 90,
-    "google/gemini-2.0-flash": 85,
+    "google/gemini-2.0-flash": 86, "google/gemini-3.1-pro": 98, "google/gemini-3-pro-preview": 97,
+    "google/gemma-3-27b-it": 83, "google/gemma-3-12b-it": 76, "google/gemma-3-4b-it": 68,
+    "google/gemma-2-27b-it": 81, "google/gemma-2-9b-it": 75,
     # Anthropic
-    "anthropic/claude-sonnet-4": 95, "anthropic/claude-3.5-sonnet": 92,
-    "anthropic/claude-3.5-haiku": 81,
+    "anthropic/claude-opus-4.6": 99, "anthropic/claude-sonnet-4.6": 97, "anthropic/claude-haiku-4.5": 92,
+    "anthropic/claude-sonnet-4": 95, "anthropic/claude-3.5-sonnet": 94,
+    "anthropic/claude-3.5-haiku": 83,
     # DeepSeek
-    "deepseek/deepseek-r1": 94, "deepseek/deepseek-r1-0528": 95,
-    "deepseek/deepseek-chat": 87,
+    "deepseek/deepseek-r1": 97, "deepseek/deepseek-r1-0528": 98, "deepseek/deepseek-r1-distill-llama-70b": 92,
+    "deepseek/deepseek-chat": 93, "deepseek/deepseek-v3": 95,
     # Mistral
-    "mistralai/mistral-large": 89, "mistralai/mistral-medium": 83,
-    "mistralai/mistral-small": 77,
-    # Meta
+    "mistralai/mistral-large": 90, "mistralai/mistral-large-2407": 92, "mistralai/mistral-large-2411": 93,
+    "mistralai/mistral-small-3.1-24b-instruct": 82, "mistralai/mistral-small": 78,
+    "mistralai/ministral-8b-instruct": 74, "mistralai/pixtral-large-2411": 91,
+    # Meta Llama
     "meta-llama/llama-4-maverick": 88, "meta-llama/llama-4-scout": 84,
-    "meta-llama/llama-3.3-70b-instruct": 85,
+    "meta-llama/llama-3.3-70b-instruct": 92, "meta-llama/llama-3.1-405b-instruct": 94,
+    "meta-llama/llama-3.1-70b-instruct": 90, "meta-llama/llama-3.1-8b-instruct": 76,
+    "meta-llama/llama-3.2-3b-instruct": 65, "meta-llama/llama-3.2-1b-instruct": 58,
     # Qwen
-    "qwen/qwen3-235b-a22b": 91, "qwen/qwen3-30b-a3b": 83,
+    "qwen/qwen-max": 93, "qwen/qwen-plus": 88, 
+    "qwen/qwen3-235b-a22b": 92, "qwen/qwen3-30b-a3b": 85,
+    "qwen/qwen2.5-72b-instruct": 90, "qwen/qwen2.5-32b-instruct": 84, "qwen/qwen2.5-14b-instruct": 78,
+    "qwen/qwen2.5-7b-instruct": 74, "qwen/qwq-32b-preview": 87,
+    # Nvidia
+    "nvidia/nemotron-4-340b-instruct": 91, "nvidia/llama-3.1-nemotron-70b-instruct": 92,
+    # Others
+    "cohere/command-r-plus": 89, "cohere/command-r": 82, "cohere/command-r-plus-08-2024": 91,
+    "x-ai/grok-beta": 88, "x-ai/grok-2-1212": 93, "inflection/inflection-3-pi": 86,
 }
 
 
@@ -279,11 +295,50 @@ def fuse_intelligence(
         weighted_sum = sum(weight_map.get(s[0], 1) * s[1] for s in scores)
         return int(weighted_sum / total_weight)
 
-    # Source 4: Context-length heuristic (fallback)
-    if context_length <= 0:
-        return 50
-    score = 30 + 10 * math.log2(max(context_length / 1024, 1))
-    return min(int(score), 95)
+    # Source 4: Name/Parameter Semantic Parser Heuristic (fallback)
+    # Extracts keywords, 'xxxB' patterns to estimate real capability instead of context length.
+    base_score = 65
+    
+    # Keyword boosts
+    if "pro" in model_lower or "opus" in model_lower or "-max" in model_lower or "large" in model_lower:
+        base_score += 18
+    elif "sonnet" in model_lower or "plus" in model_lower or "medium" in model_lower:
+        base_score += 15
+    elif "flash" in model_lower or "mini" in model_lower or "haiku" in model_lower or "small" in model_lower:
+        base_score += 12
+        
+    # Thinking/Reasoner bonus
+    if "thinking" in model_lower or "reason" in model_lower or "r1" in model_lower or "o1" in model_lower or "o3" in model_lower or "qwq" in model_lower:
+        base_score += 6
+        
+    # Parameter size logic (overrides some base stats if present)
+    param_match = re.search(r'(\d+(?:\.\d+)?)\s*[bm]', model_lower.replace('-', ''))
+    if param_match:
+        val = float(param_match.group(1))
+        # if matched an 'm' (million), it's tiny
+        if 'm' in param_match.group(0):
+            val = val / 1000.0
+            
+        if val >= 400:     param_score = 93
+        elif val >= 100:   param_score = 89
+        elif val >= 65:    param_score = 87
+        elif val >= 30:    param_score = 83
+        elif val >= 12:    param_score = 77
+        elif val >= 7:     param_score = 73
+        elif val >= 3:     param_score = 66
+        elif val < 3:      param_score = 60
+        else:              param_score = 75
+        
+        # Blend keyword bonuses into parameter score (limited)
+        base_score = param_score + (base_score - 65) * 0.5
+        
+    # Minimal contextual length bonus (+0 to +3)
+    # E.g. 1M token context adds +3 to intelligence score, 4k adds 0.
+    ctx_boost = max(0, min(3, math.log2(max(context_length / 4096, 1))))
+    
+    final_score = base_score + ctx_boost
+    
+    return min(int(final_score), 95)
 
 
 def apply_promo_boost(model_id: str, promo_kings: list[str], intel: int) -> int:
