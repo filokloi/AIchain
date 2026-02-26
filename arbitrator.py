@@ -470,6 +470,9 @@ def arbitrate() -> dict:
     aa_map = fetch_artificial_analysis()
     promo_kings = fetch_promo_tracker(raw_models, gemini_key)
 
+    # Filter placeholders from promo tracker
+    promo_kings = [p for p in promo_kings if "gpt-oss" not in p]
+
     print(f"[AIchain] Data fusion: OpenRouter({len(raw_models)}) + "
           f"LMSYS({len(elo_map)}) + AA({len(aa_map)}) + PromoKings({len(promo_kings)})")
 
