@@ -12,6 +12,8 @@
     <meta property="og:description" content="Decentralized intelligence routing layer. 344+ AI models ranked by value.">
     <meta property="og:type" content="website">
     <title>AIchain — The Sovereign Global Value Maximizer</title>
+    <link rel="icon"
+        href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⛓</text></svg>">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700;800&display=swap"
@@ -1277,6 +1279,230 @@
                 padding: 20px 0;
             }
         }
+
+        /* ── MODAL ── */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(8px);
+            z-index: 1000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+            opacity: 1;
+        }
+
+        .modal-card {
+            background: var(--bg-surface);
+            border: 1px solid var(--border-color);
+            box-shadow: 0 0 40px rgba(0, 255, 65, 0.1);
+            width: 90%;
+            max-width: 500px;
+            padding: 24px;
+            position: relative;
+            transform: translateY(20px);
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .modal-overlay.active .modal-card {
+            transform: translateY(0);
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 16px;
+            right: 20px;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 1.5rem;
+            line-height: 1;
+            transition: color 0.2s;
+        }
+
+        .modal-close:hover {
+            color: var(--neon-green);
+            text-shadow: 0 0 8px var(--neon-green);
+        }
+
+        .modal-title {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+            padding-right: 30px;
+            word-break: break-all;
+        }
+
+        .modal-provider {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-bottom: 24px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .modal-metrics {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .modal-metric-box {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 12px;
+        }
+
+        .modal-metric-label {
+            font-size: 0.65rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 6px;
+        }
+
+        .modal-metric-val {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .modal-bar-bg {
+            height: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            margin-top: 8px;
+            overflow: hidden;
+        }
+
+        .modal-bar-fill {
+            height: 100%;
+            background: var(--text-muted);
+        }
+
+        .modal-bar-fill.high {
+            background: var(--neon-green);
+            box-shadow: 0 0 8px var(--neon-green);
+        }
+
+        .modal-bar-fill.mid {
+            background: var(--tier-oauth);
+            box-shadow: 0 0 8px var(--tier-oauth);
+        }
+
+        .modal-actions {
+            margin-top: 24px;
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn-modal {
+            flex: 1;
+            background: transparent;
+            border: 1px solid var(--neon-green);
+            color: var(--neon-green);
+            padding: 10px;
+            font-family: inherit;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.2s;
+        }
+
+        .btn-modal:hover {
+            background: rgba(0, 255, 65, 0.1);
+            box-shadow: 0 0 12px rgba(0, 255, 65, 0.2);
+        }
+
+        /* ── TOOLTIPS ── */
+        .has-tooltip {
+            position: relative;
+            cursor: help;
+        }
+
+        .has-tooltip::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%) translateY(-8px);
+            background: #000;
+            color: var(--neon-green);
+            border: 1px solid var(--neon-green);
+            padding: 6px 10px;
+            font-size: 0.65rem;
+            font-weight: 400;
+            white-space: nowrap;
+            pointer-events: none;
+            opacity: 0;
+            box-shadow: 0 4px 12px rgba(0, 255, 65, 0.15);
+            transition: opacity 0.2s, transform 0.2s;
+            z-index: 100;
+        }
+
+        .has-tooltip:hover::after {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        /* Loading Spinner */
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(0, 255, 65, 0.1);
+            border-top-color: var(--neon-green);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 16px;
+        }
+
+        @keyframes spin {
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .clickable-row {
+            cursor: pointer;
+        }
+
+        .row-copy-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            padding: 2px 4px;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.2s, color 0.2s;
+            font-size: 0.8rem;
+        }
+
+        .clickable-row:hover .row-copy-btn {
+            opacity: 1;
+        }
+
+        .row-copy-btn:hover {
+            color: var(--neon-green);
+        }
+
+        .changelog-hint {
+            font-size: 0.65rem;
+            color: var(--neon-green);
+            margin-top: 4px;
+            letter-spacing: 0.5px;
+        }
     </style>
 </head>
 
@@ -1550,6 +1776,7 @@
                 <span class="section-marker">//</span>
                 <h2 class="section-title">Global Routing Table</h2>
                 <span class="section-meta" id="lastUpdate">Loading...</span>
+                <div id="changelogHint" class="changelog-hint" style="display: none;"></div>
             </div>
 
             <!-- Stats Bar -->
@@ -1586,6 +1813,11 @@
                     onclick="setFilter('HEAVY_HITTER')">Rescue</button>
                 <button class="filter-btn" data-filter="DAILY_FREE" onclick="setFilter('DAILY_FREE')">Daily
                     Free</button>
+                <div style="flex-grow: 1;"></div>
+                <button class="filter-btn" style="border-color: var(--text-muted); color: var(--text-muted);"
+                    onclick="exportCSV()">📥 CSV</button>
+                <button class="filter-btn" style="border-color: var(--text-muted); color: var(--text-muted);"
+                    onclick="exportJSON()">📥 JSON</button>
             </div>
         </div>
 
@@ -1595,22 +1827,32 @@
                 <table>
                     <thead>
                         <tr>
-                            <th data-sort="rank" class="sorted-asc">Rank</th>
+                            <th data-sort="rank" class="sorted-asc has-tooltip"
+                                data-tooltip="Global ranking (1 is best)">Rank</th>
                             <th data-sort="model">Model</th>
-                            <th data-sort="tier">Tier</th>
-                            <th data-sort="task_label">Role</th>
-                            <th data-sort="intelligence">Intel</th>
-                            <th data-sort="speed">Speed</th>
-                            <th data-sort="stability">Stab</th>
-                            <th data-sort="cost">Cost</th>
-                            <th data-sort="value_score">Value</th>
+                            <th data-sort="tier" class="has-tooltip"
+                                data-tooltip="Access model (Primary, Free, Rescue)">Tier</th>
+                            <th data-sort="task_label" class="has-tooltip" data-tooltip="Assigned OpenClaw Role">Role
+                            </th>
+                            <th data-sort="intelligence" class="has-tooltip"
+                                data-tooltip="Composite capability score (0-100)">Intel</th>
+                            <th data-sort="speed" class="has-tooltip"
+                                data-tooltip="Output tokens per second relative score (0-100)">Speed</th>
+                            <th data-sort="stability" class="has-tooltip"
+                                data-tooltip="API Uptime and reliability (0-100)">Stab</th>
+                            <th data-sort="cost" class="has-tooltip" data-tooltip="Average price per 1M output tokens">
+                                Cost</th>
+                            <th data-sort="value_score" class="has-tooltip"
+                                data-tooltip="V = (Intel×33 + Speed×25 + Stab×25) / (Cost + ε)">Value</th>
                         </tr>
                     </thead>
                     <tbody id="tableBody">
-                        <tr>
-                            <td colspan="9" style="text-align: center; padding: 40px;">
-                                <div class="loading-skeleton" style="width: 60%; margin: 0 auto 8px;"></div>
-                                <div class="loading-skeleton" style="width: 40%; margin: 0 auto;"></div>
+                        <tr id="loadingRow">
+                            <td colspan="9" style="text-align: center; padding: 60px 20px;">
+                                <div class="spinner"></div>
+                                <div
+                                    style="color: var(--neon-green); font-size: 0.8rem; letter-spacing: 2px; text-transform: uppercase;">
+                                    Connecting to routing feed...</div>
                             </td>
                         </tr>
                     </tbody>
@@ -1697,6 +1939,60 @@
             All models evaluated equally.
         </div>
     </footer>
+
+    <!-- ═══ MODAL ═══ -->
+    <div class="modal-overlay" id="modelModal" onclick="if(event.target===this) closeModal()">
+        <div class="modal-card">
+            <div class="modal-close" onclick="closeModal()">&times;</div>
+            <div class="modal-title" id="mTitle">Model Name</div>
+            <div class="modal-provider" id="mProvider">Provider</div>
+
+            <div style="display: flex; gap: 10px; margin-bottom: 20px;" id="mBadges">
+                <!-- Badges injected here -->
+            </div>
+
+            <div class="modal-metrics">
+                <div class="modal-metric-box">
+                    <div class="modal-metric-label">Intelligence</div>
+                    <div class="modal-metric-val" id="mIntel">0</div>
+                    <div class="modal-bar-bg">
+                        <div class="modal-bar-fill" id="mIntelBar"></div>
+                    </div>
+                </div>
+                <div class="modal-metric-box">
+                    <div class="modal-metric-label">Speed</div>
+                    <div class="modal-metric-val" id="mSpeed">0</div>
+                    <div class="modal-bar-bg">
+                        <div class="modal-bar-fill" id="mSpeedBar"></div>
+                    </div>
+                </div>
+                <div class="modal-metric-box">
+                    <div class="modal-metric-label">Stability</div>
+                    <div class="modal-metric-val" id="mStab">0</div>
+                    <div class="modal-bar-bg">
+                        <div class="modal-bar-fill" id="mStabBar"></div>
+                    </div>
+                </div>
+                <div class="modal-metric-box"
+                    style="background: rgba(0, 255, 65, 0.05); border-color: rgba(0, 255, 65, 0.2);">
+                    <div class="modal-metric-label" style="color: var(--neon-green);">Value Score</div>
+                    <div class="modal-metric-val" id="mValue" style="color: var(--neon-green); font-size: 1.5rem;">0
+                    </div>
+                    <div style="font-size: 0.6rem; color: var(--text-muted); margin-top: 4px;" id="mCost">Cost: $0.00
+                    </div>
+                </div>
+            </div>
+
+            <div style="font-size: 0.75rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 16px; display: none;"
+                id="mDetails">
+                <!-- Extra details injected here -->
+            </div>
+
+            <div class="modal-actions">
+                <button class="btn-modal" id="mCopyBtn" onclick="copyModelIdFromModal()">📋 Copy Model ID</button>
+            </div>
+        </div>
+    </div>
 
     <script>
         // ── State ──
@@ -1803,6 +2099,26 @@
                     `⚔ HEAVY HITTER: ${hh.model} (Intel: ${hh.intelligence})`;
             }
 
+            // Changelog Hint
+            const h = routingData.routing_hierarchy;
+            if (h && h.length > 0) {
+                try {
+                    const cached = localStorage.getItem('aiChainLastModels');
+                    if (cached) {
+                        const oldList = JSON.parse(cached);
+                        const added = h.filter(m => !oldList.some(o => o.model === m.model)).length;
+                        let hintHtml = '';
+                        if (added > 0) hintHtml += `<span style="color:var(--neon-green)">+${added} new models</span> `;
+                        if (hintHtml) {
+                            const el = document.getElementById('changelogHint');
+                            el.innerHTML = hintHtml;
+                            el.style.display = 'block';
+                        }
+                    }
+                    localStorage.setItem('aiChainLastModels', JSON.stringify(h.map(m => ({ model: m.model, rank: m.rank }))));
+                } catch (e) { }
+            }
+
             // Live Promos (Free Kings)
             const promos = routingData.live_promos || [];
             if (promos.length > 0) {
@@ -1895,10 +2211,14 @@
 
                     const rankDisplay = m.rank === 1 ? '🥇' : m.rank === 2 ? '🥈' : m.rank === 3 ? '🥉' : m.rank;
 
-                    return `<tr class="${medalClass}">
+                    const mJson = encodeURIComponent(JSON.stringify(m));
+                    return `<tr class="${medalClass} clickable-row" onclick="showModelDetail(decodeURIComponent('${mJson}'))">
                     <td class="rank-cell ${m.rank <= 3 ? 'top-3' : ''}">${rankDisplay}</td>
                     <td class="model-cell">
-                        <div class="model-name">${escHtml(m.model)}</div>
+                        <div style="display:flex; align-items:center; gap:4px;">
+                            <div class="model-name">${escHtml(m.model)}</div>
+                            <button class="row-copy-btn" onclick="event.stopPropagation(); copyModelId('${escHtml(m.model)}', this)" title="Copy Model ID">📋</button>
+                        </div>
                         <div class="model-provider">${escHtml(m.provider || '')}</div>
                     </td>
                     <td><span class="tier-badge ${tierClass}">${tierIcon} ${tierLabel}</span></td>
@@ -1944,6 +2264,138 @@
             const div = document.createElement('div');
             div.textContent = str;
             return div.innerHTML;
+        }
+
+        // ── Modal Logic ──
+        let currentModalModelId = '';
+
+        function showModelDetail(jsonStr) {
+            try {
+                const m = JSON.parse(jsonStr);
+                currentModalModelId = m.model;
+
+                document.getElementById('mTitle').textContent = m.model.split('/').pop();
+                document.getElementById('mProvider').textContent = m.provider || m.model.split('/')[0] || 'Unknown';
+
+                // Badges
+                const tierClass = m.tier === 'OAUTH_BRIDGE' ? 'oauth' : m.tier === 'FREE_FRONTIER' ? 'free' : 'paid';
+                const tierIcon = m.tier === 'OAUTH_BRIDGE' ? '🔑' : m.tier === 'FREE_FRONTIER' ? '🆓' : '⚔️';
+                const tierLabel = m.tier === 'OAUTH_BRIDGE' ? 'PRIMARY' : m.tier === 'FREE_FRONTIER' ? 'FREE' : 'RESCUE';
+
+                document.getElementById('mBadges').innerHTML = `
+                    <span class="tier-badge ${tierClass}">${tierIcon} ${tierLabel}</span>
+                    <span class="task-label ${m.task_label === 'DAILY_FREE' ? 'daily' : 'rescue'}">${m.task_label === 'DAILY_FREE' ? 'DAILY' : 'RESCUE'}</span>
+                    <span class="task-label" style="background: rgba(255,255,255,0.1); color: #fff;">RANK #${m.rank}</span>
+                `;
+
+                // Metrics
+                const intel = m.metrics?.intelligence || 0;
+                const speed = m.metrics?.speed || 0;
+                const stab = m.metrics?.stability || 0;
+                const cost = m.metrics?.cost || 0;
+                const val = m.value_score || 0;
+
+                setModalMetric('mIntel', intel);
+                setModalMetric('mSpeed', speed);
+                setModalMetric('mStab', stab);
+
+                document.getElementById('mValue').textContent = val >= 100 ? val.toFixed(0) : val.toFixed(1);
+                document.getElementById('mCost').textContent = cost <= 0 ? 'Cost: $0.00 (Free)' : `Cost: $${cost.toFixed(6)} / 1M out`;
+
+                // Extra details if available (architecture, context length context)
+                const detailsEl = document.getElementById('mDetails');
+                const extras = [];
+                if (m.context_length) extras.push(`Context: ${m.context_length.toLocaleString()} tokens`);
+                if (m.architecture) extras.push(`Arch: ${m.architecture.instruction_instruct ? 'Instruct' : 'Base'}`);
+                if (extras.length > 0) {
+                    detailsEl.textContent = extras.join(' • ');
+                    detailsEl.style.display = 'block';
+                } else {
+                    detailsEl.style.display = 'none';
+                }
+
+                document.getElementById('mCopyBtn').textContent = '📋 Copy Model ID';
+                document.getElementById('modelModal').classList.add('active');
+            } catch (e) {
+                console.error('Failed to parse model detail', e);
+            }
+        }
+
+        function setModalMetric(prefix, val) {
+            document.getElementById(prefix).textContent = val;
+            const bar = document.getElementById(prefix + 'Bar');
+            bar.style.width = val + '%';
+            bar.className = 'modal-bar-fill ' + metricClass(val).replace('metric-', '');
+        }
+
+        function closeModal() {
+            document.getElementById('modelModal').classList.remove('active');
+            currentModalModelId = '';
+        }
+
+        function copyModelId(id, btnElement) {
+            navigator.clipboard.writeText(id).then(() => {
+                const orig = btnElement.textContent;
+                btnElement.textContent = '✓';
+                btnElement.style.color = 'var(--neon-green)';
+                setTimeout(() => {
+                    btnElement.textContent = orig;
+                    btnElement.style.color = '';
+                }, 2000);
+            });
+        }
+
+        function copyModelIdFromModal() {
+            if (!currentModalModelId) return;
+            navigator.clipboard.writeText(currentModalModelId).then(() => {
+                const btn = document.getElementById('mCopyBtn');
+                btn.textContent = '✓ Copied!';
+                setTimeout(() => { if (btn) btn.textContent = '📋 Copy Model ID'; }, 2000);
+            });
+        }
+
+        function exportCSV() {
+            if (!routingData || !routingData.routing_hierarchy) return;
+            // Get currently displayed models from the DOM or filter state
+            // It's cleaner to re-filter based on state
+            let models = [...routingData.routing_hierarchy];
+            if (currentFilter !== 'all') {
+                if (currentFilter === 'DAILY_FREE') models = models.filter(m => m.task_label === 'DAILY_FREE');
+                else models = models.filter(m => m.tier === currentFilter);
+            }
+            if (searchQuery) {
+                models = models.filter(m => m.model.toLowerCase().includes(searchQuery) || (m.provider || '').toLowerCase().includes(searchQuery));
+            }
+
+            const header = ['Rank', 'Model', 'Provider', 'Tier', 'Role', 'Intelligence', 'Speed', 'Stability', 'Cost', 'ValueScore'];
+            const rows = models.map(m => [
+                m.rank, m.model, m.provider || '', m.tier, m.task_label || 'NONE',
+                m.metrics?.intelligence || 0, m.metrics?.speed || 0, m.metrics?.stability || 0,
+                m.metrics?.cost || 0, m.value_score || 0
+            ]);
+
+            const csvContent = "data:text/csv;charset=utf-8,"
+                + header.join(",") + "\n"
+                + rows.map(e => e.join(",")).join("\n");
+
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", `aichain_routing_${new Date().toISOString().split('T')[0]}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        function exportJSON() {
+            if (!routingData) return;
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(routingData, null, 2));
+            const link = document.createElement("a");
+            link.setAttribute("href", dataStr);
+            link.setAttribute("download", `aichain_routing_${new Date().toISOString().split('T')[0]}.json`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
         }
 
         function updateStatus(text, online) {
