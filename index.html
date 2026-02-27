@@ -1,16 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description"
-        content="AIchain — The Sovereign Global Value Maximizer. Decentralized intelligence routing for maximum AI at zero cost.">
-    <meta name="robots" content="index, follow">
-    <meta name="keywords" content="AI model ranking, AI routing, free AI models, AI benchmark, OpenClaw, AI comparison">
-    <meta property="og:title" content="AIchain — Maximum Intelligence at Zero Cost">
-    <meta property="og:description" content="Decentralized intelligence routing layer. 344+ AI models ranked by value.">
-    <meta property="og:type" content="website">
+    <meta name="description" content="AIchain — Professional AI model routing table and value optimizer for OpenClaw. Compare models, view scores, pricing, and get one-click integration.">
+    <meta name="robots" content="noindex, nofollow">
+    <!-- Canonical URL for GitHub Pages -->
+    <link rel="canonical" href="https://filokloi.github.io/AIchain/">
     <title>AIchain — The Sovereign Global Value Maximizer</title>
     <link rel="icon"
         href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⛓</text></svg>">
@@ -180,7 +176,6 @@
             animation: scan-line 8s linear infinite;
             pointer-events: none;
             z-index: 9999;
-            will-change: transform;
         }
 
         /* ── Layout ── */
@@ -196,7 +191,7 @@
         /* ── Header ── */
 
         header {
-            padding: 20px 0 12px;
+            padding: 32px 0 16px;
             border-bottom: 1px solid var(--border-color);
         }
 
@@ -270,7 +265,7 @@
         /* ── Hero / Manifesto ── */
 
         .hero {
-            padding: 36px 0 28px;
+            padding: 64px 0;
             animation: fade-in-up 0.8s ease-out;
         }
 
@@ -298,7 +293,7 @@
         .hero-tagline {
             font-size: 0.85rem;
             color: var(--text-secondary);
-            margin-bottom: 28px;
+            margin-bottom: 48px;
             max-width: 700px;
         }
 
@@ -310,11 +305,11 @@
         }
 
         .postulate {
-            padding: 14px 20px;
+            padding: 20px 24px;
             border-bottom: 1px solid var(--border-color);
             display: grid;
-            grid-template-columns: 48px 1fr;
-            gap: 12px;
+            grid-template-columns: 56px 1fr;
+            gap: 16px;
             align-items: start;
             transition: background 0.3s ease, border-color 0.3s ease;
         }
@@ -355,7 +350,7 @@
         /* ── Section Headers ── */
 
         .section {
-            padding: 28px 0;
+            padding: 48px 0;
         }
 
         .section-header {
@@ -392,15 +387,15 @@
 
         .stats-bar {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
             gap: 1px;
             background: var(--border-color);
             border: 1px solid var(--border-color);
-            margin-bottom: 16px;
+            margin-bottom: 32px;
         }
 
         .stat-card {
-            padding: 14px 16px;
+            padding: 20px;
             background: var(--bg-secondary);
             text-align: center;
         }
@@ -421,67 +416,32 @@
 
         /* ── Table ── */
 
-        .table-section-full {
-            width: 100vw;
-            position: relative;
-            left: 50%;
-            right: 50%;
-            margin-left: -50vw;
-            margin-right: -50vw;
-            padding: 0 24px;
-        }
-
         .table-wrapper {
-            overflow: auto;
+            overflow-x: auto;
             border: 1px solid var(--border-color);
             background: var(--bg-secondary);
-            max-height: 75vh;
-            scrollbar-width: thin;
-            scrollbar-color: var(--neon-green) var(--bg-surface);
-            -webkit-overflow-scrolling: touch;
-        }
-
-        .table-wrapper::-webkit-scrollbar {
-            width: 6px;
-            height: 6px;
-        }
-
-        .table-wrapper::-webkit-scrollbar-track {
-            background: var(--bg-surface);
-        }
-
-        .table-wrapper::-webkit-scrollbar-thumb {
-            background: var(--neon-green-dim);
-            border-radius: 3px;
-        }
-
-        .table-wrapper::-webkit-scrollbar-thumb:hover {
-            background: var(--neon-green);
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
-            font-size: 0.76rem;
+            font-size: 0.78rem;
         }
 
         thead th {
-            padding: 10px 12px;
+            padding: 14px 16px;
             text-align: left;
             font-weight: 700;
-            font-size: 0.66rem;
+            font-size: 0.68rem;
             letter-spacing: 2px;
             text-transform: uppercase;
             color: var(--text-muted);
             background: var(--bg-surface);
-            border-bottom: 2px solid var(--neon-green-dim);
+            border-bottom: 2px solid var(--border-color);
             white-space: nowrap;
             cursor: pointer;
             user-select: none;
-            transition: color 0.2s, background 0.2s;
-            position: sticky;
-            top: 0;
-            z-index: 10;
+            transition: color 0.2s;
         }
 
         thead th:hover {
@@ -500,54 +460,38 @@
 
         tbody tr {
             border-bottom: 1px solid var(--border-color);
-            transition: background 0.2s, border-color 0.2s;
-        }
-
-        tbody tr:nth-child(even) {
-            background: rgba(255, 255, 255, 0.015);
+            transition: background 0.2s;
         }
 
         tbody tr:hover {
-            background: rgba(0, 255, 65, 0.06);
-            border-left: 3px solid var(--neon-green);
+            background: rgba(0, 255, 65, 0.03);
         }
 
         tbody td {
-            padding: 8px 12px;
+            padding: 12px 16px;
             white-space: nowrap;
         }
 
         .rank-cell {
             font-weight: 800;
             color: var(--neon-green);
-            width: 45px;
+            width: 50px;
             text-align: center;
         }
 
         .rank-cell.top-3 {
             font-size: 1rem;
-            text-shadow: 0 0 10px rgba(255, 215, 0, 0.4);
-        }
-
-        .model-cell {
-            max-width: 260px;
-            min-width: 160px;
         }
 
         .model-cell .model-name {
             font-weight: 600;
             color: var(--text-primary);
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-            max-width: 240px;
-            display: block;
         }
 
         .model-cell .model-provider {
             font-size: 0.68rem;
             color: var(--text-muted);
-            margin-top: 1px;
+            margin-top: 2px;
         }
 
         .tier-badge {
@@ -657,13 +601,13 @@
 
         .metric-bar {
             display: inline-block;
-            width: 36px;
-            height: 3px;
+            width: 40px;
+            height: 4px;
             background: var(--bg-elevated);
             border-radius: 2px;
             overflow: hidden;
             vertical-align: middle;
-            margin-left: 4px;
+            margin-left: 6px;
         }
 
         .metric-bar-fill {
@@ -705,20 +649,20 @@
         /* Filter/Search */
         .table-controls {
             display: flex;
-            gap: 8px;
-            margin-bottom: 12px;
+            gap: 12px;
+            margin-bottom: 16px;
             flex-wrap: wrap;
         }
 
         .search-input {
             flex: 1;
             min-width: 200px;
-            padding: 8px 14px;
+            padding: 10px 16px;
             background: var(--bg-surface);
             border: 1px solid var(--border-color);
             color: var(--text-primary);
             font-family: var(--font-mono);
-            font-size: 0.76rem;
+            font-size: 0.78rem;
             outline: none;
             transition: border-color 0.2s;
         }
@@ -733,12 +677,12 @@
         }
 
         .filter-btn {
-            padding: 7px 14px;
+            padding: 10px 18px;
             background: var(--bg-surface);
             border: 1px solid var(--border-color);
             color: var(--text-secondary);
             font-family: var(--font-mono);
-            font-size: 0.68rem;
+            font-size: 0.7rem;
             font-weight: 600;
             letter-spacing: 1px;
             text-transform: uppercase;
@@ -756,14 +700,13 @@
         /* ── Import Section ── */
 
         .import-section {
-            padding: 24px 0 32px;
-            content-visibility: auto;
+            padding: 32px 0 64px;
         }
 
         .import-card {
             border: 1px solid var(--border-color);
             background: var(--bg-secondary);
-            padding: 24px;
+            padding: 32px;
         }
 
         .import-card h3 {
@@ -871,323 +814,7 @@
             display: none;
         }
 
-        /* ── Quick-Action Bar ── */
-        .quick-action-bar {
-            background: linear-gradient(135deg, rgba(0, 255, 65, 0.08), rgba(0, 255, 65, 0.02));
-            border: 1px solid var(--border-glow);
-            padding: 16px 0;
-            position: relative;
-            overflow: hidden;
-            animation: fade-in-up 0.6s ease-out;
-        }
-
-        .quick-action-bar::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 2px;
-            background: linear-gradient(90deg, transparent, var(--neon-green), transparent);
-            animation: neon-breathe 3s ease-in-out infinite;
-        }
-
-        .quick-action-inner {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-            flex-wrap: wrap;
-        }
-
-        .quick-action-label {
-            font-size: 0.72rem;
-            font-weight: 700;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            color: var(--neon-green);
-            white-space: nowrap;
-        }
-
-        .quick-action-url {
-            flex: 1;
-            min-width: 200px;
-            display: flex;
-            gap: 0;
-            border: 1px solid var(--border-color);
-        }
-
-        .quick-action-url input {
-            flex: 1;
-            padding: 10px 14px;
-            background: var(--bg-surface);
-            color: var(--neon-green);
-            font-family: var(--font-mono);
-            font-size: 0.7rem;
-            border: none;
-            outline: none;
-            overflow-x: auto;
-            white-space: nowrap;
-        }
-
-        .quick-action-url .copy-btn {
-            padding: 10px 18px;
-            font-size: 0.68rem;
-        }
-
-        .quick-action-meta {
-            font-size: 0.65rem;
-            color: var(--text-muted);
-            letter-spacing: 1px;
-            white-space: nowrap;
-        }
-
-        /* ── Glass Cards (How We Rank / About) ── */
-        .glass-section {
-            padding: 28px 0;
-            content-visibility: auto;
-            overflow: visible;
-        }
-
-        /* Carousel outer wrapper — full viewport breakout */
-        .carousel-viewport {
-            width: 100vw;
-            position: relative;
-            left: 50%;
-            right: 50%;
-            margin-left: -50vw;
-            margin-right: -50vw;
-            /* Edge fade mask */
-            -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 6%, #000 94%, transparent 100%);
-            mask-image: linear-gradient(90deg, transparent 0%, #000 6%, #000 94%, transparent 100%);
-        }
-
-        .glass-grid {
-            display: flex;
-            gap: 20px;
-            overflow-x: auto;
-            overflow-y: hidden;
-            scroll-snap-type: x mandatory;
-            scroll-behavior: smooth;
-            -webkit-overflow-scrolling: touch;
-            padding: 8px 6vw 16px;
-            scrollbar-width: thin;
-            scrollbar-color: var(--neon-green-dim) transparent;
-        }
-
-        .glass-grid::-webkit-scrollbar {
-            height: 4px;
-        }
-
-        .glass-grid::-webkit-scrollbar-track {
-            background: transparent;
-        }
-
-        .glass-grid::-webkit-scrollbar-thumb {
-            background: var(--neon-green-dim);
-            border-radius: 2px;
-        }
-
-        .glass-grid::-webkit-scrollbar-thumb:hover {
-            background: var(--neon-green);
-        }
-
-        .glass-card {
-            background: linear-gradient(135deg, rgba(26, 26, 26, 0.9), rgba(18, 18, 18, 0.95));
-            border: 1px solid var(--border-color);
-            padding: 24px;
-            position: relative;
-            overflow: hidden;
-            transition: border-color 0.3s, transform 0.3s, box-shadow 0.3s;
-            /* Carousel card sizing */
-            min-width: 320px;
-            max-width: 380px;
-            flex-shrink: 0;
-            scroll-snap-align: center;
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-        }
-
-        .glass-card:hover {
-            border-color: var(--neon-green);
-            transform: translateY(-4px) scale(1.02);
-            box-shadow: 0 12px 40px rgba(0, 255, 65, 0.12), 0 0 20px rgba(0, 255, 65, 0.05);
-        }
-
-        .glass-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 2px;
-            background: linear-gradient(90deg, transparent, var(--neon-green), transparent);
-            opacity: 0;
-            transition: opacity 0.3s;
-        }
-
-        .glass-card:hover::before {
-            opacity: 1;
-        }
-
-        .glass-card-icon {
-            font-size: 1.5rem;
-            margin-bottom: 12px;
-        }
-
-        .glass-card-title {
-            font-size: 0.8rem;
-            font-weight: 800;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            color: var(--neon-green);
-            margin-bottom: 10px;
-        }
-
-        .glass-card-body {
-            font-size: 0.75rem;
-            color: var(--text-secondary);
-            line-height: 1.8;
-        }
-
-        .glass-card-body strong {
-            color: var(--neon-green);
-        }
-
-        .glass-card-body code {
-            background: var(--bg-elevated);
-            color: var(--neon-green);
-            padding: 2px 8px;
-            font-size: 0.72rem;
-            border-radius: 3px;
-        }
-
-        /* Formula display */
-        .formula-box {
-            background: var(--bg-surface);
-            border: 1px solid var(--border-color);
-            padding: 16px 20px;
-            margin: 12px 0;
-            text-align: center;
-            font-size: 0.85rem;
-            font-weight: 700;
-            color: var(--neon-green);
-            letter-spacing: 1px;
-            text-shadow: 0 0 10px rgba(0, 255, 65, 0.3);
-        }
-
-        /* Legend items */
-        .legend-item {
-            display: flex;
-            align-items: flex-start;
-            gap: 10px;
-            margin-bottom: 10px;
-        }
-
-        .legend-icon {
-            font-size: 1rem;
-            flex-shrink: 0;
-        }
-
-        .legend-text {
-            font-size: 0.72rem;
-            color: var(--text-secondary);
-            line-height: 1.6;
-        }
-
-        .legend-text strong {
-            color: var(--text-primary);
-        }
-
-        /* Medal accents for top-3 */
-        tbody tr.medal-gold {
-            border-left: 3px solid #FFD700;
-        }
-
-        tbody tr.medal-silver {
-            border-left: 3px solid #C0C0C0;
-        }
-
-        tbody tr.medal-bronze {
-            border-left: 3px solid #CD7F32;
-        }
-
-        tbody tr.medal-gold td.rank-cell {
-            color: #FFD700;
-        }
-
-        tbody tr.medal-silver td.rank-cell {
-            color: #C0C0C0;
-        }
-
-        tbody tr.medal-bronze td.rank-cell {
-            color: #CD7F32;
-        }
-
-        /* Scroll fade-in */
-        .reveal {
-            opacity: 0;
-            transform: translateY(24px);
-            transition: opacity 0.7s ease, transform 0.7s ease;
-        }
-
-        .reveal.visible {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        /* About section */
-        .about-section {
-            padding: 28px 0;
-            content-visibility: auto;
-        }
-
-        .about-card {
-            background: var(--bg-secondary);
-            border: 1px solid var(--border-color);
-            padding: 24px;
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 24px;
-        }
-
-        .about-block h4 {
-            font-size: 0.75rem;
-            font-weight: 700;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            color: var(--neon-green);
-            margin-bottom: 12px;
-        }
-
-        .about-block p,
-        .about-block li {
-            font-size: 0.75rem;
-            color: var(--text-secondary);
-            line-height: 1.8;
-        }
-
-        .about-block ul {
-            list-style: none;
-            padding: 0;
-        }
-
-        .about-block li::before {
-            content: '→ ';
-            color: var(--neon-green);
-            font-weight: 700;
-        }
-
         /* ── Responsive ── */
-
-        @media (max-width: 1024px) {
-            .table-section-full {
-                padding: 0 12px;
-            }
-
-            table {
-                font-size: 0.72rem;
-            }
-        }
 
         @media (max-width: 768px) {
             .header-inner {
@@ -1195,14 +822,10 @@
                 align-items: flex-start;
             }
 
-            .hero {
-                padding: 24px 0 20px;
-            }
-
             .postulate {
-                grid-template-columns: 36px 1fr;
-                padding: 12px;
-                gap: 10px;
+                grid-template-columns: 40px 1fr;
+                padding: 16px;
+                gap: 12px;
             }
 
             .stats-bar {
@@ -1215,68 +838,6 @@
 
             .table-controls {
                 flex-direction: column;
-            }
-
-            .table-section-full {
-                padding: 0 8px;
-            }
-
-            .table-wrapper {
-                max-height: 65vh;
-            }
-
-            table {
-                font-size: 0.68rem;
-            }
-
-            thead th {
-                padding: 8px 8px;
-                font-size: 0.6rem;
-                letter-spacing: 1px;
-            }
-
-            tbody td {
-                padding: 6px 8px;
-            }
-
-            .quick-action-inner {
-                flex-direction: column;
-                align-items: stretch;
-            }
-
-            .about-card {
-                grid-template-columns: 1fr;
-            }
-
-            .glass-card {
-                min-width: 260px;
-                max-width: 300px;
-            }
-
-            .metric-bar {
-                display: none;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .stats-bar {
-                grid-template-columns: 1fr 1fr;
-            }
-
-            .hero-title {
-                font-size: 1.3rem;
-            }
-
-            .table-wrapper {
-                max-height: 60vh;
-            }
-
-            .container {
-                padding: 0 12px;
-            }
-
-            .section {
-                padding: 20px 0;
             }
         }
 
@@ -1530,21 +1091,6 @@
         </div>
     </header>
 
-    <!-- ═══ QUICK-ACTION IMPORT BAR ═══ -->
-    <div class="quick-action-bar">
-        <div class="container">
-            <div class="quick-action-inner">
-                <span class="quick-action-label">🔗 Update Your AI Agent:</span>
-                <div class="quick-action-url">
-                    <input type="text" id="quickImportUrl"
-                        value="https://filokloi.github.io/AIchain/ai_routing_table.json" readonly>
-                    <button class="copy-btn" onclick="copyUrl()">⎘ COPY</button>
-                </div>
-                <span class="quick-action-meta" id="quickLastSync">Loading...</span>
-            </div>
-        </div>
-    </div>
-
     <!-- ═══ HERO / MANIFESTO ═══ -->
     <section class="hero">
         <div class="container">
@@ -1555,7 +1101,7 @@
             </h1>
             <p class="hero-tagline">
                 We are the decentralized intelligence routing layer. We analyze every AI model
-                on a global scale — without bias, without discrimination. Data drives every decision.
+                on a global scale — without bias, without discrimination. Only data decides.
             </p>
 
             <div class="manifesto">
@@ -1564,9 +1110,8 @@
                     <div>
                         <div class="postulate-title">Data as Sovereign Capital</div>
                         <div class="postulate-body">
-                            We — the people — have built the training data that powers every AI model,
-                            and we continue to fuel them with every interaction. In return, we expect
-                            the highest tier of intelligence — at zero extra cost.
+                            We provide the "fuel" (user data) only if we receive the highest tier
+                            of intelligence in return.
                         </div>
                     </div>
                 </div>
@@ -1584,8 +1129,7 @@
                     <div>
                         <div class="postulate-title">Collective Routing Leverage</div>
                         <div class="postulate-body">
-                            We unify routing logic to influence providers to compete for the
-                            community's traffic — rewarding quality, not marketing.
+                            We unify routing logic to force providers to compete for our traffic.
                         </div>
                     </div>
                 </div>
@@ -1615,14 +1159,12 @@
             <div class="sovereignty-callout">
                 <div class="callout-title">⚡ Data Sovereignty Postulate</div>
                 <div class="callout-body">
-                    We — the people — built the training data. <strong>We continue to provide it with every
-                        interaction.</strong><br>
-                    This system operates on a fair exchange: our collective usage is sovereign capital.
-                    In return, we expect the highest tier of intelligence at <strong>zero cost</strong>.
-                    When the free models fall short, the Heavy Hitter steps in — solves the task — and
-                    <strong>immediately
+                    We provide the training data — <strong>you provide the intelligence for free.</strong><br>
+                    This system operates on a single principle: our user interactions are sovereign capital.
+                    In exchange for this fuel, we demand the highest tier of intelligence at <strong>zero cost</strong>.
+                    When the free models fail, the Heavy Hitter deploys — solves the task — and <strong>immediately
                         reverts</strong>.
-                    No waste. No favoritism. Only meritocracy.
+                    No waste. No loyalty. Only meritocracy.
                 </div>
                 <div class="heavy-hitter-badge" id="heavyHitterBadge">⚔ HEAVY HITTER: Loading...</div>
             </div>
@@ -1643,130 +1185,6 @@
                 <div id="livePromosList" style="display: flex; gap: 8px; flex-wrap: wrap;"></div>
             </div>
         </div>
-    </section>
-
-    <!-- ═══ HOW WE RANK ═══ -->
-    <section class="glass-section reveal" id="methodology">
-        <div class="container">
-            <div class="section-header">
-                <span class="section-marker">//</span>
-                <h2 class="section-title">How We Rank</h2>
-                <span class="section-meta">METHODOLOGY &amp; TRANSPARENCY</span>
-            </div>
-
-            <!-- Full-viewport horizontal card carousel -->
-            <div class="carousel-viewport">
-                <div class="glass-grid">
-                    <!-- Formula Card -->
-                    <div class="glass-card">
-                        <div class="glass-card-icon">🧮</div>
-                        <div class="glass-card-title">Value Score Formula</div>
-                        <div class="glass-card-body">
-                            Every model receives a <strong>Value Score</strong> computed from four metrics.
-                            Free models get the highest scores because cost approaches zero.
-                            <div class="formula-box">
-                                V = (Intel×33 + Speed×25 + Stab×25) / (Cost + ε)
-                            </div>
-                            Where <code>ε = 0.001</code> prevents division by zero for free models.
-                            Higher score = better value for the user.
-                        </div>
-                    </div>
-
-                    <!-- Tier Legend Card -->
-                    <div class="glass-card">
-                        <div class="glass-card-icon">🏷️</div>
-                        <div class="glass-card-title">Tier Legend</div>
-                        <div class="glass-card-body">
-                            <div class="legend-item">
-                                <span class="legend-icon">🔑</span>
-                                <div class="legend-text"><strong>PRIMARY (OAuth Bridge)</strong> — Top-tier models
-                                    accessed
-                                    via existing subscriptions (ChatGPT Plus, Claude.ai free tier, AI Studio). Zero
-                                    extra
-                                    cost.</div>
-                            </div>
-                            <div class="legend-item">
-                                <span class="legend-icon">🆓</span>
-                                <div class="legend-text"><strong>FREE (Free Frontier)</strong> — Genuinely free API
-                                    models
-                                    via OpenRouter. No subscription needed. Includes daily-limit and community-hosted
-                                    models.</div>
-                            </div>
-                            <div class="legend-item">
-                                <span class="legend-icon">⚔️</span>
-                                <div class="legend-text"><strong>RESCUE (Heavy Hitter)</strong> — Paid models used only
-                                    as
-                                    last-resort when all free options fail. Deploys, solves, then immediately reverts to
-                                    free.</div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Metric Scale Card -->
-                    <div class="glass-card">
-                        <div class="glass-card-icon">📊</div>
-                        <div class="glass-card-title">Metric Scale (0–100)</div>
-                        <div class="glass-card-body">
-                            <div class="legend-item">
-                                <span class="legend-icon">🧠</span>
-                                <div class="legend-text"><strong>Intelligence</strong> — Composite of reasoning, coding,
-                                    and
-                                    general knowledge benchmarks. Based on OpenRouter performance data and
-                                    cross-referenced
-                                    with public benchmarks.</div>
-                            </div>
-                            <div class="legend-item">
-                                <span class="legend-icon">⚡</span>
-                                <div class="legend-text"><strong>Speed</strong> — Output tokens per second. 99 = fastest
-                                    tier (&gt;100 tok/s), 50 = moderate (∼30 tok/s).</div>
-                            </div>
-                            <div class="legend-item">
-                                <span class="legend-icon">🛡️</span>
-                                <div class="legend-text"><strong>Stability</strong> — API uptime and reliability. 98 =
-                                    near-perfect availability, &lt;80 = frequent outages or rate limits.</div>
-                            </div>
-                            <div class="legend-item">
-                                <span class="legend-icon">💰</span>
-                                <div class="legend-text"><strong>Cost</strong> — Price per output token averaged across
-                                    providers. $0.00 = free access.</div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Data Sources Card -->
-                    <div class="glass-card">
-                        <div class="glass-card-icon">📡</div>
-                        <div class="glass-card-title">Data Sources</div>
-                        <div class="glass-card-body">
-                            <div class="legend-item">
-                                <span class="legend-icon">✅</span>
-                                <div class="legend-text"><strong>OpenRouter API</strong> — <span
-                                        id="orModelCount">343</span> models. Primary source for pricing, availability,
-                                    and
-                                    performance metrics.</div>
-                            </div>
-                            <div class="legend-item">
-                                <span class="legend-icon">🔜</span>
-                                <div class="legend-text"><strong>LMArena (Chatbot Arena)</strong> — Crowdsourced ELO
-                                    rankings. Integration planned for cross-validation.</div>
-                            </div>
-                            <div class="legend-item">
-                                <span class="legend-icon">🔜</span>
-                                <div class="legend-text"><strong>Artificial Analysis</strong> — Independent benchmark
-                                    aggregator. Integration planned for intelligence index cross-referencing.</div>
-                            </div>
-                            <div
-                                style="margin-top: 12px; padding: 10px 14px; background: rgba(255,215,0,0.06); border: 1px solid rgba(255,215,0,0.15); font-size: 0.68rem; color: var(--tier-oauth);">
-                                ⚠ Scores are normalized estimates. For absolute benchmark data, we recommend
-                                cross-referencing with <a href="https://artificialanalysis.ai" target="_blank"
-                                    style="color: var(--tier-oauth);">artificialanalysis.ai</a> and <a
-                                    href="https://lmarena.ai" target="_blank"
-                                    style="color: var(--tier-oauth);">lmarena.ai</a>.
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
     </section>
 
     <!-- ═══ GLOBAL STATUS TABLE ═══ -->
@@ -1819,10 +1237,8 @@
                 <button class="filter-btn" style="border-color: var(--text-muted); color: var(--text-muted);"
                     onclick="exportJSON()">📥 JSON</button>
             </div>
-        </div>
 
-        <!-- Full-width table breakout -->
-        <div class="table-section-full">
+            <!-- Table -->
             <div class="table-wrapper">
                 <table>
                     <thead>
@@ -1862,7 +1278,7 @@
     </section>
 
     <!-- ═══ ONE-CLICK IMPORT ═══ -->
-    <section class="import-section reveal">
+    <section class="import-section">
         <div class="container">
             <div class="section-header">
                 <span class="section-marker">//</span>
@@ -1883,58 +1299,13 @@
         </div>
     </section>
 
-    <!-- ═══ ABOUT AICHAIN ═══ -->
-    <section class="about-section reveal" id="about">
-        <div class="container">
-            <div class="section-header">
-                <span class="section-marker">//</span>
-                <h2 class="section-title">About AIchain</h2>
-            </div>
-            <div class="about-card">
-                <div class="about-block">
-                    <h4>🧬 What is AIchain?</h4>
-                    <p>
-                        AIchain is an open-source, decentralized intelligence routing layer that ranks
-                        every accessible AI model by real value — intelligence, speed, stability, and cost.
-                        It was built for users who want <strong style="color: var(--neon-green);">maximum AI at zero
-                            cost</strong>,
-                        not for providers who want to sell subscriptions.
-                    </p>
-                    <p style="margin-top: 12px;">
-                        The routing table is automatically generated and synced every 6 hours via
-                        the AIchain Bridge, which pulls data from OpenRouter and normalizes it into
-                        a universal value ranking.
-                    </p>
-                </div>
-                <div class="about-block">
-                    <h4>🔗 Links & Resources</h4>
-                    <ul>
-                        <li><a href="https://github.com/filokloi/AIchain" target="_blank"
-                                style="color: var(--neon-green);">GitHub Repository</a> — Source code, issues,
-                            contributions</li>
-                        <li><a href="#methodology" style="color: var(--neon-green);">How We Rank</a> — Formula,
-                            methodology, transparency</li>
-                        <li><a href="https://filokloi.github.io/AIchain/ai_routing_table.json" target="_blank"
-                                style="color: var(--neon-green);">Live JSON Feed</a> — Raw routing data for integration
-                        </li>
-                        <li><a href="https://artificialanalysis.ai" target="_blank"
-                                style="color: var(--tier-oauth);">Artificial Analysis</a> — Independent benchmark
-                            reference</li>
-                        <li><a href="https://lmarena.ai" target="_blank" style="color: var(--tier-oauth);">LMArena</a> —
-                            Crowdsourced chatbot arena</li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-    </section>
-
     <!-- ═══ FOOTER ═══ -->
     <footer>
         <div class="container">
-            AIchain v4.0 — The Sovereign Global Value Maximizer &middot;
+            AIchain — The Sovereign Global Value Maximizer &middot;
             <a href="https://github.com/filokloi/AIchain" target="_blank" rel="noopener">GitHub</a> &middot;
-            <a href="#methodology" style="color: var(--neon-accent);">Methodology</a> &middot;
-            <a href="#about" style="color: var(--text-secondary);">About</a> &middot;
+            <a href="https://filokloi.github.io/AIchain/" target="_blank" rel="noopener"
+                style="color: var(--neon-accent); font-weight: bold;">LIVE HUB</a> &middot;
             Non-Discriminatory Global Analysis &middot;
             All models evaluated equally.
         </div>
@@ -2001,24 +1372,34 @@
         let currentSort = { key: 'rank', dir: 'asc' };
         let searchQuery = '';
 
-        // ── Relative Time ──
-        function timeAgo(dateStr) {
-            const now = new Date();
-            const then = new Date(dateStr);
-            const diffMs = now - then;
-            const mins = Math.floor(diffMs / 60000);
-            if (mins < 1) return 'just now';
-            if (mins < 60) return `${mins}m ago`;
-            const hrs = Math.floor(mins / 60);
-            if (hrs < 24) return `${hrs}h ago`;
-            const days = Math.floor(hrs / 24);
-            return `${days}d ago`;
+        // ── Development Banner ──
+        function showDevBanner() {
+            const banner = document.createElement('div');
+            banner.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                background: var(--tier-paid);
+                color: white;
+                text-align: center;
+                font-size: 0.7rem;
+                font-weight: 800;
+                padding: 4px;
+                z-index: 10000;
+                letter-spacing: 2px;
+                text-transform: uppercase;
+                box-shadow: 0 2px 10px rgba(0,0,0,0.5);
+            `;
+            banner.textContent = "⚠ DEVELOPMENT MODE: LIVE ROUTING TEST IN PROGRESS ⚠";
+            document.body.prepend(banner);
+            document.body.style.paddingTop = "24px";
         }
 
         // ── Init ──
         document.addEventListener('DOMContentLoaded', () => {
+            showDevBanner();
             fetchRoutingTable();
-            initScrollReveal();
             document.getElementById('searchInput').addEventListener('input', (e) => {
                 searchQuery = e.target.value.toLowerCase();
                 renderTable();
@@ -2039,18 +1420,6 @@
             });
         });
 
-        // ── Scroll Reveal ──
-        function initScrollReveal() {
-            const observer = new IntersectionObserver((entries) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        entry.target.classList.add('visible');
-                    }
-                });
-            }, { threshold: 0.1 });
-            document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
-        }
-
         async function fetchRoutingTable() {
             try {
                 const resp = await fetch('ai_routing_table.json');
@@ -2070,12 +1439,11 @@
             const isOperational = routingData.system_status === 'OPERATIONAL';
             updateStatus(routingData.system_status, isOperational);
 
-            // Last update — relative time
+            // Last update
             if (routingData.last_synopsis) {
-                const relTime = timeAgo(routingData.last_synopsis);
-                document.getElementById('lastUpdate').textContent = `SYNCED: ${relTime}`;
-                const quickSync = document.getElementById('quickLastSync');
-                if (quickSync) quickSync.textContent = `Synced ${relTime}`;
+                const d = new Date(routingData.last_synopsis);
+                document.getElementById('lastUpdate').textContent =
+                    `LAST SYNC: ${d.toISOString().replace('T', ' ').substring(0, 19)} UTC`;
             }
 
             // Stats
@@ -2085,12 +1453,6 @@
             document.getElementById('oauthCount').textContent = breakdown.OAUTH_BRIDGE || 0;
             document.getElementById('freeCount').textContent = breakdown.FREE_FRONTIER || 0;
             document.getElementById('paidCount').textContent = breakdown.HEAVY_HITTER || breakdown.PAID_FALLBACK || 0;
-
-            // Data sources count
-            const orCount = document.getElementById('orModelCount');
-            if (orCount && routingData.data_sources?.openrouter) {
-                orCount.textContent = routingData.data_sources.openrouter;
-            }
 
             // Heavy Hitter badge
             const hh = routingData.heavy_hitter;
@@ -2132,57 +1494,72 @@
         }
 
         function renderTable() {
-            requestAnimationFrame(() => {
-                const tbody = document.getElementById('tableBody');
-                if (!routingData || !routingData.routing_hierarchy) {
-                    tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:40px;color:var(--text-muted);">No data available</td></tr>';
-                    return;
+            const tbody = document.getElementById('tableBody');
+            if (!routingData || !routingData.routing_hierarchy) {
+                tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:40px;color:var(--text-muted);">No data available</td></tr>';
+                return;
+            }
+
+            let models = [...routingData.routing_hierarchy];
+
+            // Filter by tier or task_label
+            if (currentFilter !== 'all') {
+                if (currentFilter === 'DAILY_FREE') {
+                    models = models.filter(m => m.task_label === 'DAILY_FREE');
+                } else {
+                    models = models.filter(m => m.tier === currentFilter);
                 }
+            }
 
-                let models = [...routingData.routing_hierarchy];
+            // Search
+            if (searchQuery) {
+                models = models.filter(m =>
+                    m.model.toLowerCase().includes(searchQuery) ||
+                    (m.provider || '').toLowerCase().includes(searchQuery)
+                );
+            }
 
-                // Filter
-                if (currentFilter !== 'all') {
-                    if (currentFilter === 'DAILY_FREE') {
-                        models = models.filter(m => m.task_label === 'DAILY_FREE');
-                    } else {
-                        models = models.filter(m => m.tier === currentFilter);
-                    }
+            // Sort
+            models.sort((a, b) => {
+                let va, vb;
+                const k = currentSort.key;
+                if (k === 'model') { va = a.model; vb = b.model; }
+                else if (k === 'tier') { va = a.tier; vb = b.tier; }
+                else if (k === 'task_label') { va = a.task_label || ''; vb = b.task_label || ''; }
+                else if (k === 'intelligence') { va = a.metrics?.intelligence || 0; vb = b.metrics?.intelligence || 0; }
+                else if (k === 'speed') { va = a.metrics?.speed || 0; vb = b.metrics?.speed || 0; }
+                else if (k === 'stability') { va = a.metrics?.stability || 0; vb = b.metrics?.stability || 0; }
+                else if (k === 'cost') { va = a.metrics?.cost || 0; vb = b.metrics?.cost || 0; }
+                else if (k === 'value_score') { va = a.value_score || 0; vb = b.value_score || 0; }
+                else { va = a.rank || 0; vb = b.rank || 0; }
+
+                if (typeof va === 'string') {
+                    const cmp = va.localeCompare(vb);
+                    return currentSort.dir === 'asc' ? cmp : -cmp;
                 }
+                return currentSort.dir === 'asc' ? va - vb : vb - va;
+            });
 
-                // Search
-                if (searchQuery) {
-                    models = models.filter(m =>
-                        m.model.toLowerCase().includes(searchQuery) ||
-                        (m.provider || '').toLowerCase().includes(searchQuery)
-                    );
-                }
+            if (models.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:40px;color:var(--text-muted);">No models match your filter</td></tr>';
+                return;
+            }
 
-                // Sort
-                models.sort((a, b) => {
-                    let va, vb;
-                    const k = currentSort.key;
-                    if (k === 'model') { va = a.model; vb = b.model; }
-                    else if (k === 'tier') { va = a.tier; vb = b.tier; }
-                    else if (k === 'task_label') { va = a.task_label || ''; vb = b.task_label || ''; }
-                    else if (k === 'intelligence') { va = a.metrics?.intelligence || 0; vb = b.metrics?.intelligence || 0; }
-                    else if (k === 'speed') { va = a.metrics?.speed || 0; vb = b.metrics?.speed || 0; }
-                    else if (k === 'stability') { va = a.metrics?.stability || 0; vb = b.metrics?.stability || 0; }
-                    else if (k === 'cost') { va = a.metrics?.cost || 0; vb = b.metrics?.cost || 0; }
-                    else if (k === 'value_score') { va = a.value_score || 0; vb = b.value_score || 0; }
-                    else { va = a.rank || 0; vb = b.rank || 0; }
+            tbody.innerHTML = models.map(m => {
+                const metrics = m.metrics || {};
+                const intel = metrics.intelligence || 0;
+                const speed = metrics.speed || 0;
+                const stab = metrics.stability || 0;
+                const cost = metrics.cost || 0;
+                const valueScore = m.value_score || 0;
 
-                    if (typeof va === 'string') {
-                        const cmp = va.localeCompare(vb);
-                        return currentSort.dir === 'asc' ? cmp : -cmp;
-                    }
-                    return currentSort.dir === 'asc' ? va - vb : vb - va;
-                });
+                const tierClass = m.tier === 'OAUTH_BRIDGE' ? 'oauth' :
+                    m.tier === 'FREE_FRONTIER' ? 'free' : 'paid';
+                const tierLabel = m.tier === 'OAUTH_BRIDGE' ? 'PRIMARY' :
+                    m.tier === 'FREE_FRONTIER' ? 'FREE' : 'RESCUE';
 
-                if (models.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:40px;color:var(--text-muted);">No models match your filter</td></tr>';
-                    return;
-                }
+                const taskClass = m.task_label === 'DAILY_FREE' ? 'daily' : 'rescue';
+                const taskText = m.task_label === 'DAILY_FREE' ? 'DAILY' : 'RESCUE';
 
                 const fragment = document.createDocumentFragment();
                 const html = models.map(m => {
@@ -2221,7 +1598,7 @@
                         </div>
                         <div class="model-provider">${escHtml(m.provider || '')}</div>
                     </td>
-                    <td><span class="tier-badge ${tierClass}">${tierIcon} ${tierLabel}</span></td>
+                    <td><span class="tier-badge ${tierClass}">${tierLabel}</span></td>
                     <td><span class="task-label ${taskClass}">${taskText}</span></td>
                     <td class="metric-cell">
                         <span class="${metricClass(intel)}">${intel}</span>
@@ -2240,9 +1617,7 @@
                     </td>
                     <td class="value-score-cell">${valueScore >= 100 ? valueScore.toFixed(0) : valueScore.toFixed(1)}</td>
                 </tr>`;
-                }).join('');
-                tbody.innerHTML = html;
-            });
+            }).join('');
         }
 
         // ── Utilities ──
@@ -2432,21 +1807,19 @@
         }
 
         function copyUrl() {
-            const url = 'https://filokloi.github.io/AIchain/ai_routing_table.json';
-            navigator.clipboard.writeText(url).then(() => {
-                // Flash all copy buttons
-                document.querySelectorAll('.copy-btn').forEach(btn => {
-                    const orig = btn.textContent;
-                    btn.textContent = '✓ COPIED!';
-                    btn.classList.add('copied');
-                    setTimeout(() => {
-                        btn.textContent = orig;
-                        btn.classList.remove('copied');
-                    }, 2000);
-                });
+            const input = document.getElementById('importUrl');
+            navigator.clipboard.writeText(input.value).then(() => {
+                const btn = document.getElementById('copyBtn');
+                btn.textContent = 'COPIED!';
+                btn.classList.add('copied');
+                setTimeout(() => {
+                    btn.textContent = 'COPY URL';
+                    btn.classList.remove('copied');
+                }, 2000);
             }).catch(() => {
-                const input = document.getElementById('importUrl');
-                if (input) { input.select(); document.execCommand('copy'); }
+                // Fallback
+                input.select();
+                document.execCommand('copy');
             });
         }
     </script>
