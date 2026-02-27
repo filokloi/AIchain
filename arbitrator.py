@@ -468,7 +468,17 @@ def arbitrate() -> dict:
     raw_models = fetch_openrouter_models(api_key)
     elo_map = fetch_lmsys_arena()
     aa_map = fetch_artificial_analysis()
-    promo_kings = fetch_promo_tracker(raw_models, gemini_key)
+    promo_kings_raw = fetch_promo_tracker(raw_models, gemini_key)
+
+    # Normalize: ensure list of strings (extract 'id' if dict)
+    promo_kings = []
+    for pk in promo_kings_raw:
+        if isinstance(pk, str):
+            promo_kings.append(pk)
+        elif isinstance(pk, dict) and "id" in pk:
+            promo_kings.append(pk["id"])
+        else:
+            promo_kings.append(str(pk))
 
     # Filter placeholders from promo tracker
     promo_kings = [p for p in promo_kings if "gpt-oss" not in p]
