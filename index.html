@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <base href="/AIchain/">
     <meta name="description" content="AIchain — Professional AI model routing table and value optimizer for OpenClaw. Compare models, view scores, pricing, and get one-click integration.">
     <meta name="robots" content="noindex, nofollow">
     <!-- Canonical URL for GitHub Pages -->
@@ -1155,6 +1156,20 @@
                 </div>
             </div>
 
+            <!-- How to use (professional blurb) -->
+            <section id="how-to-use" style="max-width:800px; margin:2rem auto; padding:1.5rem; background:var(--bg-surface); border-radius:8px; border:1px solid var(--border-color);">
+                <h2 style="margin-top:0; font-size:1.2rem; color:var(--neon-green);">How to use AIchain</h2>
+                <p style="line-height:1.6; color:var(--text-secondary); margin-bottom:0.5rem;">
+                    AIchain ranks models by <strong>Value Score</strong> — a formula that maximizes intelligence while minimizing cost. Table is sorted by this score; click headers to re-sort.
+                </p>
+                <p style="line-height:1.6; color:var(--text-secondary); margin-bottom:0.5rem;">
+                    <strong>Tier</strong>: <span style="color:var(--tier-oauth)">PRIMARY</span> (free with subscription), <span style="color:var(--tier-free)">FREE</span> (zero‑cost API), <span style="color:var(--tier-paid)">RESCUE</span> (paid fallback). <strong>Intelligence</strong> is normalized 0–100; 99 vs 96 is a meaningful gap.
+                </p>
+                <p style="line-height:1.6; color:var(--text-secondary); margin-bottom:0;">
+                    Use <strong>search</strong> to filter; <strong>Compare</strong> (checkboxes) to select up to 4 models for side‑by‑side view. Costs are $/1M tokens (blended). Data refreshes every 6 hours.
+                </p>
+            </section>
+
             <!-- Data Sovereignty Callout -->
             <div class="sovereignty-callout">
                 <div class="callout-title">⚡ Data Sovereignty Postulate</div>
@@ -1491,6 +1506,8 @@
             }
 
             renderTable();
+            // Hide loading indicator
+            document.getElementById('loadingRow').style.display = 'none';
         }
 
         function renderTable() {
