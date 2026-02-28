@@ -1440,14 +1440,20 @@
                 const resp = await fetch('ai_routing_table.json');
                 if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
                 routingData = await resp.json();
+                console.log('Fetched routing data:', routingData);
                 updateDashboard();
             } catch (err) {
+                console.error('Fetch error:', err);
                 showError(`Failed to load routing data: ${err.message}`);
                 updateStatus('OFFLINE', false);
+                // Hide loading on error too
+                const lr = document.getElementById('loadingRow');
+                if (lr) lr.style.display = 'none';
             }
         }
 
         function updateDashboard() {
+            console.log('updateDashboard() called with:', routingData);
             if (!routingData) return;
 
             // Status
@@ -1511,13 +1517,16 @@
         }
 
         function renderTable() {
+            console.log('renderTable() called');
             const tbody = document.getElementById('tableBody');
             if (!routingData || !routingData.routing_hierarchy) {
+                console.warn('No routing data or hierarchy');
                 tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:40px;color:var(--text-muted);">No data available</td></tr>';
                 return;
             }
 
             let models = [...routingData.routing_hierarchy];
+            console.log('Models to render:', models.length);
 
             // Filter by tier or task_label
             if (currentFilter !== 'all') {
