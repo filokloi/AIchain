@@ -262,6 +262,8 @@ def cmd_revert(cfg: dict, ctrl: Controller, log: logging.Logger):
 
 def cmd_godmode(cfg: dict, ctrl: Controller, log: logging.Logger, model: str):
     """Instant model pin."""
+    import json
+    from pathlib import Path
     paths = get_paths(cfg)
     oc_config = read_openclaw_config(paths["openclaw_config"])
     current = oc_config.get("agents", {}).get("defaults", {}).get("model", {}).get("primary", "")
@@ -271,6 +273,18 @@ def cmd_godmode(cfg: dict, ctrl: Controller, log: logging.Logger, model: str):
     write_config(paths["openclaw_config"], new_config, paths["backups_dir"], cfg.get("max_backups", 3), log)
     ctrl.set_godmode(oc_id, current)
 
+    try:
+        bridge_cfg_path = Path.home() / ".openclaw" / "aichain" / "bridge_config.json"
+        if bridge_cfg_path.exists():
+            with open(bridge_cfg_path, "r", encoding="utf-8") as f:
+                bcfg = json.load(f)
+            bcfg["auto_routing"] = False
+            bcfg["pinned_model"] = oc_id
+            with open(bridge_cfg_path, "w", encoding="utf-8") as f:
+                json.dump(bcfg, f, indent=2)
+    except Exception as e:
+        log.warning(f"Could not update bridge config: {e}")
+
     log.info(f"GOD MODE → {oc_id} | AIchain control: SUSPENDED")
     write_health(cfg, ctrl.state)
     return True
@@ -278,10 +292,24 @@ def cmd_godmode(cfg: dict, ctrl: Controller, log: logging.Logger, model: str):
 
 def cmd_auto(cfg: dict, ctrl: Controller, log: logging.Logger):
     """Return to AIchain control."""
+    import json
+    from pathlib import Path
     if not ctrl.is_godmode:
         log.info("God Mode not active")
         return False
     ctrl.clear_godmode()
+
+    try:
+        bridge_cfg_path = Path.home() / ".openclaw" / "aichain" / "bridge_config.json"
+        if bridge_cfg_path.exists():
+            with open(bridge_cfg_path, "r", encoding="utf-8") as f:
+                bcfg = json.load(f)
+            bcfg["auto_routing"] = True
+            with open(bridge_cfg_path, "w", encoding="utf-8") as f:
+                json.dump(bcfg, f, indent=2)
+    except Exception as e:
+        log.warning(f"Could not update bridge config: {e}")
+
     log.info("God Mode cleared — re-syncing...")
     return cmd_sync(cfg, ctrl, log)
 

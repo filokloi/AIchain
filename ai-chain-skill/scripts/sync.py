@@ -133,15 +133,26 @@ def apply_scenario_recalculation(table: dict, scenario: dict, log: logging.Logge
 
 
 def get_best_free_primary(table: dict) -> dict | None:
-    """Find best $0/effective-$0 model, explicitly avoiding manual-assist-only models."""
+    """Find best $0/effective-$0 model, explicitly avoiding manual-assist-only models.
+    Prioritizes OpenRouter models if multiple free options are available."""
+    candidates = []
     for entry in table.get("routing_hierarchy", []):
         if entry.get("access_type") == "manual_assist":
             continue
         # We consider FREE_FRONTIER, OAUTH_BRIDGE, or anyone whose effective_cost is 0.0
         cost = entry.get("metrics", {}).get("effective_cost", entry.get("metrics", {}).get("cost", 1))
         if entry.get("tier") in ("OAUTH_BRIDGE", "FREE_FRONTIER") or cost <= 0.00000001:
-            return entry
-    return None
+            candidates.append(entry)
+    
+    if not candidates:
+        return None
+        
+    # Mission Alignment: If we have multiple candidates, prioritize OpenRouter
+    openrouter_candidates = [c for c in candidates if c.get("model", "").startswith("openrouter/")]
+    if openrouter_candidates:
+        return openrouter_candidates[0] # Top of hierarchy among OpenRouter models
+        
+    return candidates[0]
 
 
 def get_heavy_hitter(table: dict) -> dict | None:

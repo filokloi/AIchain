@@ -430,6 +430,27 @@ def classify_tier(model_id: str, cost: float) -> str:
         return "HEAVY_HITTER"
 
 
+def assess_geopolitical_risk(model_id: str) -> str:
+    """
+    Assess geopolitical risk level based on provider origin.
+    Returns: "LOW", "MEDIUM", "HIGH"
+    """
+    model_lower = model_id.lower()
+    
+    # HIGH RISK: Regions with active conflicts or heavy sanctions affecting US/EU/SRB relations
+    # or providers with known state-level surveillance concerns.
+    high_risk_keywords = ["deepseek", "qwen", "zhipu", "moonshot", "yi-", "baichuan", "huawei", "internlm"]
+    if any(k in model_lower for k in high_risk_keywords):
+        return "HIGH"
+        
+    # MEDIUM RISK: Emerging regions or providers with complex governance
+    medium_risk_keywords = ["mistral", "cohere", "upstage", "零一万物", "01-ai"]
+    if any(k in model_lower for k in medium_risk_keywords):
+        return "MEDIUM"
+        
+    return "LOW"
+
+
 def assign_task_label(tier: str, intelligence: int) -> str:
     """
     Label each model for its intended role:
@@ -521,6 +542,7 @@ def arbitrate() -> dict:
             "provider": provider,
             "tier": tier,
             "task_label": task_label,
+            "geopolitical_risk": assess_geopolitical_risk(model_id),
             "metrics": {
                 "intelligence": intelligence,
                 "speed": speed,
@@ -547,6 +569,7 @@ def arbitrate() -> dict:
                 "provider": info["provider"],
                 "tier": "OAUTH_BRIDGE",
                 "task_label": "DAILY_FREE",
+                "geopolitical_risk": assess_geopolitical_risk(bridge_id),
                 "metrics": {"intelligence": intel, "speed": speed, "stability": stab, "cost": 0.00},
                 "value_score": vs,
                 "bridge_note": info["note"],

@@ -419,6 +419,8 @@ def check_specialist_trigger(text: str) -> dict | None:
 # ─────────────────────────────────────────────
 
 def resolve_openclaw_model_id(aichain_model: str) -> str:
+    if aichain_model.startswith("openrouter/"):
+        return aichain_model
     for prefix, provider in DIRECT_PROVIDER_MAP.items():
         if aichain_model.startswith(prefix):
             if provider == "openrouter" and not aichain_model.startswith("openrouter/"):

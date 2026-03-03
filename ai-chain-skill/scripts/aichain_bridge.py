@@ -1,21 +1,17 @@
 #!/usr/bin/env python3
 """
 ╔═══════════════════════════════════════════════════════════════════╗
-║  AIchain — The Sovereign Global Value Maximizer                  ║
-║  aichain_bridge.py v4.0 — Multi-Role Proxy Bridge                ║
+║  AIchain — The Sovereign Global Value Maximizer                   ║
+║  aichain_bridge.py v4.0 — Universal Arbitrator (Two-Brain)        ║
 ║                                                                   ║
-║  Roles:                                                           ║
-║    1. Analyst: High reasoning (Tier 0 > Best Free)                ║
-║    2. Visualist: Multimodal handling (0ms heuristic)              ║
-║    3. Quick-Responder: Lowest latency $0 model for simple queries ║
+║  Logics:                                                          ║
+║    - Fast Brain (Arbitrator): Best $0/Fast model.                 ║
+║      Evaluates user queries in <0.2s to classify them.            ║
+║    - Heavy Brain (Analytic): Highest Intelligence model.          ║
+║      Takes over only when Fast Brain deems the query complex.     ║
 ║                                                                   ║
-║  Decision Engine:                                                 ║
-║    - 0ms Visual Heuristic (Image/File detection)                  ║
-║    - <0.1s Flash Categorization (via Gemini Flash or Groq Llama)  ║
-║                                                                   ║
-║  Dual-Override Protocol:                                          ║
-║    - Control A: 'auto_routing' flag in local config               ║
-║    - Control B: NL Commands ("Disable router", "Always use X")    ║
+║  Universal Proxy:                                                 ║
+║    Routes Google to Google, OpenAI to OpenAI, OpenRouter to OR.   ║
 ╚═══════════════════════════════════════════════════════════════════╝
 """
 
@@ -26,9 +22,9 @@ import time
 import logging
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from pathlib import Path
-from urllib.error import URLError
 import urllib.request
 import urllib.parse
+from urllib.error import URLError
 try:
     import requests
 except ImportError:
@@ -40,18 +36,11 @@ except ImportError:
 # ─────────────────────────────────────────────
 
 PORT = 8080
-OPENROUTER_API = "https://openrouter.ai/api/v1/chat/completions"
-
-# Default Trio System Roles (can be overridden by personalized_routing_table or discovery)
-TRIO_ROLES = {
-    "analyst": "google/gemini-2.5-pro",
-    "visualist": "openai/gpt-4o",
-    "quick": "google/gemini-2.5-flash"
-}
+ROUTING_URL = "https://filokloi.github.io/AIchain/ai_routing_table.json"
 
 CONFIG_DIR = Path.home() / ".openclaw" / "aichain"
 BRIDGE_CONFIG_FILE = CONFIG_DIR / "bridge_config.json"
-TABLE_FILE = CONFIG_DIR / "personalized_routing_table.json"
+CACHE_FILE = CONFIG_DIR / "routing_table_cache.json"
 
 logging.basicConfig(
     level=logging.INFO,
@@ -60,7 +49,19 @@ logging.basicConfig(
 logger = logging.getLogger("aichain_bridge")
 
 # ─────────────────────────────────────────────
-# STATE MANAGEMENT & DUAL-OVERRIDE
+# PROVIDER ENDPOINTS (OpenAI Compatible)
+# ─────────────────────────────────────────────
+ENDPOINTS = {
+    "openrouter": "https://openrouter.ai/api/v1/chat/completions",
+    "google": "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions",
+    "openai": "https://api.openai.com/v1/chat/completions",
+    "deepseek": "https://api.deepseek.com/v1/chat/completions",
+    "groq": "https://api.groq.com/openai/v1/chat/completions",
+    "anthropic": "https://api.anthropic.com/v1/messages" # Anthropic uses native format, but we'll try to stick to OR if possible for them unless they support OpenAI compat
+}
+
+# ─────────────────────────────────────────────
+# STATE MANAGEMENT
 # ─────────────────────────────────────────────
 
 def ensure_config():
@@ -70,35 +71,84 @@ def ensure_config():
         default_cfg = {
             "auto_routing": True,
             "pinned_model": "openai/gpt-4o",
-            "trio_overrides": {}
         }
-        with open(BRIDGE_CONFIG_FILE, "w") as f:
+        with open(BRIDGE_CONFIG_FILE, "w", encoding="utf-8") as f:
             json.dump(default_cfg, f, indent=2)
 
 def load_bridge_config() -> dict:
     ensure_config()
     try:
-        with open(BRIDGE_CONFIG_FILE, "r") as f:
+        with open(BRIDGE_CONFIG_FILE, "r", encoding="utf-8") as f:
             return json.load(f)
     except Exception as e:
         logger.error(f"Failed to load bridge config: {e}")
         return {"auto_routing": True, "pinned_model": "openai/gpt-4o"}
 
 def save_bridge_config(cfg: dict):
-    # Atomic save to prevent EBADF
     import tempfile
     fd, tmp_path = tempfile.mkstemp(dir=CONFIG_DIR, text=True)
     with os.fdopen(fd, "w", encoding="utf-8") as f:
         json.dump(cfg, f, indent=2)
     os.replace(tmp_path, BRIDGE_CONFIG_FILE)
-    logger.info("Bridge config atomically updated.")
 
 # ─────────────────────────────────────────────
-# DECISION ENGINE
+# TWO-BRAIN DYNAMIC ROUTING
 # ─────────────────────────────────────────────
+
+def get_dynamic_roles():
+    """Fetches the routing table and assigns Fast Brain and Heavy Brain."""
+    table = None
+    # 1. Try to fetch from web
+    try:
+        resp = requests.get(ROUTING_URL, timeout=10)
+        if resp.status_code == 200:
+            table = resp.json()
+            # Cache it
+            with open(CACHE_FILE, "w", encoding="utf-8") as f:
+                json.dump(table, f)
+            logger.info("Fetched fresh routing table from GitHub.")
+    except Exception as e:
+        logger.warning(f"Failed to fetch live routing table: {e}")
+    
+    # 2. Fallback to cache
+    if not table and CACHE_FILE.exists():
+        try:
+            with open(CACHE_FILE, "r", encoding="utf-8") as f:
+                table = json.load(f)
+            logger.info("Loaded routing table from local cache.")
+        except:
+            pass
+            
+    # Default fallback if all fails
+    roles = {
+        "fast_brain": "openrouter/google/gemini-2.5-flash:free",
+        "heavy_brain": "openrouter/google/gemini-2.5-pro",
+        "visual_brain": "openrouter/openai/gpt-4o"
+    }
+    
+    if table and "routing_hierarchy" in table:
+        hierarchy = table["routing_hierarchy"]
+        
+        # Fast Brain: Highest value score that is FREE ($0)
+        fast_brain = None
+        for m in hierarchy:
+            if m.get("tier") in ("FREE_FRONTIER", "OAUTH_BRIDGE") or m.get("metrics", {}).get("cost", 1) <= 0.0:
+                fast_brain = m["model"]
+                break
+        
+        # Heavy Brain: Highest pure intelligence
+        heavy_brain = table.get("heavy_hitter", {}).get("model")
+        if not heavy_brain or heavy_brain == "N/A":
+            if hierarchy:
+                heavy_brain = sorted(hierarchy, key=lambda x: x.get("metrics", {}).get("intelligence", 0), reverse=True)[0]["model"]
+                
+        if fast_brain: roles["fast_brain"] = fast_brain
+        if heavy_brain: roles["heavy_brain"] = heavy_brain
+        
+    return roles
 
 def detect_visual(messages: list) -> bool:
-    """0ms Visual Heuristic: Check for image URLs in the payload."""
+    """0ms Visual Heuristic."""
     for msg in messages:
         content = msg.get("content", "")
         if isinstance(content, list):
@@ -107,17 +157,11 @@ def detect_visual(messages: list) -> bool:
                     return True
     return False
 
-def fast_text_categorize(messages: list) -> str:
+def fast_text_categorize(messages: list, fast_model: str) -> str:
     """
-    <0.1s Flash Categorization.
-    Uses Groq Llama3 or Gemini Flash to classify text complexity.
-    Returns: 'analyst' or 'quick'
+    Two-Brain Arbitrator Logic.
+    Uses Fast Brain to classify text complexity.
     """
-    api_key = os.environ.get("GEMINI_KEY") or os.environ.get("GEMINI_API_KEY")
-    if not api_key:
-        logger.warning("No Gemini API key for fast categorization. Defaulting to 'analyst'.")
-        return "analyst"
-
     # Extract user prompt
     last_user_msg = ""
     for msg in reversed(messages):
@@ -134,38 +178,48 @@ def fast_text_categorize(messages: list) -> str:
 
     prompt = (
         "Classify the complexity of the following user query into exactly one word: 'analyst' or 'quick'. "
-        "'analyst' means the query requires deep reasoning, coding, math, or complex generation. "
+        "'analyst' means the query requires deep reasoning, complex coding, math, or heavy synthesis. "
         "'quick' means the query is simple, greeting, factual retrieval, or short editing.\n\n"
-        f"Query: {last_user_msg[:500]}"
+        f"Query: {last_user_msg[:1000]}"
     )
 
     try:
         start_t = time.time()
-        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={api_key}"
-        payload = {"contents": [{"parts": [{"text": prompt}]}]}
-        resp = requests.post(url, json=payload, timeout=2)
+        # Fast Brain classification request
+        key, ep = get_endpoint_for_model(fast_model)
+        if not key or not ep:
+            return "analyst"
+            
+        model_val = fast_model
+        if fast_model.startswith("openrouter/"):
+            model_val = fast_model.replace("openrouter/", "", 1)
         
+        payload = {
+            "model": model_val,
+            "messages": [{"role": "user", "content": prompt}],
+            "max_tokens": 5,
+            "temperature": 0.0
+        }
+        headers = {"Authorization": f"Bearer {key}", "Content-Type": "application/json"}
+        
+        resp = requests.post(ep, json=payload, headers=headers, timeout=3)
         if resp.status_code == 200:
             data = resp.json()
-            text = data.get("candidates", [{}])[0].get("content", {}).get("parts", [{}])[0].get("text", "").strip().lower()
+            text = data.get("choices", [{}])[0].get("message", {}).get("content", "").strip().lower()
             dt = time.time() - start_t
             if "analyst" in text:
-                logger.info(f"Categorized as: ANALYST ({dt:.3f}s)")
+                logger.info(f"🧠 Fast Brain decided: ANALYST [Task is complex] ({dt:.3f}s)")
                 return "analyst"
             else:
-                logger.info(f"Categorized as: QUICK ({dt:.3f}s)")
+                logger.info(f"⚡ Fast Brain decided: QUICK [Task is simple] ({dt:.3f}s)")
                 return "quick"
     except Exception as e:
-        logger.warning(f"Categorization failed: {e}. Defaulting to 'analyst'.")
+        logger.warning(f"Arbitrator failed to classify: {e}. Defaulting to 'analyst'.")
     
     return "analyst"
 
 def detect_nl_override(messages: list, cfg: dict) -> bool:
-    """
-    Control B (Natural Language Override):
-    Check system prompts for "Disable router" or "Always use X".
-    Returns True if an override was executed.
-    """
+    """Control B (Natural Language Override)"""
     for msg in messages:
         if msg.get("role") == "system":
             content = msg.get("content", "").lower()
@@ -175,13 +229,10 @@ def detect_nl_override(messages: list, cfg: dict) -> bool:
                     cfg["auto_routing"] = False
                     save_bridge_config(cfg)
                 return True
-            
             if "always use " in content:
-                # Naive extraction for demo purposes
                 parts = content.split("always use ")
                 if len(parts) > 1:
-                    model_target = parts[1].split()[0] # get next word
-                    # Just an approximation
+                    model_target = parts[1].split()[0]
                     if model_target and model_target != cfg.get("pinned_model"):
                         logger.warning(f"NL Override: Pinning model to '{model_target}'")
                         cfg["auto_routing"] = False
@@ -189,6 +240,42 @@ def detect_nl_override(messages: list, cfg: dict) -> bool:
                         save_bridge_config(cfg)
                         return True
     return False
+
+# ─────────────────────────────────────────────
+# UNIVERSAL API ROUTING
+# ─────────────────────────────────────────────
+
+def get_endpoint_for_model(model_id: str):
+    """Returns (api_key, endpoint_url) based on provider prefix or environment variables."""
+    prefix = model_id.split("/")[0].lower() if "/" in model_id else "openrouter"
+    
+    # Try environmental variables first based on prefix
+    g_key = os.environ.get("GOOGLE_API_KEY") or os.environ.get("GEMINI_API_KEY") or os.environ.get("GEMINI_KEY")
+    oa_key = os.environ.get("OPENAI_API_KEY")
+    ds_key = os.environ.get("DEEPSEEK_API_KEY")
+    gq_key = os.environ.get("GROQ_API_KEY") or os.environ.get("GROQ_KEY")
+    
+    if prefix == "google" and g_key:
+        key = g_key
+        ep = ENDPOINTS["google"]
+    elif prefix == "openai" and oa_key:
+        key = oa_key
+        ep = ENDPOINTS["openai"]
+    elif prefix == "deepseek" and ds_key:
+        key = ds_key
+        ep = ENDPOINTS["deepseek"]
+    elif prefix == "groq" and gq_key:
+        key = gq_key
+        ep = ENDPOINTS["groq"]
+    else:
+        # Default OpenRouter fallback (even for missing native keys)
+        key = os.environ.get("OPENROUTER_KEY") or os.environ.get("OPENROUTER_API_KEY")
+        ep = ENDPOINTS["openrouter"]
+        
+        # If the target model was native (e.g. "openai/gpt-4o") and we fell back to OpenRouter,
+        # OpenRouter wants the model format as "openai/gpt-4o" (so no change)
+        
+    return key, ep
 
 # ─────────────────────────────────────────────
 # HTTP PROXY HANDLER
@@ -216,56 +303,85 @@ class AIchainBridgeHandler(BaseHTTPRequestHandler):
         # 1. Check NL Overrides
         nl_triggered = detect_nl_override(messages, cfg)
         if nl_triggered:
-            cfg = load_bridge_config() # Reload in case it changed
+            cfg = load_bridge_config()
 
-        # 2. Sovereign Logic: Bypass if auto_routing is False
+        # 2. Sovereign Logic
         if not cfg.get("auto_routing", True):
-            target_model = cfg.get("pinned_model") or "openai/gpt-4o"
-            logger.info(f"🔒 Auto-routing disabled. Sovereign bypass to: {target_model}")
+            target_model = cfg.get("pinned_model") or "openrouter/openai/gpt-4o"
+            logger.info(f"🔒 God Mode / Bypass Active. Routing to: {target_model}")
         else:
-            # 3. Decision Engine Routing
+            # Refresh roles
+            roles = get_dynamic_roles()
             if detect_visual(messages):
                 logger.info("👁️ Visual Heuristic triggered: Routing to VISUALIST")
-                target_model = TRIO_ROLES.get("visualist", "openai/gpt-4o")
+                target_model = roles.get("visual_brain", "openrouter/openai/gpt-4o")
             else:
-                category = fast_text_categorize(messages)
-                target_model = TRIO_ROLES.get(category) or TRIO_ROLES.get("analyst", "openai/gpt-4o")
-                logger.info(f"🧠 Text Categorization: Routing to {category.upper()} ({target_model})")
+                category = fast_text_categorize(messages, fast_model=roles["fast_brain"])
+                target_model = roles["heavy_brain"] if category == "analyst" else roles["fast_brain"]
                 
-        payload["model"] = target_model or "google/gemini-2.5-pro"
+        # Prep payload model name (some APIs need prefix stripped, but OpenAI compat usually ignores unused prefixes, however Google/DeepSeek strictness might require stripping)
+        # We will strip the prefix ONLY IF it is going to a native provider API that isn't OpenRouter.
+        api_key, endpoint_url = get_endpoint_for_model(target_model)
         
-        # 4. Forward to OpenRouter
-        self.forward_request(payload)
+        # Strip provider prefixes strictly
+        model_val = target_model
+        if target_model.startswith("openrouter/"):
+            model_val = target_model.replace("openrouter/", "", 1)
+        elif "/" in target_model:
+            prefix = target_model.split("/")[0]
+            # for native google/openai endpoints, remove their own prefix
+            if prefix in ("google", "openai", "deepseek", "anthropic", "groq"):
+                model_val = target_model.replace(f"{prefix}/", "", 1)
+                
+        payload["model"] = model_val
+            
+        # 4. Forward
+        self.forward_request(payload, api_key, endpoint_url, target_model)
 
-    def forward_request(self, payload: dict):
-        api_key = os.environ.get("OPENROUTER_KEY") or os.environ.get("OPENROUTER_API_KEY")
+    def forward_request(self, payload: dict, api_key: str, endpoint_url: str, original_model_id: str, is_retry: bool = False):
+        if not api_key:
+            logger.error(f"❌ Missing API key for endpoint {endpoint_url} (Model: {original_model_id})")
+            self.send_error(500, "Missing required API Key")
+            return
+            
         headers = {
             "Authorization": f"Bearer {api_key}",
             "Content-Type": "application/json",
             "HTTP-Referer": "https://github.com/AIchain",
-            "X-Title": "AIchain Multi-Role Bridge"
+            "X-Title": "AIchain Two-Brain Arbitrator"
         }
         
         try:
             start_t = time.time()
-            logger.info(f"Forwarding Payload: {json.dumps(payload)}")
-            req = urllib.request.Request(OPENROUTER_API, data=json.dumps(payload).encode("utf-8"), headers=headers, method="POST")
-            with urllib.request.urlopen(req) as response:
+            logger.info(f"🚀 Forwarding to {endpoint_url} with model {payload.get('model')}")
+            req = urllib.request.Request(endpoint_url, data=json.dumps(payload).encode("utf-8"), headers=headers, method="POST")
+            with urllib.request.urlopen(req, timeout=60) as response:
                 resp_data = response.read()
                 self.send_response(response.status)
                 for k, v in response.getheaders():
-                    self.send_header(k, v)
+                    # skip transfer-encoding to avoid issues
+                    if k.lower() != "transfer-encoding":
+                        self.send_header(k, v)
                 self.end_headers()
                 self.wfile.write(resp_data)
                 
             dt = time.time() - start_t
-            logger.info(f"✅ Forwarded successfully to {payload.get('model')} in {dt:.2f}s")
+            logger.info(f"✅ Forwarded successfully to {original_model_id} in {dt:.2f}s")
             
         except urllib.error.HTTPError as e:
-            logger.error(f"❌ HTTP Error {e.code} forwarding to OpenRouter: {e.read().decode()}")
+            err_data = e.read()
+            if e.code == 401 and not is_retry and endpoint_url != ENDPOINTS["openrouter"]:
+                logger.warning(f"Native API returned 401 Unauthorized. Retrying via OpenRouter...")
+                fallback_key = os.environ.get("OPENROUTER_KEY") or os.environ.get("OPENROUTER_API_KEY")
+                if fallback_key:
+                    payload["model"] = original_model_id.replace("openrouter/", "", 1) if original_model_id.startswith("openrouter/") else original_model_id
+                    self.forward_request(payload, fallback_key, ENDPOINTS["openrouter"], original_model_id, is_retry=True)
+                    return
+                    
+            logger.error(f"❌ HTTP Error {e.code}: {err_data.decode()[:200]}")
             self.send_response(e.code)
             self.end_headers()
-            self.wfile.write(e.read())
+            self.wfile.write(err_data)
         except Exception as e:
             logger.error(f"❌ Failed to forward request: {e}")
             self.send_error(500, "Internal Bridge Error")
@@ -274,10 +390,12 @@ def main():
     ensure_config()
     server_address = ('', PORT)
     httpd = HTTPServer(server_address, AIchainBridgeHandler)
-    logger.info("=" * 60)
-    logger.info(f"AIchain v4.0 Multi-Role Bridge starting on port {PORT}")
-    logger.info("Decision Engine: 0ms Visual Heuristic | Flash Categorization")
-    logger.info("=" * 60)
+    logger.info("=" * 64)
+    logger.info(f"AIchain v4.0 Universal Arbitrator (Two-Brain) on port {PORT}")
+    roles = get_dynamic_roles()
+    logger.info(f"⚡ Fast Brain  : {roles.get('fast_brain')}")
+    logger.info(f"🧠 Heavy Brain : {roles.get('heavy_brain')}")
+    logger.info("=" * 64)
     
     try:
         httpd.serve_forever()

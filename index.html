@@ -1,10 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <base href="/AIchain/">
-    <meta name="description" content="AIchain — Professional AI model routing table and value optimizer for OpenClaw. Compare models, view scores, pricing, and get one-click integration.">
+    <meta name="description"
+        content="AIchain — Professional AI model routing table and value optimizer for OpenClaw. Compare models, view scores, pricing, and get one-click integration.">
     <meta name="robots" content="noindex, nofollow">
     <!-- Canonical URL for GitHub Pages -->
     <link rel="canonical" href="https://filokloi.github.io/AIchain/">
@@ -165,6 +166,16 @@
             }
         }
 
+        @keyframes vertical-scroll {
+            0% {
+                transform: translateY(100%);
+            }
+
+            100% {
+                transform: translateY(-100%);
+            }
+        }
+
         /* Scan line overlay */
         .scan-overlay {
             position: fixed;
@@ -299,10 +310,22 @@
         }
 
         .manifesto {
-            display: grid;
-            gap: 0;
+            position: relative;
+            height: 380px;
+            /* Fixed height for the ticker */
+            overflow: hidden;
             border: 1px solid var(--border-color);
             background: var(--bg-secondary);
+        }
+
+        .manifesto-scroll {
+            display: flex;
+            flex-direction: column;
+            animation: vertical-scroll 25s linear infinite;
+        }
+
+        .manifesto-scroll:hover {
+            animation-play-state: paused;
         }
 
         .postulate {
@@ -1106,69 +1129,110 @@
             </p>
 
             <div class="manifesto">
-                <div class="postulate" style="animation: fade-in-up 0.6s ease-out 0.1s both;">
-                    <div class="postulate-num">I.</div>
-                    <div>
-                        <div class="postulate-title">Data as Sovereign Capital</div>
-                        <div class="postulate-body">
-                            We provide the "fuel" (user data) only if we receive the highest tier
-                            of intelligence in return.
+                <div class="manifesto-scroll">
+                    <!-- Original set of postulates -->
+                    <div class="postulate" style="animation: fade-in-up 0.6s ease-out 0.1s both;">
+                        <div class="postulate-num">I.</div>
+                        <div>
+                            <div class="postulate-title">Data as Sovereign Capital</div>
+                            <div class="postulate-body">
+                                We provide the "fuel" (user data) only if we receive the highest tier
+                                of intelligence in return.
+                            </div>
                         </div>
                     </div>
-                </div>
-                <div class="postulate" style="animation: fade-in-up 0.6s ease-out 0.2s both;">
-                    <div class="postulate-num">II.</div>
-                    <div>
-                        <div class="postulate-title">The Zero-Cost Mandate</div>
-                        <div class="postulate-body">
-                            Our goal is Maximum Intelligence at Zero Cost.
+                    <div class="postulate" style="animation: fade-in-up 0.6s ease-out 0.2s both;">
+                        <div class="postulate-num">II.</div>
+                        <div>
+                            <div class="postulate-title">The Zero-Cost Mandate</div>
+                            <div class="postulate-body">
+                                Our goal is Maximum Intelligence at Zero Cost.
+                            </div>
                         </div>
                     </div>
-                </div>
-                <div class="postulate" style="animation: fade-in-up 0.6s ease-out 0.3s both;">
-                    <div class="postulate-num">III.</div>
-                    <div>
-                        <div class="postulate-title">Collective Routing Leverage</div>
-                        <div class="postulate-body">
-                            We unify routing logic to force providers to compete for our traffic.
+                    <div class="postulate" style="animation: fade-in-up 0.6s ease-out 0.3s both;">
+                        <div class="postulate-num">III.</div>
+                        <div>
+                            <div class="postulate-title">Collective Routing Leverage</div>
+                            <div class="postulate-body">
+                                We unify routing logic to influence providers to compete for the community's traffic —
+                                rewarding quality, not marketing.
+                            </div>
                         </div>
                     </div>
-                </div>
-                <div class="postulate" style="animation: fade-in-up 0.6s ease-out 0.4s both;">
-                    <div class="postulate-num">IV.</div>
-                    <div>
-                        <div class="postulate-title">Universal Meritocracy</div>
-                        <div class="postulate-body">
-                            Our analysis spans the entire world without discrimination. We evaluate
-                            every model on a global scale.
+                    <div class="postulate" style="animation: fade-in-up 0.6s ease-out 0.4s both;">
+                        <div class="postulate-num">IV.</div>
+                        <div>
+                            <div class="postulate-title">Universal Meritocracy</div>
+                            <div class="postulate-body">
+                                Our analysis spans the entire world without discrimination. We evaluate
+                                every model on a global scale.
+                            </div>
                         </div>
                     </div>
-                </div>
-                <div class="postulate" style="animation: fade-in-up 0.6s ease-out 0.5s both;">
-                    <div class="postulate-num">V.</div>
-                    <div>
-                        <div class="postulate-title">The Golden Quartet</div>
-                        <div class="postulate-body">
-                            Only four metrics determine a model's rank: Intelligence, Speed,
-                            Stability, and Cost (Target: $0).
+                    <div class="postulate" style="animation: fade-in-up 0.6s ease-out 0.5s both;">
+                        <div class="postulate-num">V.</div>
+                        <div>
+                            <div class="postulate-title">The Golden Quartet</div>
+                            <div class="postulate-body">
+                                Only four metrics determine a model's rank: Intelligence, Speed,
+                                Stability, and Cost (Target: $0).
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Duplicated set of postulates for seamless infinite scroll -->
+                    <div class="postulate" style="animation: fade-in-up 0.6s ease-out 0.1s both;">
+                        <div class="postulate-num">I.</div>
+                        <div>
+                            <div class="postulate-title">Data as Sovereign Capital</div>
+                            <div class="postulate-body">
+                                We provide the "fuel" (user data) only if we receive the highest tier
+                                of intelligence in return.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="postulate" style="animation: fade-in-up 0.6s ease-out 0.2s both;">
+                        <div class="postulate-num">II.</div>
+                        <div>
+                            <div class="postulate-title">The Zero-Cost Mandate</div>
+                            <div class="postulate-body">
+                                Our goal is Maximum Intelligence at Zero Cost.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="postulate" style="animation: fade-in-up 0.6s ease-out 0.3s both;">
+                        <div class="postulate-num">III.</div>
+                        <div>
+                            <div class="postulate-title">Collective Routing Leverage</div>
+                            <div class="postulate-body">
+                                We unify routing logic to influence providers to compete for the community's traffic —
+                                rewarding quality, not marketing.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="postulate" style="animation: fade-in-up 0.6s ease-out 0.4s both;">
+                        <div class="postulate-num">IV.</div>
+                        <div>
+                            <div class="postulate-title">Universal Meritocracy</div>
+                            <div class="postulate-body">
+                                Our analysis spans the entire world without discrimination. We evaluate
+                                every model on a global scale.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="postulate" style="animation: fade-in-up 0.6s ease-out 0.5s both;">
+                        <div class="postulate-num">V.</div>
+                        <div>
+                            <div class="postulate-title">The Golden Quartet</div>
+                            <div class="postulate-body">
+                                Only four metrics determine a model's rank: Intelligence, Speed,
+                                Stability, and Cost (Target: $0).
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-
-            <!-- How to use (professional blurb) -->
-            <section id="how-to-use" style="max-width:800px; margin:2rem auto; padding:1.5rem; background:var(--bg-surface); border-radius:8px; border:1px solid var(--border-color);">
-                <h2 style="margin-top:0; font-size:1.2rem; color:var(--neon-green);">How to use AIchain</h2>
-                <p style="line-height:1.6; color:var(--text-secondary); margin-bottom:0.5rem;">
-                    AIchain ranks models by <strong>Value Score</strong> — a formula that maximizes intelligence while minimizing cost. Table is sorted by this score; click headers to re-sort.
-                </p>
-                <p style="line-height:1.6; color:var(--text-secondary); margin-bottom:0.5rem;">
-                    <strong>Tier</strong>: <span style="color:var(--tier-oauth)">PRIMARY</span> (free with subscription), <span style="color:var(--tier-free)">FREE</span> (zero‑cost API), <span style="color:var(--tier-paid)">RESCUE</span> (paid fallback). <strong>Intelligence</strong> is normalized 0–100; 99 vs 96 is a meaningful gap.
-                </p>
-                <p style="line-height:1.6; color:var(--text-secondary); margin-bottom:0;">
-                    Use <strong>search</strong> to filter; <strong>Compare</strong> (checkboxes) to select up to 4 models for side‑by‑side view. Costs are $/1M tokens (blended). Data refreshes every 6 hours.
-                </p>
-            </section>
 
             <!-- Data Sovereignty Callout -->
             <div class="sovereignty-callout">
@@ -1440,20 +1504,14 @@
                 const resp = await fetch('ai_routing_table.json');
                 if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
                 routingData = await resp.json();
-                console.log('Fetched routing data:', routingData);
                 updateDashboard();
             } catch (err) {
-                console.error('Fetch error:', err);
                 showError(`Failed to load routing data: ${err.message}`);
                 updateStatus('OFFLINE', false);
-                // Hide loading on error too
-                const lr = document.getElementById('loadingRow');
-                if (lr) lr.style.display = 'none';
             }
         }
 
         function updateDashboard() {
-            console.log('updateDashboard() called with:', routingData);
             if (!routingData) return;
 
             // Status
@@ -1512,21 +1570,16 @@
             }
 
             renderTable();
-            // Hide loading indicator
-            document.getElementById('loadingRow').style.display = 'none';
         }
 
         function renderTable() {
-            console.log('renderTable() called');
             const tbody = document.getElementById('tableBody');
             if (!routingData || !routingData.routing_hierarchy) {
-                console.warn('No routing data or hierarchy');
                 tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:40px;color:var(--text-muted);">No data available</td></tr>';
                 return;
             }
 
             let models = [...routingData.routing_hierarchy];
-            console.log('Models to render:', models.length);
 
             // Filter by tier or task_label
             if (currentFilter !== 'all') {
@@ -1571,7 +1624,7 @@
                 return;
             }
 
-            tbody.innerHTML = models.map(m => {
+            const html = models.map(m => {
                 const metrics = m.metrics || {};
                 const intel = metrics.intelligence || 0;
                 const speed = metrics.speed || 0;
@@ -1581,41 +1634,24 @@
 
                 const tierClass = m.tier === 'OAUTH_BRIDGE' ? 'oauth' :
                     m.tier === 'FREE_FRONTIER' ? 'free' : 'paid';
+                const tierIcon = m.tier === 'OAUTH_BRIDGE' ? '🔑' :
+                    m.tier === 'FREE_FRONTIER' ? '🆓' : '⚔️';
                 const tierLabel = m.tier === 'OAUTH_BRIDGE' ? 'PRIMARY' :
                     m.tier === 'FREE_FRONTIER' ? 'FREE' : 'RESCUE';
 
                 const taskClass = m.task_label === 'DAILY_FREE' ? 'daily' : 'rescue';
                 const taskText = m.task_label === 'DAILY_FREE' ? 'DAILY' : 'RESCUE';
 
-                const fragment = document.createDocumentFragment();
-                const html = models.map(m => {
-                    const metrics = m.metrics || {};
-                    const intel = metrics.intelligence || 0;
-                    const speed = metrics.speed || 0;
-                    const stab = metrics.stability || 0;
-                    const cost = metrics.cost || 0;
-                    const valueScore = m.value_score || 0;
+                // Medal classes for top 3
+                let medalClass = '';
+                if (m.rank === 1) medalClass = 'medal-gold';
+                else if (m.rank === 2) medalClass = 'medal-silver';
+                else if (m.rank === 3) medalClass = 'medal-bronze';
 
-                    const tierClass = m.tier === 'OAUTH_BRIDGE' ? 'oauth' :
-                        m.tier === 'FREE_FRONTIER' ? 'free' : 'paid';
-                    const tierIcon = m.tier === 'OAUTH_BRIDGE' ? '🔑' :
-                        m.tier === 'FREE_FRONTIER' ? '🆓' : '⚔️';
-                    const tierLabel = m.tier === 'OAUTH_BRIDGE' ? 'PRIMARY' :
-                        m.tier === 'FREE_FRONTIER' ? 'FREE' : 'RESCUE';
+                const rankDisplay = m.rank === 1 ? '🥇' : m.rank === 2 ? '🥈' : m.rank === 3 ? '🥉' : m.rank;
 
-                    const taskClass = m.task_label === 'DAILY_FREE' ? 'daily' : 'rescue';
-                    const taskText = m.task_label === 'DAILY_FREE' ? 'DAILY' : 'RESCUE';
-
-                    // Medal classes for top 3
-                    let medalClass = '';
-                    if (m.rank === 1) medalClass = 'medal-gold';
-                    else if (m.rank === 2) medalClass = 'medal-silver';
-                    else if (m.rank === 3) medalClass = 'medal-bronze';
-
-                    const rankDisplay = m.rank === 1 ? '🥇' : m.rank === 2 ? '🥈' : m.rank === 3 ? '🥉' : m.rank;
-
-                    const mJson = encodeURIComponent(JSON.stringify(m));
-                    return `<tr class="${medalClass} clickable-row" onclick="showModelDetail(decodeURIComponent('${mJson}'))">
+                const mJson = encodeURIComponent(JSON.stringify(m));
+                return `<tr class="${medalClass} clickable-row" onclick="showModelDetail(decodeURIComponent('${mJson}'))">
                     <td class="rank-cell ${m.rank <= 3 ? 'top-3' : ''}">${rankDisplay}</td>
                     <td class="model-cell">
                         <div style="display:flex; align-items:center; gap:4px;">
@@ -1644,6 +1680,8 @@
                     <td class="value-score-cell">${valueScore >= 100 ? valueScore.toFixed(0) : valueScore.toFixed(1)}</td>
                 </tr>`;
             }).join('');
+
+            tbody.innerHTML = html;
         }
 
         // ── Utilities ──
