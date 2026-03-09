@@ -566,6 +566,35 @@
             background: rgba(255, 68, 68, 0.1);
         }
 
+        .task-label.reasoning {
+            color: #FFB347;
+            background: rgba(255, 179, 71, 0.12);
+        }
+
+        .task-label.coding {
+            color: #8DFF8A;
+            background: rgba(141, 255, 138, 0.12);
+        }
+
+        .task-label.vision {
+            color: #7FDBFF;
+            background: rgba(127, 219, 255, 0.12);
+        }
+
+        .task-label.structured {
+            color: #B388FF;
+            background: rgba(179, 136, 255, 0.12);
+        }
+
+        .task-label.long {
+            color: #4DFFB8;
+            background: rgba(77, 255, 184, 0.12);
+        }
+
+        .task-label.general {
+            color: var(--text-primary);
+            background: rgba(255, 255, 255, 0.08);
+        }
         .sovereignty-callout {
             border: 1px solid var(--neon-green);
             background: rgba(0, 255, 65, 0.03);
@@ -678,6 +707,138 @@
             flex-wrap: wrap;
         }
 
+        .plane-summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1px;
+            background: var(--border-color);
+            border: 1px solid var(--border-color);
+            margin-bottom: 16px;
+        }
+
+        .plane-card {
+            padding: 16px 18px;
+            background: var(--bg-secondary);
+            min-height: 112px;
+        }
+
+        .plane-card-title {
+            font-size: 0.62rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+        }
+
+        .plane-card-value {
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 6px;
+        }
+
+        .plane-card-meta {
+            font-size: 0.68rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        .operational-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .operational-card {
+            border: 1px solid var(--border-color);
+            background: var(--bg-secondary);
+            padding: 16px;
+        }
+
+        .operational-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .operational-name {
+            font-size: 0.78rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .mode-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 8px;
+            border: 1px solid var(--border-color);
+            font-size: 0.58rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+
+        .mode-runtime_confirmed {
+            color: var(--neon-green);
+            border-color: var(--neon-green);
+            background: rgba(0, 255, 65, 0.08);
+        }
+
+        .mode-degraded_fallback,
+        .mode-degraded {
+            color: var(--tier-paid);
+            border-color: var(--tier-paid);
+            background: rgba(255, 107, 53, 0.08);
+        }
+
+        .mode-blocked_missing_credentials {
+            color: #FF6B6B;
+            border-color: #FF6B6B;
+            background: rgba(255, 107, 107, 0.08);
+        }
+
+        .mode-target_form_not_reached {
+            color: var(--tier-oauth);
+            border-color: var(--tier-oauth);
+            background: rgba(255, 215, 0, 0.08);
+        }
+
+        .mode-failed_runtime,
+        .mode-unknown {
+            color: var(--text-secondary);
+            border-color: var(--text-secondary);
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .operational-body {
+            display: grid;
+            gap: 6px;
+        }
+
+        .operational-line {
+            font-size: 0.68rem;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+
+        .operational-line strong {
+            color: var(--text-primary);
+        }
+
+        .operational-list {
+            margin-top: 8px;
+            padding-left: 16px;
+            color: var(--text-secondary);
+            font-size: 0.66rem;
+            line-height: 1.5;
+        }
         .search-input {
             flex: 1;
             min-width: 200px;
@@ -1308,8 +1469,7 @@
                     onclick="setFilter('FREE_FRONTIER')">Free</button>
                 <button class="filter-btn" data-filter="HEAVY_HITTER"
                     onclick="setFilter('HEAVY_HITTER')">Rescue</button>
-                <button class="filter-btn" data-filter="DAILY_FREE" onclick="setFilter('DAILY_FREE')">Daily
-                    Free</button>
+                <button class="filter-btn" data-filter="task:coding" onclick="setFilter('task:coding')">Coding</button>
                 <div style="flex-grow: 1;"></div>
                 <button class="filter-btn" style="border-color: var(--text-muted); color: var(--text-muted);"
                     onclick="exportCSV()">📥 CSV</button>
@@ -1338,7 +1498,7 @@
                             <th data-sort="cost" class="has-tooltip" data-tooltip="Average price per 1M output tokens">
                                 Cost</th>
                             <th data-sort="value_score" class="has-tooltip"
-                                data-tooltip="V = (Intel×33 + Speed×25 + Stab×25) / (Cost + ε)">Value</th>
+                                data-tooltip="Score = 0.30·Intel + 0.14·Speed + 0.16·Stability + 0.18·CostEff + 0.10·Avail + 0.06·Context + 0.06·TaskFit">Value</th>
                         </tr>
                     </thead>
                     <tbody id="tableBody">
@@ -1361,17 +1521,19 @@
         <div class="container">
             <div class="section-header">
                 <span class="section-marker">//</span>
-                <h2 class="section-title">Import for OpenClaw</h2>
+                <h2 class="section-title">Catalog Feed for aichaind</h2>
             </div>
             <div class="import-card">
-                <h3>One-Click Integration</h3>
+                <h3>Sidecar Catalog Manifest</h3>
                 <p>
-                    Copy the JSON URL below and paste it into your OpenClaw Skill configuration
-                    to enable automatic, globally-optimized AI model routing.
+                    Copy the manifest URL below and use it as the default routing source for
+                    <code>aichaind</code>, the thin OpenClaw bridge, and the public dashboard. The
+                    canonical v5 catalog manifest is now the primary public artifact; the legacy
+                    ranking feed remains available only as an operational rollback path.
                 </p>
                 <div class="import-url-box">
                     <input type="text" class="import-url" id="importUrl"
-                        value="https://filokloi.github.io/AIchain/ai_routing_table.json" readonly>
+                        value="https://filokloi.github.io/AIchain/catalog_manifest.json" readonly>
                     <button class="copy-btn" id="copyBtn" onclick="copyUrl()">Copy URL</button>
                 </div>
             </div>
@@ -1446,7 +1608,10 @@
 
     <script>
         // ── State ──
+        const CANONICAL_SOURCE_URL = 'catalog_manifest.json';
+        const LEGACY_SOURCE_URL = 'ai_routing_table.json';
         let routingData = null;
+        let routingRawData = null;
         let currentFilter = 'all';
         let currentSort = { key: 'rank', dir: 'asc' };
         let searchQuery = '';
@@ -1475,6 +1640,20 @@
             document.body.style.paddingTop = "24px";
         }
 
+        function clearBanner() {
+            const banner = document.getElementById('errorBanner');
+            banner.textContent = '';
+            banner.classList.remove('warning');
+            banner.style.display = 'none';
+        }
+
+        function setBanner(msg, level = 'error') {
+            const banner = document.getElementById('errorBanner');
+            banner.textContent = msg;
+            banner.classList.toggle('warning', level === 'warning');
+            banner.style.display = 'block';
+        }
+
         // ── Init ──
         document.addEventListener('DOMContentLoaded', () => {
             showDevBanner();
@@ -1500,32 +1679,160 @@
         });
 
         async function fetchRoutingTable() {
+            clearBanner();
+            let canonicalError = null;
+
             try {
-                const resp = await fetch('ai_routing_table.json');
-                if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-                routingData = await resp.json();
-                updateDashboard();
+                const payload = await fetchArtifact(CANONICAL_SOURCE_URL);
+                routingRawData = payload;
+                routingData = normalizeRoutingPayload(payload, 'canonical', CANONICAL_SOURCE_URL);
             } catch (err) {
-                showError(`Failed to load routing data: ${err.message}`);
-                updateStatus('OFFLINE', false);
+                canonicalError = err;
+                try {
+                    const payload = await fetchArtifact(LEGACY_SOURCE_URL);
+                    routingRawData = payload;
+                    routingData = normalizeRoutingPayload(payload, 'legacy_rollback', LEGACY_SOURCE_URL);
+                    routingData.rollback_reason = err.message;
+                    setBanner(`Canonical manifest unavailable, using legacy rollback feed: ${err.message}`, 'warning');
+                } catch (legacyErr) {
+                    showError(`Failed to load canonical or rollback routing data: ${legacyErr.message}`);
+                    updateStatus('OFFLINE', 'OFFLINE');
+                    return;
+                }
             }
+
+            const scoringFormula = routingData?.scoring?.display_formula;
+            if (scoringFormula) {
+                const valueHeader = document.querySelector("th[data-sort='value_score']");
+                if (valueHeader) valueHeader.setAttribute('data-tooltip', scoringFormula);
+            }
+
+            if (routingData?.artifact_mode === 'canonical' && routingData?.public_artifact_readiness?.dashboard_switch_ready === false) {
+                const blockers = routingData.public_artifact_readiness.blockers || [];
+                setBanner(`Canonical manifest loaded while readiness is still holding the switch: ${blockers.join(' • ')}`, 'warning');
+            } else if (!canonicalError && routingData?.artifact_mode === 'canonical') {
+                clearBanner();
+            }
+
+            updateDashboard();
+        }
+
+        async function fetchArtifact(url) {
+            const resp = await fetch(url, { cache: 'no-store' });
+            if (!resp.ok) throw new Error(`HTTP ${resp.status} from ${url}`);
+            const payload = await resp.json();
+            if (url === CANONICAL_SOURCE_URL && payload?.manifest_type !== 'aichain.catalog') {
+                throw new Error('canonical manifest did not expose manifest_type=aichain.catalog');
+            }
+            return payload;
+        }
+
+        function normalizeRoutingPayload(payload, artifactMode, artifactUrl) {
+            if (payload?.manifest_type === 'aichain.catalog') {
+                const catalog = payload.catalog || {};
+                const observability = payload.observability || {};
+                return {
+                    artifact_mode: artifactMode,
+                    artifact_label: 'catalog_manifest.json',
+                    artifact_url: artifactUrl,
+                    system_status: payload.system_status || 'UNKNOWN',
+                    last_synopsis: payload.last_synopsis || payload.generated_at || null,
+                    scoring: payload.scoring || {},
+                    total_models_analyzed: catalog.total_models_analyzed || payload.routing_hierarchy?.length || 0,
+                    tier_breakdown: catalog.tier_breakdown || {},
+                    heavy_hitter: catalog.heavy_hitter || {},
+                    routing_hierarchy: (payload.routing_hierarchy || []).map((entry, index) => normalizeModelEntry(entry, index)),
+                    live_promos: payload.live_promos || [],
+                    source_health: observability.source_health || {},
+                    degradation_reasons: observability.degradation_reasons || [],
+                    helper_ai: observability.helper_ai || {},
+                    operational_status: payload.operational_status || {},
+                    public_artifact_readiness: payload.public_artifact_readiness || {},
+                    canonical_public_artifact: payload.canonical_public_artifact || {},
+                };
+            }
+
+            return {
+                artifact_mode: artifactMode,
+                artifact_label: 'ai_routing_table.json',
+                artifact_url: artifactUrl,
+                system_status: payload.system_status || 'UNKNOWN',
+                last_synopsis: payload.last_synopsis || null,
+                scoring: payload.scoring || {},
+                total_models_analyzed: payload.total_models_analyzed || payload.routing_hierarchy?.length || 0,
+                tier_breakdown: payload.tier_breakdown || {},
+                heavy_hitter: payload.heavy_hitter || {},
+                routing_hierarchy: (payload.routing_hierarchy || []).map((entry, index) => normalizeModelEntry(entry, index)),
+                live_promos: payload.live_promos || [],
+                source_health: payload.source_health || {},
+                degradation_reasons: payload.degradation_reasons || [],
+                helper_ai: payload.helper_ai || {},
+                operational_status: payload.operational_status || {},
+                public_artifact_readiness: payload.public_artifact_readiness || {},
+                canonical_public_artifact: payload.canonical_public_artifact || {},
+            };
+        }
+
+        function normalizeModelEntry(entry, index) {
+            const normalized = { ...entry };
+            normalized.rank = entry.rank || index + 1;
+            normalized.provider = entry.provider || entry.display_name || entry.model?.split('/')[0] || 'Unknown';
+            normalized.context_length = entry.context_length || entry.raw_metrics?.context_length || 0;
+            normalized.task_label = deriveTaskLabel(entry);
+            normalized.metrics = {
+                intelligence: entry.metrics?.intelligence ?? Math.round(entry.normalized_metrics?.intelligence || 0),
+                speed: entry.metrics?.speed ?? Math.round(entry.normalized_metrics?.speed || 0),
+                stability: entry.metrics?.stability ?? Math.round(entry.normalized_metrics?.stability || 0),
+                cost: entry.metrics?.cost ?? entry.raw_metrics?.average_cost ?? 0,
+            };
+            normalized.value_score = entry.value_score || 0;
+            return normalized;
+        }
+
+        function deriveTaskLabel(entry) {
+            const explicit = entry.task_label;
+            if (typeof explicit === 'string' && explicit.trim()) {
+                return explicit.trim().toUpperCase();
+            }
+            const primary = entry.task_metadata?.primary;
+            if (Array.isArray(primary) && primary.length > 0) {
+                return String(primary[0]).trim().replace(/[_\s]+/g, '-').toUpperCase();
+            }
+            return 'GENERAL-CHAT';
+        }
+
+        function getTaskMeta(taskLabel) {
+            const normalized = String(taskLabel || 'GENERAL-CHAT').trim().replace(/[_\s]+/g, '-').toUpperCase();
+            const map = {
+                'DAILY-FREE': { text: 'DAILY', className: 'daily' },
+                'COMPLEX-RESCUE': { text: 'RESCUE', className: 'rescue' },
+                'CODING': { text: 'CODING', className: 'coding' },
+                'REASONING': { text: 'REASON', className: 'reasoning' },
+                'VISION': { text: 'VISION', className: 'vision' },
+                'LONG-CONTEXT': { text: 'LONG CTX', className: 'long' },
+                'STRUCTURED-OUTPUT': { text: 'STRUCT', className: 'structured' },
+                'EXTRACTION': { text: 'EXTRACT', className: 'general' },
+                'GENERAL-CHAT': { text: 'CHAT', className: 'general' },
+                'TOOL-AGENT-COMPATIBILITY': { text: 'AGENT', className: 'general' },
+            };
+            return map[normalized] || { text: normalized.slice(0, 10), className: 'general' };
+        }
+
+        function formatMode(mode) {
+            return String(mode || 'unknown').replaceAll('_', ' ');
         }
 
         function updateDashboard() {
             if (!routingData) return;
 
-            // Status
-            const isOperational = routingData.system_status === 'OPERATIONAL';
-            updateStatus(routingData.system_status, isOperational);
+            updateStatus(routingData.system_status, routingData.system_status);
 
-            // Last update
             if (routingData.last_synopsis) {
                 const d = new Date(routingData.last_synopsis);
                 document.getElementById('lastUpdate').textContent =
                     `LAST SYNC: ${d.toISOString().replace('T', ' ').substring(0, 19)} UTC`;
             }
 
-            // Stats
             const breakdown = routingData.tier_breakdown || {};
             document.getElementById('totalModels').textContent =
                 routingData.total_models_analyzed || routingData.routing_hierarchy?.length || 0;
@@ -1533,14 +1840,12 @@
             document.getElementById('freeCount').textContent = breakdown.FREE_FRONTIER || 0;
             document.getElementById('paidCount').textContent = breakdown.HEAVY_HITTER || breakdown.PAID_FALLBACK || 0;
 
-            // Heavy Hitter badge
             const hh = routingData.heavy_hitter;
             if (hh && hh.model && hh.model !== 'N/A') {
                 document.getElementById('heavyHitterBadge').textContent =
                     `⚔ HEAVY HITTER: ${hh.model} (Intel: ${hh.intelligence})`;
             }
 
-            // Changelog Hint
             const h = routingData.routing_hierarchy;
             if (h && h.length > 0) {
                 try {
@@ -1550,6 +1855,11 @@
                         const added = h.filter(m => !oldList.some(o => o.model === m.model)).length;
                         let hintHtml = '';
                         if (added > 0) hintHtml += `<span style="color:var(--neon-green)">+${added} new models</span> `;
+                        if (routingData.artifact_mode === 'canonical') {
+                            hintHtml += `<span style="color:var(--text-secondary)">canonical view</span>`;
+                        } else {
+                            hintHtml += `<span style="color:var(--tier-oauth)">legacy rollback</span>`;
+                        }
                         if (hintHtml) {
                             const el = document.getElementById('changelogHint');
                             el.innerHTML = hintHtml;
@@ -1560,16 +1870,104 @@
                 } catch (e) { }
             }
 
-            // Live Promos (Free Kings)
             const promos = routingData.live_promos || [];
             if (promos.length > 0) {
                 document.getElementById('livePromosContainer').style.display = 'block';
                 document.getElementById('livePromosList').innerHTML = promos.map(p =>
                     `<span style="padding: 4px 12px; border: 1px dashed var(--neon-green); color: var(--text-primary); background: var(--bg-surface); font-size: 0.7rem; letter-spacing: 1px;">${p}</span>`
                 ).join('');
+            } else {
+                document.getElementById('livePromosContainer').style.display = 'none';
             }
 
+            updatePlaneSummary();
+            renderOperationalStatus();
             renderTable();
+        }
+
+        function updatePlaneSummary() {
+            const readiness = routingData.public_artifact_readiness || {};
+            const blockers = readiness.blockers || [];
+            const degradations = routingData.degradation_reasons || [];
+            const artifactSource = document.getElementById('artifactSource');
+            const artifactMeta = document.getElementById('artifactMeta');
+            const switchReadiness = document.getElementById('switchReadiness');
+            const switchMeta = document.getElementById('switchMeta');
+            const globalPlaneValue = document.getElementById('globalPlaneValue');
+            const globalPlaneMeta = document.getElementById('globalPlaneMeta');
+
+            artifactSource.textContent = routingData.artifact_mode === 'canonical' ? 'CANONICAL MANIFEST' : 'LEGACY ROLLBACK';
+            artifactMeta.textContent = routingData.artifact_mode === 'canonical'
+                ? `${routingData.artifact_label} • ${routingData.canonical_public_artifact?.migration_state || 'canonical active'}`
+                : `${routingData.artifact_label} • rollback active${routingData.rollback_reason ? ` • ${routingData.rollback_reason}` : ''}`;
+
+            switchReadiness.textContent = readiness.dashboard_switch_ready ? 'READY' : 'HOLD';
+            switchMeta.textContent = blockers.length > 0
+                ? blockers.join(' • ')
+                : (readiness.next_acceptance_step || 'Canonical dashboard source is clear to use.');
+
+            globalPlaneValue.textContent = routingData.system_status || 'UNKNOWN';
+            globalPlaneMeta.textContent = degradations.length > 0
+                ? degradations.join(' • ')
+                : 'No active degradation reasons.';
+        }
+
+        function renderOperationalStatus() {
+            const grid = document.getElementById('operationalGrid');
+            const operational = routingData.operational_status || {};
+            const sourceHealth = routingData.source_health || {};
+            const sections = [
+                { key: 'sources', items: operational.sources || {}, title: 'SOURCE' },
+                { key: 'helper_ai', items: operational.helper_ai || {}, title: 'HELPER' },
+            ];
+            const cards = [];
+
+            sections.forEach(section => {
+                Object.entries(section.items).forEach(([name, info]) => {
+                    const health = section.key === 'sources' ? (sourceHealth[name] || {}) : null;
+                    const issues = [...(health?.issues || []), ...(health?.warnings || []), ...(info.issues || []), ...(info.warnings || [])].slice(0, 3);
+                    cards.push(`
+                        <div class="operational-card">
+                            <div class="operational-head">
+                                <div class="operational-name">${section.title}: ${escHtml(name)}</div>
+                                <span class="mode-badge mode-${escHtml(info.mode || 'unknown')}">${escHtml(formatMode(info.mode))}</span>
+                            </div>
+                            <div class="operational-body">
+                                <div class="operational-line"><strong>Confirmed:</strong> ${info.runtime_confirmed ? 'yes' : 'no'}</div>
+                                <div class="operational-line"><strong>Target:</strong> ${escHtml(info.target_state || 'n/a')}</div>
+                                ${health ? `<div class="operational-line"><strong>Records:</strong> ${health.accepted_records || 0} / ${health.fetched_records || 0}</div>` : ''}
+                                ${info.blocked_reason ? `<div class="operational-line"><strong>Blocked:</strong> ${escHtml(info.blocked_reason)}</div>` : ''}
+                                <div class="operational-line"><strong>Rule:</strong> ${escHtml(info.acceptance_criteria || 'n/a')}</div>
+                                ${issues.length > 0 ? `<ul class="operational-list">${issues.map(issue => `<li>${escHtml(issue)}</li>`).join('')}</ul>` : ''}
+                            </div>
+                        </div>
+                    `);
+                });
+            });
+
+            grid.innerHTML = cards.join('');
+        }
+
+        function getFilteredModels() {
+            if (!routingData || !routingData.routing_hierarchy) return [];
+            let models = [...routingData.routing_hierarchy];
+
+            if (currentFilter !== 'all') {
+                if (currentFilter.startsWith('task:')) {
+                    const wanted = currentFilter.slice(5).toUpperCase();
+                    models = models.filter(m => String(m.task_label || '').replace(/[_\s]+/g, '-').toUpperCase() === wanted.toUpperCase());
+                } else {
+                    models = models.filter(m => m.tier === currentFilter);
+                }
+            }
+
+            if (searchQuery) {
+                models = models.filter(m =>
+                    m.model.toLowerCase().includes(searchQuery) ||
+                    (m.provider || '').toLowerCase().includes(searchQuery)
+                );
+            }
+            return models;
         }
 
         function renderTable() {
@@ -1579,26 +1977,8 @@
                 return;
             }
 
-            let models = [...routingData.routing_hierarchy];
+            let models = getFilteredModels();
 
-            // Filter by tier or task_label
-            if (currentFilter !== 'all') {
-                if (currentFilter === 'DAILY_FREE') {
-                    models = models.filter(m => m.task_label === 'DAILY_FREE');
-                } else {
-                    models = models.filter(m => m.tier === currentFilter);
-                }
-            }
-
-            // Search
-            if (searchQuery) {
-                models = models.filter(m =>
-                    m.model.toLowerCase().includes(searchQuery) ||
-                    (m.provider || '').toLowerCase().includes(searchQuery)
-                );
-            }
-
-            // Sort
             models.sort((a, b) => {
                 let va, vb;
                 const k = currentSort.key;
@@ -1634,15 +2014,10 @@
 
                 const tierClass = m.tier === 'OAUTH_BRIDGE' ? 'oauth' :
                     m.tier === 'FREE_FRONTIER' ? 'free' : 'paid';
-                const tierIcon = m.tier === 'OAUTH_BRIDGE' ? '🔑' :
-                    m.tier === 'FREE_FRONTIER' ? '🆓' : '⚔️';
                 const tierLabel = m.tier === 'OAUTH_BRIDGE' ? 'PRIMARY' :
                     m.tier === 'FREE_FRONTIER' ? 'FREE' : 'RESCUE';
+                const taskMeta = getTaskMeta(m.task_label);
 
-                const taskClass = m.task_label === 'DAILY_FREE' ? 'daily' : 'rescue';
-                const taskText = m.task_label === 'DAILY_FREE' ? 'DAILY' : 'RESCUE';
-
-                // Medal classes for top 3
                 let medalClass = '';
                 if (m.rank === 1) medalClass = 'medal-gold';
                 else if (m.rank === 2) medalClass = 'medal-silver';
@@ -1661,7 +2036,7 @@
                         <div class="model-provider">${escHtml(m.provider || '')}</div>
                     </td>
                     <td><span class="tier-badge ${tierClass}">${tierLabel}</span></td>
-                    <td><span class="task-label ${taskClass}">${taskText}</span></td>
+                    <td><span class="task-label ${taskMeta.className}">${taskMeta.text}</span></td>
                     <td class="metric-cell">
                         <span class="${metricClass(intel)}">${intel}</span>
                         ${metricBar(intel)}
@@ -1683,7 +2058,6 @@
 
             tbody.innerHTML = html;
         }
-
         // ── Utilities ──
 
         function metricClass(val) {
@@ -1721,9 +2095,10 @@
                 const tierIcon = m.tier === 'OAUTH_BRIDGE' ? '🔑' : m.tier === 'FREE_FRONTIER' ? '🆓' : '⚔️';
                 const tierLabel = m.tier === 'OAUTH_BRIDGE' ? 'PRIMARY' : m.tier === 'FREE_FRONTIER' ? 'FREE' : 'RESCUE';
 
+                const taskMeta = getTaskMeta(m.task_label);
                 document.getElementById('mBadges').innerHTML = `
                     <span class="tier-badge ${tierClass}">${tierIcon} ${tierLabel}</span>
-                    <span class="task-label ${m.task_label === 'DAILY_FREE' ? 'daily' : 'rescue'}">${m.task_label === 'DAILY_FREE' ? 'DAILY' : 'RESCUE'}</span>
+                    <span class="task-label ${taskMeta.className}">${taskMeta.text}</span>
                     <span class="task-label" style="background: rgba(255,255,255,0.1); color: #fff;">RANK #${m.rank}</span>
                 `;
 
@@ -1795,16 +2170,7 @@
 
         function exportCSV() {
             if (!routingData || !routingData.routing_hierarchy) return;
-            // Get currently displayed models from the DOM or filter state
-            // It's cleaner to re-filter based on state
-            let models = [...routingData.routing_hierarchy];
-            if (currentFilter !== 'all') {
-                if (currentFilter === 'DAILY_FREE') models = models.filter(m => m.task_label === 'DAILY_FREE');
-                else models = models.filter(m => m.tier === currentFilter);
-            }
-            if (searchQuery) {
-                models = models.filter(m => m.model.toLowerCase().includes(searchQuery) || (m.provider || '').toLowerCase().includes(searchQuery));
-            }
+            const models = getFilteredModels();
 
             const header = ['Rank', 'Model', 'Provider', 'Tier', 'Role', 'Intelligence', 'Speed', 'Stability', 'Cost', 'ValueScore'];
             const rows = models.map(m => [
@@ -1825,10 +2191,10 @@
             link.click();
             document.body.removeChild(link);
         }
-
         function exportJSON() {
-            if (!routingData) return;
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(routingData, null, 2));
+            const payload = routingRawData || routingData;
+            if (!payload) return;
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(payload, null, 2));
             const link = document.createElement("a");
             link.setAttribute("href", dataStr);
             link.setAttribute("download", `aichain_routing_${new Date().toISOString().split('T')[0]}.json`);
@@ -1836,10 +2202,11 @@
             link.click();
             document.body.removeChild(link);
         }
-
-        function updateStatus(text, online) {
+        function updateStatus(text, status) {
             document.getElementById('statusText').textContent = text;
             const dot = document.getElementById('statusDot');
+            const normalized = String(status || '').toUpperCase();
+            const online = normalized !== 'OFFLINE' && normalized !== 'FAILED' && normalized !== 'ERROR';
             if (online) {
                 dot.classList.remove('offline');
             } else {
@@ -1848,11 +2215,8 @@
         }
 
         function showError(msg) {
-            const banner = document.getElementById('errorBanner');
-            banner.textContent = msg;
-            banner.style.display = 'block';
+            setBanner(msg, 'error');
         }
-
         function setFilter(filter) {
             currentFilter = filter;
             document.querySelectorAll('.filter-btn').forEach(btn => {
@@ -1890,3 +2254,12 @@
 </body>
 
 </html>
+
+
+
+
+
+
+
+
+

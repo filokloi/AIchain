@@ -2,10 +2,8 @@ name: "AIchain — Intelligence Arbitration Cycle"
 
 on:
   schedule:
-    # Run every 12 hours
     - cron: "0 */12 * * *"
   workflow_dispatch:
-    # Allow manual trigger from GitHub UI
 
 permissions:
   contents: write
@@ -30,20 +28,41 @@ jobs:
         run: pip install -r requirements.txt
 
       - name: Run unit tests
-        run: python -m pytest tests/test_arbitrator.py
+        run: >-
+          python -m pytest
+          tests/test_arbitrator.py
+          tests/test_catalog_manifest_builder.py
+          tests/test_catalog_contract.py
+          tests/test_site_backend_pipeline.py
+          tests/test_dashboard_cutover.py
 
       - name: Run arbitrator
         env:
           OPENROUTER_KEY: ${{ secrets.OPENROUTER_KEY }}
           GEMINI_KEY: ${{ secrets.GEMINI_KEY }}
           GROQ_KEY: ${{ secrets.GROQ_KEY }}
-        run: python arbitrator.py
+          ARTIFICIAL_ANALYSIS_KEY: ${{ secrets.ARTIFICIAL_ANALYSIS_KEY }}
+        run: |
+          python tools/arbitrator.py
+          python tools/build_catalog_manifest.py
+
+      - name: Verify dashboard cutover release contract
+        run: python tools/verify_dashboard_release.py
+
+      - name: Upload ingestion snapshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: aichain-source-snapshots
+          path: artifacts/source_snapshots
+          if-no-files-found: warn
+          retention-days: 7
 
       - name: Commit and push updated routing table
         run: |
           git config user.name "AIchain Bot"
           git config user.email "aichain-bot@users.noreply.github.com"
-          git add ai_routing_table.json
+          git add ai_routing_table.json catalog_manifest.json
           if ! git diff --cached --quiet; then
             git commit -m "chore: update global routing table [$(date -u +%Y-%m-%dT%H:%M:%SZ)]"
             git push

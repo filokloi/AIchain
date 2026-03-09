@@ -1,5 +1,6 @@
-import pytest
-from arbitrator import assess_geopolitical_risk, compute_value_score, parse_cost
+import sys, os
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
+from tools.arbitrator import assess_geopolitical_risk, compute_value_score, parse_cost
 
 def test_geopolitical_risk_assessment():
     assert assess_geopolitical_risk("openai/gpt-4o") == "LOW"

@@ -20,17 +20,29 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
-      - name: Python syntax check (root)
-        run: python -m py_compile arbitrator.py aichain_bridge.py debug_sync.py
-
-      - name: Python syntax check (skill)
-        run: python -m py_compile ai-chain-skill/aichain.py ai-chain-skill/scripts/*.py ai-chain-skill/providers/*.py
+      - name: Python syntax check (core runtime)
+        run: >-
+          python -m py_compile
+          aichaind/main.py
+          aichaind/core/*.py
+          aichaind/routing/*.py
+          aichaind/security/*.py
+          aichaind/providers/*.py
+          aichaind/providers/adapters/*.py
+          aichaind/telemetry/*.py
+          aichaind/transport/*.py
+          openclaw-skill/skill.py
+          tools/arbitrator.py
+          tools/build_catalog_manifest.py
+          tools/verify_dashboard_release.py
+          tools/verify_live_dashboard.py
+          tools/verify_local_execution.py
 
       - name: Validate JSON files
         run: |
           python - << 'PY'
           import json,glob,sys
-          files = glob.glob('*.json') + glob.glob('ai-chain-skill/*.json')
+          files = glob.glob('*.json') + glob.glob('config/*.json')
           bad=[]
           for f in files:
               try:
@@ -44,3 +56,19 @@ jobs:
               sys.exit(1)
           print('All JSON files valid')
           PY
+
+      - name: Run focused regression tests
+        run: >-
+          python -m pytest
+          tests/test_catalog_contract.py
+          tests/test_catalog_manifest_builder.py
+          tests/test_site_backend_pipeline.py
+          tests/test_dashboard_cutover.py
+          tests/test_http_server_enforcement.py
+          tests/test_local_adapter.py
+          tests/test_operational_verifiers.py
+          tests/test_injection_guard.py
+          tests/test_output_validation.py
+          tests/test_policy.py
+
+

@@ -1,135 +1,139 @@
-# ⛓ AIchain — The Sovereign Global Value Maximizer
+# ⛓ AIchain
 
 <div align="center">
 
-**Maximum Intelligence. Zero Cost.**
+**Global catalog plane for AI routing. Local execution plane for OpenClaw.**
 
 [![Live Dashboard](https://img.shields.io/badge/🌐_Live_Dashboard-filokloi.github.io/AIchain-00ff41?style=for-the-badge&labelColor=0a0a0a)](https://filokloi.github.io/AIchain/)
 [![Status](https://img.shields.io/badge/Status-OPERATIONAL-00ff41?style=flat-square&labelColor=0a0a0a)](https://filokloi.github.io/AIchain/)
-[![Models](https://img.shields.io/badge/Models_Analyzed-344+-00ff41?style=flat-square&labelColor=0a0a0a)](https://filokloi.github.io/AIchain/)
-[![License](https://img.shields.io/badge/License-Open_Source-FFD700?style=flat-square&labelColor=0a0a0a)](LICENSE)
+[![Manifest](https://img.shields.io/badge/v5-Catalog_Manifest-FFD700?style=flat-square&labelColor=0a0a0a)](https://filokloi.github.io/AIchain/catalog_manifest.json)
 
----
-
-*The decentralized intelligence routing layer that ranks every AI model on a global scale — without bias, without discrimination. Data drives every decision.*
-
-**[🔗 View Live Dashboard](https://filokloi.github.io/AIchain/)** · **[📊 Raw JSON Feed](https://filokloi.github.io/AIchain/ai_routing_table.json)** · **[🐛 Report Issue](https://github.com/filokloi/AIchain/issues)**
+**[Live Dashboard](https://filokloi.github.io/AIchain/)** · **[Catalog Manifest](https://filokloi.github.io/AIchain/catalog_manifest.json)** · **[Legacy Feed](https://filokloi.github.io/AIchain/ai_routing_table.json)** · **[Issues](https://github.com/filokloi/AIchain/issues)**
 
 </div>
 
 ---
 
-## ⚡ The Five Postulates
+## Mission
 
-| # | Postulate | Principle |
-|:---:|-----------|-----------|
-| **I** | **Data as Sovereign Capital** | We — the people — have built the training data that powers every AI model, and we continue to fuel them with every interaction. In return, we expect the highest tier of intelligence — at zero extra cost. |
-| **II** | **The Zero-Cost Mandate** | Our goal is Maximum Intelligence at Zero Cost. |
-| **III** | **Collective Routing Leverage** | We unify routing logic to influence providers to compete for the community's traffic — rewarding quality, not marketing. |
-| **IV** | **Universal Meritocracy** | Our analysis spans the entire world without discrimination. We evaluate every model on a global scale. |
-| **V** | **The Golden Quartet** | Only four metrics determine rank: Intelligence, Speed, Stability, and Cost (Target: $0). |
+AIchain is being refactored into a two-plane system:
 
----
+- **Global plane**: the GitHub Pages site publishes the public catalog, routing hierarchy, compatibility contract, and operator-facing information.
+- **Local plane**: the OpenClaw skill and `aichaind` sidecar execute requests locally, apply policy/privacy rules, choose providers, and stream results back safely.
 
-## 🧮 How It Works
+The target outcome is simple:
 
-Every model receives a **Value Score** computed from the Golden Quartet:
-
-```
-V = (Intel×33 + Speed×25 + Stab×25) / (Cost + ε)
-```
-
-Where `ε = 0.001` prevents division by zero for free models. Higher score = better value.
-
-### Routing Hierarchy
-
-| Priority | Tier | Description |
-|:---:|------|-------------|
-| 🔑 | **PRIMARY (OAuth Bridge)** | Free via existing subscriptions — ChatGPT Plus, Google AI Studio, Claude.ai |
-| 🆓 | **FREE (Free Frontier)** | $0 cost API models with high intelligence via OpenRouter |
-| ⚔️ | **RESCUE (Heavy Hitter)** | Paid last-resort. Deploys, solves, immediately reverts to free |
+**maximum intelligence, maximum speed, maximum stability, minimum cost**
 
 ---
 
-## 🏗 Architecture
+## Current State
+
+Today the repository publishes two feed formats:
+
+- `catalog_manifest.json`
+  - native v5 contract for `aichaind`
+  - explicit roles for `fast`, `heavy`, and `visual`
+  - plane metadata for global catalog vs local execution
+- `ai_routing_table.json`
+  - legacy ranking feed kept for compatibility
+  - still used by the dashboard UI
+
+`aichaind` now validates both formats and prefers the native v5 contract when available.
+
+---
+
+## Architecture
 
 ```mermaid
 graph LR
-    A[GitHub Actions<br/>Cron: 12h] --> B[arbitrator.py]
-    B --> C[OpenRouter API<br/>+ Global Benchmarks]
-    C --> B
-    B --> D[ai_routing_table.json]
-    D --> E[GitHub Pages<br/>Live Dashboard]
-    D --> F[OpenClaw Skill<br/>JSON Import]
+    A["GitHub Actions"] --> B["tools/arbitrator.py"]
+    B --> C["ai_routing_table.json (legacy)"]
+    C --> D["tools/build_catalog_manifest.py"]
+    D --> E["catalog_manifest.json (v5)"]
+    C --> F["GitHub Pages Dashboard"]
+    E --> G["aichaind"]
+    H["openclaw-skill"] --> G
 ```
 
 ---
 
-## 🚀 Quick Start
+## OpenClaw + aichaind
 
-### Use in OpenClaw (One-Click)
+Use the catalog manifest as the default routing source for the local sidecar:
 
-Copy the JSON URL and paste it into your OpenClaw Skill configuration:
-
-```
-https://filokloi.github.io/AIchain/ai_routing_table.json
+```text
+https://filokloi.github.io/AIchain/catalog_manifest.json
 ```
 
-### Run Locally
+The thin skill lives in `openclaw-skill/skill.py`.
+All routing, policy, provider selection, and execution logic belongs in `aichaind/`.
+
+---
+
+## Local Development
 
 ```bash
-# Prerequisites: Python 3.11+
 pip install -r requirements.txt
-python arbitrator.py
-
-# View dashboard
-python -m http.server 8080
-# Open http://localhost:8080
+python tools/arbitrator.py
+python tools/build_catalog_manifest.py
+python -m pytest tests -q
 ```
 
-### Deploy Your Own
+If you want to run the sidecar locally:
 
-1. Fork this repository
-2. Add your `OPENROUTER_KEY` as a GitHub Secret
-3. Enable GitHub Pages (source: root, branch: main)
-4. The workflow runs automatically every 12 hours
+```bash
+python -m aichaind.main config/default.json
+```
 
 ---
 
-## 📁 Project Structure
+## Repository Layout
 
-```
+```text
 AIchain/
-├── index.html                 # Live Dashboard (GitHub Pages)
-├── arbitrator.py              # Global model arbitration engine
-├── ai_routing_table.json      # Live routing data (auto-updated)
-├── requirements.txt           # Python dependencies
-├── ai-chain-skill/            # OpenClaw integration skill
-│   ├── SKILL.md               # Skill definition
-│   └── scripts/               # Controller & personalization
-├── .github/workflows/
-│   └── ai_cycle.yml           # 12-hour automation pipeline
-└── README.md
+├── index.html                    # GitHub Pages dashboard
+├── ai_routing_table.json         # Legacy public ranking feed
+├── catalog_manifest.json         # Native v5 public catalog manifest
+├── openclaw-skill/               # Thin bridge to local sidecar
+├── aichaind/                     # Local execution, routing, policy, security
+├── tools/arbitrator.py           # Global ranking generator
+├── tools/build_catalog_manifest.py
+├── config/default.json           # Default sidecar config
+├── docs/architecture/            # Architecture and contract docs
+└── .github/workflows/ai_cycle.yml
 ```
 
 ---
 
-## 📡 Data Sources
+## Status of the Refactor
 
-| Source | Status | Usage |
-|--------|:------:|-------|
-| **OpenRouter API** | ✅ Active | 344+ models — pricing, availability, performance |
-| **LMArena (Chatbot Arena)** | 🔜 Planned | Crowdsourced ELO rankings for cross-validation |
-| **Artificial Analysis** | 🔜 Planned | Independent benchmark aggregation |
+Already in place:
+
+- native v5 catalog contract validation in `aichaind`
+- direct-provider and balance-aware routing
+- thin OpenClaw bridge to local sidecar
+- audit trail, rate limiting, token auth, PII redaction baseline
+- public `catalog_manifest.json` generation path
+
+Not finished yet:
+
+- canonical session lifecycle in the request path
+- hard fail-closed privacy and policy enforcement
+- stronger injection defense and output enforcement
+- full observability/metrics pipeline
+- agent adapters beyond stubs
+- packaging and distribution path for other users with their own credentials
 
 ---
 
-<div align="center">
+## Philosophy
 
-**Built for the community. Open source. No restrictions.**
+AIchain is not trying to become a generic cloud router.
+The intended end state is:
 
-*We — the people — built the training data. We continue to provide it with every interaction.*
-
-**[🌐 Live Dashboard](https://filokloi.github.io/AIchain/)** · **[⭐ Star this repo](https://github.com/filokloi/AIchain)**
-
-</div>
+- a public, stable, informative catalog plane
+- a private, local-first execution plane
+- explicit compatibility between the two
+- graceful degradation when providers fail
+- strong cost discipline without losing capability
