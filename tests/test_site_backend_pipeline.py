@@ -351,8 +351,9 @@ def test_helper_alias_resolution_is_applied_in_pipeline(tmp_path):
 
 
 def test_site_formula_matches_backend_constant():
-    index_html = Path('C:/Users/filok/OneDrive/Desktop/AI chain for Open Claw envirement/index.html').read_text(encoding='utf-8')
+    index_html = (Path(__file__).resolve().parents[1] / 'index.html').read_text(encoding='utf-8')
     assert SCORING_DISPLAY_FORMULA in index_html
+
 
 
 
