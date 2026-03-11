@@ -45,19 +45,25 @@ def classify_live_dashboard_status(index_html: str, manifest_text: str, site_htt
         reasons.append("live dashboard HTML not reachable")
     if not site_uses_canonical:
         reasons.append("live dashboard still does not reference catalog_manifest.json")
-    if site_uses_legacy:
-        reasons.append("live dashboard still references legacy ai_routing_table.json path")
     if not manifest_http_ok:
         reasons.append("live catalog_manifest.json not reachable")
     if manifest_http_ok and not manifest_valid:
         reasons.append("live catalog_manifest.json missing canonical readiness markers")
 
     if site_http_ok and manifest_http_ok and site_uses_canonical and manifest_valid:
-        status = "deploy_confirmed_candidate"
+        if site_uses_legacy:
+            status = "deploy_confirmed_with_rollback"
+            reasons.append("legacy ai_routing_table.json rollback path still active")
+        else:
+            status = "deploy_confirmed"
     elif site_http_ok and not manifest_http_ok:
         status = "deploy_not_switched"
+        if site_uses_legacy:
+            reasons.append("live dashboard still references legacy ai_routing_table.json path")
     else:
         status = "deploy_not_confirmed"
+        if site_uses_legacy:
+            reasons.append("live dashboard still references legacy ai_routing_table.json path")
 
     return LiveDashboardStatus(
         status=status,
@@ -90,7 +96,7 @@ def main() -> int:
     payload["legacy_reachable"] = legacy_ok
     print(json.dumps(payload, indent=2, ensure_ascii=False))
 
-    return 0 if result.status == "deploy_confirmed_candidate" else 1
+    return 0 if result.status in {"deploy_confirmed", "deploy_confirmed_with_rollback"} else 1
 
 
 if __name__ == "__main__":

@@ -15,6 +15,8 @@ if str(REPO_ROOT) not in sys.path:
 
 from aichaind.routing.catalog_contract import validate_catalog_manifest
 from aichaind.routing.table_sync import compute_table_checksum
+from tools.catalog_pipeline.provider_access import build_provider_access_matrix
+from tools.catalog_pipeline.self_hosting import build_self_hosted_model_index
 
 TABLE_FILE = REPO_ROOT / "ai_routing_table.json"
 MANIFEST_FILE = REPO_ROOT / "catalog_manifest.json"
@@ -92,12 +94,13 @@ def _visual_score(entry: dict) -> float:
     return score
 
 
-def build_manifest(table: dict, base_url: str = DEFAULT_BASE_URL) -> dict:
+def build_manifest(table: dict, base_url: str = DEFAULT_BASE_URL, provider_access_runtime: dict | None = None) -> dict:
     roles = derive_roles(table)
     checksum = compute_table_checksum(table)
     generated_at = datetime.now(timezone.utc).isoformat()
     manifest_url = f"{base_url}/catalog_manifest.json"
     legacy_url = f"{base_url}/ai_routing_table.json"
+    self_hosted_model_index = build_self_hosted_model_index(table.get("routing_hierarchy", []))
 
     manifest = {
         "schema_version": SCHEMA_VERSION,
@@ -130,6 +133,7 @@ def build_manifest(table: dict, base_url: str = DEFAULT_BASE_URL) -> dict:
             "supports_local_canonical_state": True,
             "supports_policy_gated_privacy": True,
             "supports_cost_optimization": True,
+            "supports_self_hosted_model_index": True,
         },
         "catalog": {
             "scope": table.get("scope", "GLOBAL_NON_DISCRIMINATORY"),
@@ -137,6 +141,7 @@ def build_manifest(table: dict, base_url: str = DEFAULT_BASE_URL) -> dict:
             "legacy_feed_version": table.get("version", ""),
             "feed_checksum": checksum,
             "total_models_analyzed": table.get("total_models_analyzed", 0),
+            "self_hostable_models": self_hosted_model_index["total_models"],
             "data_sources": deepcopy(table.get("data_sources", {})),
             "tier_breakdown": deepcopy(table.get("tier_breakdown", {})),
             "heavy_hitter": deepcopy(table.get("heavy_hitter", {})),
@@ -148,6 +153,8 @@ def build_manifest(table: dict, base_url: str = DEFAULT_BASE_URL) -> dict:
             "merge_diagnostics": deepcopy(table.get("merge_diagnostics", {})),
         },
         "operational_status": deepcopy(table.get("operational_status", {})),
+        "provider_access_matrix": build_provider_access_matrix(provider_access_runtime),
+        "self_hosted_model_index": self_hosted_model_index,
         "public_artifact_readiness": deepcopy(table.get("public_artifact_readiness", {})),
         "scoring": deepcopy(table.get("scoring", {})),
         "live_promos": deepcopy(table.get("live_promos", [])),
@@ -179,6 +186,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-
-
-

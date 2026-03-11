@@ -84,6 +84,7 @@ class CascadeRouter:
         available_free_model: str = "",
         available_heavy_model: str = "",
         available_visual_model: str = "",
+        available_local_model: str = "",
         balance_report=None,
     ) -> RouteDecision:
         """Run the cascading router. Returns the best RouteDecision."""
@@ -93,9 +94,12 @@ class CascadeRouter:
             "free": available_free_model,
             "heavy": available_heavy_model,
             "visual": available_visual_model,
+            "local": available_local_model,
         }
 
         def _resolve_model(preference: str) -> str:
+            if preference == "local":
+                return available_local_model
             if preference == "heavy":
                 return available_heavy_model
             if preference == "visual":
@@ -237,6 +241,9 @@ class CascadeRouter:
             balance_report=balance_report,
             available_models=available_models,
             estimated_tokens=self._estimate_tokens(messages),
+            current_model=decision.target_model,
+            current_provider=decision.target_provider,
+            task_hint=self._build_task_hint(decision, messages),
         )
         if not optimized or not optimized.model:
             return decision
@@ -264,6 +271,8 @@ class CascadeRouter:
         reason = (decision.reason or "").lower()
         target_model = decision.target_model or ""
 
+        if target_model and target_model == available_models.get("local"):
+            return "local"
         if target_model and target_model == available_models.get("visual"):
             return "visual"
         if any(token in reason for token in ("visual", "image", "vision", "screenshot")):
@@ -295,6 +304,26 @@ class CascadeRouter:
         if prefix in _DIRECT_PROVIDERS:
             return prefix
         return "openrouter"
+
+    def _build_task_hint(self, decision: RouteDecision, messages: list[dict]) -> str:
+        parts = []
+        if decision.reason:
+            parts.append(decision.reason)
+        if decision.decision_layers:
+            parts.extend(decision.decision_layers[:4])
+        prompt_parts = []
+        for msg in messages:
+            content = msg.get("content", "")
+            if isinstance(content, str):
+                prompt_parts.append(content)
+            elif isinstance(content, list):
+                for part in content:
+                    if isinstance(part, dict):
+                        prompt_parts.append(str(part.get("text", "")))
+        prompt_text = " ".join(part for part in prompt_parts if part).strip()
+        if prompt_text:
+            parts.append(prompt_text[:400])
+        return " | ".join(part for part in parts if part)
 
     def _estimate_tokens(self, messages: list[dict]) -> int:
         chars = 0

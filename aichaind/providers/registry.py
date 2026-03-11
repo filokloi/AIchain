@@ -36,6 +36,7 @@ def _load_defaults():
     from aichaind.providers.adapters.groq import GroqAdapter
     from aichaind.providers.adapters.deepseek import DeepSeekAdapter
     from aichaind.providers.adapters.openai_native import OpenAINativeAdapter
+    from aichaind.providers.adapters.openai_codex import OpenAICodexOAuthAdapter
     from aichaind.providers.adapters.generic import GenericOpenAIAdapter
     from aichaind.providers.adapters.local_openai import LocalOpenAIAdapter
 
@@ -44,6 +45,7 @@ def _load_defaults():
     register_adapter("groq", GroqAdapter)
     register_adapter("deepseek", DeepSeekAdapter)
     register_adapter("openai", OpenAINativeAdapter)
+    register_adapter("openai-codex", OpenAICodexOAuthAdapter)
 
     # Local OpenAI-compatible runtimes
     for provider_name in ("local", "vllm", "ollama", "lmstudio", "llamacpp"):
@@ -99,3 +101,4 @@ def discover_all() -> dict:
         except Exception as e:
             log.error(f"Discovery failed for {prefix}: {e}")
     return results
+

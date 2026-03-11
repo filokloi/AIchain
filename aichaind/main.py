@@ -21,6 +21,9 @@ from aichaind.routing.cascade import CascadeRouter
 from aichaind.routing.cost_optimizer import CostOptimizer
 from aichaind.routing.table_sync import fetch_routing_table
 from aichaind.providers.balance import BalanceChecker
+from aichaind.providers.access import build_provider_access_layer
+from aichaind.providers.local_runtime import resolve_local_execution
+from aichaind.providers.local_profile import LocalProfileStore
 from aichaind.telemetry.audit import AuditLogger
 from aichaind.transport.http_server import start_server
 
@@ -41,6 +44,44 @@ _LOCAL_BASE_ENV = {
     "lmstudio": "LMSTUDIO_BASE_URL",
     "llamacpp": "LLAMACPP_BASE_URL",
 }
+
+
+def _pid_exists(pid: int) -> bool:
+    if pid <= 0:
+        return False
+    try:
+        os.kill(pid, 0)
+    except (OSError, SystemError, ValueError):
+        return False
+    return True
+
+
+def acquire_single_instance(pid_file: Path, log: logging.Logger) -> None:
+    current_pid = os.getpid()
+    pid_file.parent.mkdir(parents=True, exist_ok=True)
+    if pid_file.exists():
+        raw = pid_file.read_text(encoding="utf-8").strip()
+        if raw:
+            try:
+                existing_pid = int(raw)
+            except ValueError:
+                existing_pid = 0
+            if existing_pid and existing_pid != current_pid and _pid_exists(existing_pid):
+                raise RuntimeError(f"another aichaind instance is already running (pid={existing_pid})")
+        try:
+            pid_file.unlink()
+        except OSError:
+            pass
+    pid_file.write_text(str(current_pid), encoding="utf-8")
+    log.info(f"PID file written to {pid_file}")
+
+
+def release_single_instance(pid_file: Path) -> None:
+    try:
+        if pid_file.exists() and pid_file.read_text(encoding="utf-8").strip() == str(os.getpid()):
+            pid_file.unlink()
+    except OSError:
+        pass
 
 
 def resolve_roles(cfg: dict, log: logging.Logger) -> tuple[dict, dict]:
@@ -105,62 +146,76 @@ def resolve_roles(cfg: dict, log: logging.Logger) -> tuple[dict, dict]:
 def resolve_local_role(cfg: dict, log: logging.Logger) -> str:
     """Resolve a local execution fallback model if configured and reachable."""
     local_cfg = cfg.get("local_execution", {})
-    if not isinstance(local_cfg, dict) or not local_cfg.get("enabled"):
+    if not isinstance(local_cfg, dict):
         return ""
 
-    provider = str(local_cfg.get("provider") or "local").lower()
-    model = str(local_cfg.get("default_model") or "").strip()
-    base_url = str(local_cfg.get("base_url") or "").strip()
-    require_healthcheck = bool(local_cfg.get("require_healthcheck", True))
-
-    if not model:
-        log.warning("Local execution enabled but no default_model configured")
+    resolution = resolve_local_execution(local_cfg, timeout=2.5, detect_when_disabled=False)
+    if resolution.status != "runtime_confirmed":
+        if local_cfg.get("enabled"):
+            log.warning(f"Local execution unavailable: {resolution.reason}")
+            for probe in resolution.probes:
+                if probe.reachable or probe.executable_present:
+                    log.info(
+                        f"  local probe {probe.provider}: reachable={probe.reachable} models={len(probe.discovered_models)} executable={probe.executable_present}"
+                    )
         return ""
 
-    env_var = _LOCAL_BASE_ENV.get(provider, "AICHAIN_LOCAL_BASE_URL")
-    if base_url:
-        os.environ.setdefault(env_var, base_url)
+    env_var = _LOCAL_BASE_ENV.get(resolution.provider, "AICHAIN_LOCAL_BASE_URL")
+    if resolution.base_url:
+        os.environ[env_var] = resolution.base_url
 
-    if "/" not in model:
-        model = f"{provider}/{model}"
-
-    from aichaind.providers.registry import get_adapter
-
-    adapter = get_adapter(provider)
-    if not adapter:
-        log.warning(f"Local execution configured but adapter missing for provider={provider}")
-        return ""
-
-    if require_healthcheck and not adapter.health_check():
-        log.warning(
-            f"Local execution configured but health check failed for provider={provider}; local reroute disabled"
-        )
-        return ""
-
-    log.info(f"Local execution: ACTIVE ({model} via {provider})")
-    return model
+    log.info(f"Local execution: ACTIVE ({resolution.model} via {resolution.provider})")
+    return resolution.model
 
 
-def discover_provider_capabilities(discovery_report, log: logging.Logger) -> dict[str, set[str]]:
-    """Probe direct providers once on boot and cache available model IDs."""
+def discover_provider_capabilities(provider_access_layer, discovery_report, log: logging.Logger) -> dict[str, set[str]]:
+    """Probe only providers that have an allowed runtime access method."""
     from aichaind.providers.registry import get_adapter
 
     capabilities: dict[str, set[str]] = {}
-    for credential in discovery_report.credentials:
-        provider = credential.provider
+    runtime_providers = provider_access_layer.runtime_providers() if provider_access_layer else [
+        credential.provider for credential in discovery_report.credentials
+    ]
+
+    for provider in runtime_providers:
+        access_decision = provider_access_layer.resolve(provider) if provider_access_layer else None
         try:
             adapter = get_adapter(provider)
             if not adapter or adapter.name != provider:
                 capabilities[provider] = set()
+                if provider_access_layer:
+                    provider_access_layer.mark_runtime_result(provider, False, "adapter_missing")
                 log.info(f"Capability discovery: {provider} skipped (no direct adapter)")
+                continue
+            if access_decision and not adapter.supports_access_method(access_decision.selected_method):
+                capabilities[provider] = set()
+                provider_access_layer.mark_runtime_result(
+                    provider,
+                    False,
+                    f"access_method_not_executable:{access_decision.selected_method}",
+                )
+                log.info(
+                    f"Capability discovery: {provider} skipped "
+                    f"(method={access_decision.selected_method}, adapter={adapter.name})"
+                )
                 continue
             result = adapter.discover()
             models = set(result.available_models or [])
             capabilities[provider] = models
+            confirmed = result.status == "authenticated" and bool(models)
+            if provider_access_layer:
+                provider_access_layer.mark_runtime_result(
+                    provider,
+                    confirmed,
+                    f"discover:{result.status}:models={len(models)}",
+                    target_form_reached=result.limits.get("target_form_reached"),
+                )
             log.info(f"Capability discovery: {provider} status={result.status} models={len(models)}")
         except Exception as exc:
             log.warning(f"Capability discovery failed for {provider}: {exc}")
             capabilities[provider] = set()
+            if provider_access_layer:
+                provider_access_layer.mark_runtime_result(provider, False, f"discover_error:{type(exc).__name__}")
     return capabilities
 
 
@@ -186,6 +241,8 @@ def main():
     log = logging.getLogger("aichaind")
     log.info(f"aichaind v{VERSION} starting...")
 
+    acquire_single_instance(paths["pid_file"], log)
+
     auth_manager = AuthTokenManager(paths["auth_token_file"])
     auth_manager.generate_token()
     log.info(f"Auth token written to {paths['auth_token_file']}")
@@ -201,6 +258,7 @@ def main():
     log.info(f"State machine: {controller.state.get('system')} / {controller.state.get('circuit')}")
 
     session_store = SessionStore(paths["session_dir"])
+    local_profile_store = LocalProfileStore(paths["local_profile_file"])
 
     audit_logger = AuditLogger(paths["audit_file"])
     audit_logger.record("daemon_start", {"version": VERSION})
@@ -216,6 +274,8 @@ def main():
 
     roles, routing_table = resolve_roles(cfg, log)
     roles["local_brain"] = resolve_local_role(cfg, log)
+
+    provider_access_layer = build_provider_access_layer(cfg, discovery_report, log)
     log.info(f"Fast Brain:  {roles['fast_brain']}")
     log.info(f"Heavy Brain: {roles['heavy_brain']}")
     log.info(f"Visual:      {roles['visual_brain']}")
@@ -228,8 +288,14 @@ def main():
 
     balance_checker = BalanceChecker()
     cost_optimizer = CostOptimizer(routing_table)
-    provider_capabilities = discover_provider_capabilities(discovery_report, log)
+    provider_capabilities = discover_provider_capabilities(provider_access_layer, discovery_report, log)
     cost_optimizer.configure_provider_capabilities(provider_capabilities)
+    cost_optimizer.configure_provider_access_layer(provider_access_layer)
+    cost_optimizer.configure_local_profiles(local_profile_store.snapshot())
+    local_profile_summary = local_profile_store.summary(roles.get("local_brain", ""))
+    log.info(f"Local profiles loaded: {local_profile_summary['total_profiles']}")
+    if roles.get("local_brain") and not local_profile_summary.get("active_profile"):
+        log.warning("Local runtime is active but no profile exists yet; run tools/profile_local_runtime.py to calibrate local routing")
     cascade_router.configure_cost_optimizer(cost_optimizer)
     log.info("Cost optimizer: ACTIVE")
 
@@ -279,12 +345,16 @@ def main():
         discovery_report=discovery_report,
         route_eval_collector=route_eval_collector,
         summarizer=summarizer,
+        provider_access_layer=provider_access_layer,
+        local_profile_store=local_profile_store,
+        input_redaction_enabled=cfg.get("security", {}).get("redact_inputs_before_cloud", False),
     )
 
     def shutdown(signum, frame):
         log.info("Shutdown signal received...")
         audit_logger.record("daemon_stop", {"signal": signum})
         auth_manager.revoke()
+        release_single_instance(paths["pid_file"])
         httpd.server_close()
         sys.exit(0)
 
@@ -295,7 +365,10 @@ def main():
         httpd.serve_forever()
     except KeyboardInterrupt:
         shutdown(signal.SIGINT, None)
+    finally:
+        release_single_instance(paths["pid_file"])
 
 
 if __name__ == "__main__":
     main()
+

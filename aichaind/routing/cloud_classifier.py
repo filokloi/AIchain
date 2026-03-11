@@ -28,7 +28,7 @@ Categories:
 - FREE_SIMPLE: simple questions, greetings, translations, formatting
 - VISUAL: image analysis, screenshots, UI design
 
-Respond with ONLY a JSON object: {"category": "CATEGORY_NAME", "confidence": 0.0-1.0}
+Respond with ONLY a JSON object: {{"category": "CATEGORY_NAME", "confidence": 0.0-1.0}}
 
 User query: {query}"""
 
@@ -159,3 +159,4 @@ class CloudClassifier:
         except (json.JSONDecodeError, ValueError, KeyError) as e:
             log.warning(f"Cloud classifier parse error: {e}")
             return None
+

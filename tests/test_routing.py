@@ -218,3 +218,41 @@ class TestTableSyncUtils:
         assert "primary" not in fbs
         assert len(fbs) == 2
         assert fbs == ["fb1", "fb2"]
+
+    def test_cost_optimizer_receives_prompt_aware_task_hint(self):
+        class FakeOptimizer:
+            def __init__(self):
+                self.task_hint = ""
+
+            def optimize(self, **kwargs):
+                self.task_hint = kwargs.get("task_hint", "")
+                from aichaind.routing.cost_optimizer import CostRoute
+                return CostRoute(
+                    model=kwargs["current_model"] or kwargs["available_models"].get("free", ""),
+                    provider="deepseek",
+                    estimated_cost_usd=0.0,
+                    reason="test",
+                    tier="free",
+                    local_effective_score=0.0,
+                    access_method="api_key",
+                )
+
+        cr = CascadeRouter()
+        optimizer = FakeOptimizer()
+        cr.configure_cost_optimizer(optimizer)
+        from aichaind.providers.balance import BalanceReport, ProviderBalance
+
+        cr.route(
+            messages=[{"role": "user", "content": 'Return only minified JSON with keys ok and answer where ok is true and answer is 7.'}],
+            available_free_model="deepseek/deepseek-chat",
+            available_heavy_model="deepseek/deepseek-reasoner",
+            balance_report=BalanceReport(
+                balances={
+                    "deepseek": ProviderBalance(provider="deepseek", has_credits=True, balance_usd=2.0, source="api"),
+                },
+                providers_with_credits=["deepseek"],
+            ),
+        )
+        assert "json" in optimizer.task_hint.lower()
+        assert "answer" in optimizer.task_hint.lower()
+

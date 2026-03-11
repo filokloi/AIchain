@@ -25,7 +25,26 @@
         "provider": "local",
         "base_url": "http://127.0.0.1:11434/v1",
         "default_model": "",
-        "require_healthcheck": true
+        "require_healthcheck": true,
+        "auto_detect": true,
+        "preferred_providers": [
+            "ollama",
+            "lmstudio",
+            "local",
+            "vllm",
+            "llamacpp"
+        ],
+        "profiling": {
+            "enabled": true,
+            "auto_refresh_on_startup": false,
+            "stale_after_hours": 24,
+            "task_buckets": [
+                "general_chat",
+                "reasoning",
+                "coding",
+                "structured_output"
+            ]
+        }
     },
     "specialist_pins": {
         "vision": {
@@ -78,15 +97,252 @@
         "provider_blacklist": [],
         "max_cost_per_turn": 1.0,
         "max_cost_per_session": 10.0,
-        "pii_blocks_cloud": true
+        "pii_blocks_cloud": false,
+        "pii_prefer_local": false
     },
     "security": {
         "key_source": "environment",
         "log_redact_keys": true,
-        "integrity_check": true
+        "integrity_check": true,
+        "redact_inputs_before_cloud": false
     },
     "version_compat": {
         "min_routing_table_version": "4.0",
         "skill_version": "5.0.0"
+    },
+    "provider_access": {
+        "default_order": [
+            "local",
+            "api_key",
+            "workspace_connector",
+            "enterprise_connector",
+            "oauth"
+        ],
+        "providers": {
+            "openai": {
+                "enabled_methods": [
+                    "api_key"
+                ],
+                "api_key": {
+                    "technically_stable": true,
+                    "provider_compliant": true,
+                    "billing_basis": "metered_api_billing",
+                    "usage_tracking": "provider_console_and_api_spend",
+                    "quota_visibility": "api_balance_and_provider_console",
+                    "limitations": [
+                        "Requires separate OpenAI Platform billing; ChatGPT subscription does not automatically cover API usage.",
+                        "Spend and quota status are governed by the API account, not by the consumer ChatGPT plan."
+                    ],
+                    "project_verification": "Runtime confirmed in aichaind through the OpenAI API key path."
+                }
+            },
+            "google": {
+                "enabled_methods": [
+                    "api_key",
+                    "oauth"
+                ],
+                "api_key": {
+                    "technically_stable": true,
+                    "provider_compliant": true,
+                    "billing_basis": "metered_api_billing_or_free_tier",
+                    "usage_tracking": "provider_console",
+                    "quota_visibility": "provider_console",
+                    "limitations": [
+                        "API quotas and free-tier limits are controlled by Google AI Studio or Google Cloud."
+                    ],
+                    "project_verification": "API key execution path is implemented; runtime health depends on current provider auth state."
+                },
+                "oauth": {
+                    "official_support": true,
+                    "technically_stable": true,
+                    "provider_compliant": true,
+                    "adapter_enabled": true,
+                    "billing_basis": "workspace_or_sign_in_entitlement",
+                    "usage_tracking": "provider_console",
+                    "quota_visibility": "provider_ui",
+                    "limitations": [
+                        "Official OAuth exists, but AIchain does not yet use it as a verified execution adapter."
+                    ],
+                    "project_verification": "Target form not reached in aichaind runtime."
+                }
+            },
+            "anthropic": {
+                "enabled_methods": [
+                    "api_key"
+                ],
+                "api_key": {
+                    "technically_stable": true,
+                    "provider_compliant": true,
+                    "billing_basis": "metered_api_billing",
+                    "usage_tracking": "provider_console",
+                    "quota_visibility": "provider_console",
+                    "limitations": [
+                        "Anthropic model execution currently relies on API-key billing."
+                    ],
+                    "project_verification": "API key path is the supported execution mode in AIchain."
+                }
+            },
+            "deepseek": {
+                "enabled_methods": [
+                    "api_key"
+                ],
+                "api_key": {
+                    "technically_stable": true,
+                    "provider_compliant": true,
+                    "billing_basis": "metered_api_billing",
+                    "usage_tracking": "balance_api_plus_provider_console",
+                    "quota_visibility": "machine_readable_balance_and_provider_console",
+                    "limitations": [
+                        "DeepSeek balance is queried directly when available and cached for routing decisions."
+                    ],
+                    "project_verification": "Runtime confirmed in aichaind and used as a current stable execution path."
+                }
+            },
+            "groq": {
+                "enabled_methods": [
+                    "api_key"
+                ]
+            },
+            "openrouter": {
+                "enabled_methods": [
+                    "api_key"
+                ],
+                "api_key": {
+                    "technically_stable": true,
+                    "provider_compliant": true,
+                    "billing_basis": "metered_api_billing",
+                    "usage_tracking": "balance_api_plus_provider_console",
+                    "quota_visibility": "machine_readable_balance_and_provider_console",
+                    "limitations": [
+                        "Acts as a catalog-rich fallback but should not be treated as the only execution path."
+                    ],
+                    "project_verification": "Runtime confirmed for catalog ingestion and execution fallback."
+                }
+            },
+            "mistral": {
+                "enabled_methods": [
+                    "api_key"
+                ]
+            },
+            "xai": {
+                "enabled_methods": [
+                    "api_key"
+                ]
+            },
+            "cohere": {
+                "enabled_methods": [
+                    "api_key"
+                ]
+            },
+            "moonshot": {
+                "enabled_methods": [
+                    "api_key"
+                ]
+            },
+            "zhipu": {
+                "enabled_methods": [
+                    "api_key"
+                ]
+            },
+            "local": {
+                "enabled_methods": [
+                    "local"
+                ],
+                "local": {
+                    "technically_stable": true,
+                    "billing_basis": "local_inference_hardware",
+                    "usage_tracking": "local_runtime_health_and_operator_observation",
+                    "quota_visibility": "local_only",
+                    "limitations": [
+                        "Requires a healthy local model server and a generative model that passes completion probing."
+                    ],
+                    "project_verification": "Implemented and tested; runtime confirmation depends on the local machine."
+                }
+            },
+            "vllm": {
+                "enabled_methods": [
+                    "local"
+                ],
+                "local": {
+                    "technically_stable": true,
+                    "billing_basis": "local_inference_hardware",
+                    "usage_tracking": "local_runtime_health_and_operator_observation",
+                    "quota_visibility": "local_only",
+                    "limitations": [
+                        "Requires a healthy local model server and a generative model that passes completion probing."
+                    ],
+                    "project_verification": "Implemented and tested; runtime confirmation depends on the local machine."
+                }
+            },
+            "ollama": {
+                "enabled_methods": [
+                    "local"
+                ],
+                "local": {
+                    "technically_stable": true,
+                    "billing_basis": "local_inference_hardware",
+                    "usage_tracking": "local_runtime_health_and_operator_observation",
+                    "quota_visibility": "local_only",
+                    "limitations": [
+                        "Requires a healthy local model server and a generative model that passes completion probing."
+                    ],
+                    "project_verification": "Implemented and tested; runtime confirmation depends on the local machine."
+                }
+            },
+            "lmstudio": {
+                "enabled_methods": [
+                    "local"
+                ],
+                "local": {
+                    "technically_stable": true,
+                    "billing_basis": "local_inference_hardware",
+                    "usage_tracking": "local_runtime_health_and_operator_observation",
+                    "quota_visibility": "local_only",
+                    "limitations": [
+                        "Requires a healthy local model server and a generative model that passes completion probing."
+                    ],
+                    "project_verification": "Implemented and tested; runtime confirmation depends on the local machine."
+                }
+            },
+            "llamacpp": {
+                "enabled_methods": [
+                    "local"
+                ],
+                "local": {
+                    "technically_stable": true,
+                    "billing_basis": "local_inference_hardware",
+                    "usage_tracking": "local_runtime_health_and_operator_observation",
+                    "quota_visibility": "local_only",
+                    "limitations": [
+                        "Requires a healthy local model server and a generative model that passes completion probing."
+                    ],
+                    "project_verification": "Implemented and tested; runtime confirmation depends on the local machine."
+                }
+            },
+            "openai-codex": {
+                "enabled_methods": [
+                    "oauth"
+                ],
+                "oauth": {
+                    "official_support": true,
+                    "technically_stable": true,
+                    "provider_compliant": true,
+                    "adapter_enabled": true,
+                    "billing_basis": "subscription_plan_window",
+                    "usage_tracking": "openclaw_auth_usage_stats_plus_provider_ui",
+                    "quota_visibility": "provider_ui_or_openclaw_sign_in_window_not_fully_machine_readable",
+                    "limitations": [
+                        "Daily and weekly sign-in plan windows may apply and can change by provider policy or subscription tier.",
+                        "Remaining OAuth entitlement is not yet fully machine-readable inside AIchain and must be checked in the provider or OpenClaw UI.",
+                        "AIchain must always keep API key and ranked-model fallback paths available if this route is unavailable or exhausted."
+                    ],
+                    "project_verification": "OpenClaw OAuth execution is verified when the local gateway auth and runtime model probe succeed; AIchain prefers openai-codex/gpt-5.4 when that target model is runtime-confirmed and otherwise falls back safely."
+                },
+                "preferred_order": [
+                    "oauth",
+                    "api_key"
+                ]
+            }
+        }
     }
 }

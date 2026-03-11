@@ -58,8 +58,22 @@ def resolve_path(p: str) -> Path:
     return Path(os.path.expandvars(os.path.expanduser(p)))
 
 
+def _deep_merge_dicts(base: dict, override: dict) -> dict:
+    merged = copy.deepcopy(base)
+    for key, value in (override or {}).items():
+        if isinstance(value, dict) and isinstance(merged.get(key), dict):
+            merged[key] = _deep_merge_dicts(merged[key], value)
+        else:
+            merged[key] = copy.deepcopy(value)
+    return merged
+
+
+def _default_override_path() -> Path:
+    return resolve_path("~/.openclaw/aichain/config.local.json")
+
+
 def load_config(config_path: Path = None) -> dict:
-    """Load unified config file (TOML or JSON)."""
+    """Load unified config file (JSON) plus optional user-local override."""
     if config_path is None:
         # Default: look in config/ relative to repo root
         config_path = Path(__file__).resolve().parent.parent.parent / "config" / "default.json"
@@ -69,7 +83,18 @@ def load_config(config_path: Path = None) -> dict:
     if not config_path.exists():
         raise FileNotFoundError(f"Config not found: {config_path}")
     with open(config_path, "r", encoding="utf-8") as f:
-        return json.load(f)
+        cfg = json.load(f)
+
+    override_path = resolve_path(os.environ.get("AICHAIND_CONFIG_OVERRIDE", "")) if os.environ.get("AICHAIND_CONFIG_OVERRIDE") else _default_override_path()
+    sources = [str(config_path)]
+    if override_path.exists():
+        with open(override_path, "r", encoding="utf-8") as f:
+            override_cfg = json.load(f)
+        cfg = _deep_merge_dicts(cfg, override_cfg)
+        sources.append(str(override_path))
+
+    cfg["_config_sources"] = sources
+    return cfg
 
 
 def get_paths(cfg: dict) -> dict:
@@ -85,6 +110,8 @@ def get_paths(cfg: dict) -> dict:
         "session_dir": data_dir / "sessions",
         "audit_file": data_dir / "audit.jsonl",
         "auth_token_file": data_dir / ".auth_token",
+        "pid_file": data_dir / "aichaind.pid",
+        "local_profile_file": data_dir / "local_profiles.json",
     }
 
 

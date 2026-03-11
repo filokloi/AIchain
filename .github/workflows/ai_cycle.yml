@@ -35,6 +35,7 @@ jobs:
           tests/test_catalog_contract.py
           tests/test_site_backend_pipeline.py
           tests/test_dashboard_cutover.py
+          tests/test_provider_access_matrix.py
 
       - name: Run arbitrator
         env:
@@ -44,6 +45,7 @@ jobs:
           ARTIFICIAL_ANALYSIS_KEY: ${{ secrets.ARTIFICIAL_ANALYSIS_KEY }}
         run: |
           python tools/arbitrator.py
+          python tools/update_provider_access_runtime.py
           python tools/build_catalog_manifest.py
 
       - name: Verify dashboard cutover release contract
@@ -58,11 +60,20 @@ jobs:
           if-no-files-found: warn
           retention-days: 7
 
+      - name: Upload provider access runtime snapshot
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: aichain-provider-access-runtime
+          path: artifacts/provider_access_runtime.json
+          if-no-files-found: warn
+          retention-days: 7
+
       - name: Commit and push updated routing table
         run: |
           git config user.name "AIchain Bot"
           git config user.email "aichain-bot@users.noreply.github.com"
-          git add ai_routing_table.json catalog_manifest.json
+          git add ai_routing_table.json catalog_manifest.json artifacts/provider_access_runtime.json
           if ! git diff --cached --quiet; then
             git commit -m "chore: update global routing table [$(date -u +%Y-%m-%dT%H:%M:%SZ)]"
             git push

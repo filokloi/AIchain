@@ -10,6 +10,7 @@ from aichaind.providers.base import CompletionResponse
 from aichaind.core.summarizer import ContextSummarizer
 from aichaind.routing.rules import RouteDecision
 from aichaind.telemetry.route_eval import RouteEvalCollector
+from aichaind.providers.local_profile import LocalModelProfile, LocalProfileStore
 import aichaind.transport.http_server as http_server
 
 
@@ -17,11 +18,12 @@ class DummyController:
     state = {"system": "NORMAL", "circuit": "CLOSED"}
 
 
-def test_merge_policy_results_combines_cloud_block_and_cost_limit():
-    initial = PolicyResult(block_cloud=True, max_cost_per_turn=1.0, reason="pii")
+def test_merge_policy_results_combines_cloud_block_local_preference_and_cost_limit():
+    initial = PolicyResult(block_cloud=True, prefer_local=True, max_cost_per_turn=1.0, reason="pii")
     final = PolicyResult(max_cost_per_turn=0.5, reason="budget_warning")
     merged = http_server._merge_policy_results(initial, final)
     assert merged.block_cloud is True
+    assert merged.prefer_local is True
     assert merged.max_cost_per_turn == 0.5
     assert merged.reason == "pii|budget_warning"
 
@@ -79,6 +81,18 @@ def test_final_policy_blocks_when_estimated_cost_exceeds_budget_warning_limit():
 
     assert effective.max_cost_per_turn == 0.5
     assert reason == "per_turn_cost_exceeds_policy"
+
+
+def test_pii_metadata_can_distinguish_detected_from_redacted():
+    http_server._pii_redactor = http_server.PIIRedactor()
+    http_server._input_redaction_enabled = False
+
+    messages = [{"role": "user", "content": "My SSN is 123-45-6789"}]
+    redaction_map = {}
+    pii_categories = http_server.scan_messages(messages, http_server._pii_redactor)
+
+    assert pii_categories == ["ssn"]
+    assert redaction_map == {}
 
 
 def test_restore_redactions_applies_to_content_and_raw_response():
@@ -203,6 +217,53 @@ def test_force_local_privacy_route_rewrites_cloud_route_when_local_brain_exists(
     assert "openai/gpt-4.1" in updated.fallback_chain
     assert "privacy_local_reroute" in updated.reason
 
+def test_force_local_privacy_route_prefers_local_without_strict_cloud_block():
+    http_server._roles = {"local_brain": "local/qwen2.5-coder"}
+    decision = RouteDecision(
+        target_model="deepseek/deepseek-chat",
+        target_provider="deepseek",
+        confidence=0.85,
+        decision_layers=["L1:heuristic"],
+        reason="heuristic_quick_general",
+    )
+    initial = PolicyResult(prefer_local=True, reason="pii_detected_local_preferred")
+
+    updated, model, provider, rerouted = http_server._maybe_force_local_privacy_route(
+        decision=decision,
+        initial_policy=initial,
+        target_model="deepseek/deepseek-chat",
+        target_provider="deepseek",
+    )
+
+    assert rerouted is True
+    assert model == "local/qwen2.5-coder"
+    assert provider == "local"
+    assert updated.target_model == "local/qwen2.5-coder"
+
+
+def test_force_local_privacy_route_keeps_cloud_when_no_local_and_not_strict():
+    http_server._roles = {"local_brain": ""}
+    decision = RouteDecision(
+        target_model="deepseek/deepseek-chat",
+        target_provider="deepseek",
+        confidence=0.85,
+        decision_layers=["L1:heuristic"],
+        reason="heuristic_quick_general",
+    )
+    initial = PolicyResult(prefer_local=True, reason="pii_detected_local_preferred")
+
+    updated, model, provider, rerouted = http_server._maybe_force_local_privacy_route(
+        decision=decision,
+        initial_policy=initial,
+        target_model="deepseek/deepseek-chat",
+        target_provider="deepseek",
+    )
+
+    assert rerouted is False
+    assert model == "deepseek/deepseek-chat"
+    assert provider == "deepseek"
+    assert updated.target_model == "deepseek/deepseek-chat"
+
 
 def test_update_session_summary_state_tracks_commands_paths_and_model_ids():
     session = CanonicalSession(session_id="s6")
@@ -277,3 +338,67 @@ def test_record_route_eval_appends_cache_ref():
         assert session.telemetry_refs
         assert session.cache_refs
         assert session.cache_refs[0].startswith("query:")
+
+
+def test_build_request_includes_local_profile_timeout_override(tmp_path):
+    profile_store = LocalProfileStore(tmp_path / "local_profiles.json")
+    profile_store.upsert(LocalModelProfile(
+        provider="lmstudio",
+        model="lmstudio/qwen/qwen3-4b-thinking-2507",
+        base_url="http://127.0.0.1:1234/v1",
+        profiled_at="2026-03-11T12:00:00Z",
+        runtime_confirmed=True,
+        success_rate=1.0,
+        average_latency_ms=1200.0,
+        average_ttft_ms=450.0,
+        average_tokens_per_second=18.5,
+        speed_score=88.0,
+        stability_score=100.0,
+        safe_timeout_ms=87000,
+        prompt_type_suitability={"coding": 100.0},
+    ))
+    http_server._local_profile_store = profile_store
+    adapter = http_server.get_adapter("lmstudio")
+
+    request = http_server._build_request(
+        payload={"max_tokens": 120, "temperature": 0.2, "stream": False},
+        messages=[{"role": "user", "content": "Write Python code"}],
+        target_model="lmstudio/qwen/qwen3-4b-thinking-2507",
+        adapter=adapter,
+    )
+
+    assert request.extra["timeout_ms"] == 87000
+
+
+def test_do_post_returns_json_500_on_unhandled_exception(monkeypatch):
+    captured = {}
+    handler = object.__new__(http_server.AichainDHandler)
+    handler.path = '/v1/chat/completions'
+    handler._handle_chat = lambda: (_ for _ in ()).throw(RuntimeError('boom'))
+    handler._send_json = lambda status, data: captured.update({'status': status, 'data': data})
+    handler.send_error = lambda status, message: captured.update({'status': status, 'data': {'error': message}})
+    handler.close_connection = False
+
+    http_server.AichainDHandler.do_POST(handler)
+
+    assert captured['status'] == 500
+    assert captured['data']['error'] == 'Internal server error: RuntimeError'
+
+def test_start_server_uses_threading_http_server(monkeypatch):
+    captured = {}
+
+    class FakeServer:
+        daemon_threads = True
+        allow_reuse_address = True
+
+        def __init__(self, address, handler):
+            captured['address'] = address
+            captured['handler'] = handler
+
+    monkeypatch.setattr(http_server, 'AichainThreadingHTTPServer', FakeServer)
+
+    server = http_server.start_server(port=9999)
+
+    assert isinstance(server, FakeServer)
+    assert captured['address'] == ('127.0.0.1', 9999)
+    assert captured['handler'] is http_server.AichainDHandler

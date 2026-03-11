@@ -68,14 +68,28 @@ class LocalOpenAIAdapter(ProviderAdapter):
         config = LOCAL_PROVIDER_CONFIG.get(self.provider_name, LOCAL_PROVIDER_CONFIG["local"])
         self.base_url = base_url or _first_env(config["env_keys"]) or config["default_base_url"]
         resolved_key = api_key or _first_env(config["api_key_env"]) or ""
-        self._timeout = 20
-        super().__init__(name=self.provider_name, api_key=resolved_key)
+        # Local runtimes on low-memory machines can be materially slower than cloud APIs.
+        # Keep a wider timeout so privacy/local-only routes complete instead of failing early.
+        self._timeout = 60
+        super().__init__(name=self.provider_name, api_key=resolved_key, access_methods={"local"})
 
     def _headers(self) -> dict:
         headers = {"Content-Type": "application/json"}
         if self.api_key:
             headers["Authorization"] = f"Bearer {self.api_key}"
         return headers
+
+    def _resolve_timeout(self, request: CompletionRequest) -> float:
+        timeout_ms = None
+        if isinstance(getattr(request, "extra", None), dict):
+            timeout_ms = request.extra.get("timeout_ms")
+        try:
+            timeout_ms = float(timeout_ms)
+        except (TypeError, ValueError):
+            timeout_ms = None
+        if timeout_ms is None:
+            return float(self._timeout)
+        return max(20.0, min(timeout_ms / 1000.0, 180.0))
 
     def format_model_id(self, model_id: str) -> str:
         if "/" not in model_id:
@@ -127,12 +141,13 @@ class LocalOpenAIAdapter(ProviderAdapter):
         }
 
         start_t = time.time()
+        timeout_s = self._resolve_timeout(request)
         try:
             resp = requests.post(
                 f"{self.base_url}/chat/completions",
                 json=payload,
                 headers=self._headers(),
-                timeout=self._timeout,
+                timeout=timeout_s,
             )
             latency = (time.time() - start_t) * 1000
             if resp.status_code != 200:
@@ -197,3 +212,4 @@ def _first_env(keys: list[str]) -> str:
         if value:
             return value
     return ""
+

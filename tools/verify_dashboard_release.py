@@ -51,6 +51,27 @@ def verify_manifest(manifest: dict) -> None:
             f"got={migration_state or 'missing'}"
         )
 
+    provider_access = manifest.get("provider_access_matrix")
+    if not isinstance(provider_access, dict) or not provider_access:
+        raise VerificationError("canonical manifest is missing provider_access_matrix")
+
+    required_providers = {"openai", "openai-codex", "openrouter", "deepseek"}
+    missing = sorted(provider for provider in required_providers if provider not in provider_access)
+    if missing:
+        raise VerificationError(f"provider_access_matrix missing required providers: {missing}")
+
+    codex = provider_access.get("openai-codex", {})
+    methods = codex.get("methods", {}) if isinstance(codex, dict) else {}
+    oauth = methods.get("oauth", {}) if isinstance(methods, dict) else {}
+    if not oauth:
+        raise VerificationError("provider_access_matrix.openai-codex.methods.oauth missing")
+    if not oauth.get("target_model"):
+        raise VerificationError("provider_access_matrix.openai-codex.methods.oauth.target_model missing")
+    if oauth.get("mode") == "runtime_confirmed" and oauth.get("target_model") != "openai-codex/gpt-5.4":
+        raise VerificationError(
+            "openai-codex runtime-confirmed mode must point at openai-codex/gpt-5.4 as target_model"
+        )
+
 
 def main() -> None:
     verify_dashboard_source(_read(INDEX_HTML))

@@ -6,6 +6,7 @@ from copy import deepcopy
 
 from ..constants import BENCHMARK_MAP, MAJOR_PROVIDER_PREFIXES, OAUTH_BRIDGES
 from ..rank.tasks import infer_task_metadata
+from ..self_hosting import derive_self_hosting_profile
 from ..types import MergeDiagnostics
 from .aliases import AliasRegistry, family_id_from_model_id
 
@@ -167,37 +168,45 @@ def _build_entry(model: dict, *, model_id: str, provider: str, family_id: str, i
         intelligence=intelligence,
         helper_tasks=helper_task_map.get(model_id),
     )
+    source_attribution = {
+        "catalog": [source_kind],
+        "intelligence": intelligence_source,
+        "speed": speed_source,
+        "pricing": source_kind,
+        "context_length": source_kind,
+        "merge_priority": deepcopy(_FIELD_SOURCE_PRIORITY),
+    }
+    raw_metrics = {
+        "intelligence_base": intelligence,
+        "context_length": context_length,
+        "prompt_cost": prompt_cost,
+        "completion_cost": completion_cost,
+        "average_cost": average_cost,
+        "aa_quality": aa_match.get("quality") if aa_match else None,
+        "aa_speed": aa_match.get("speed") if aa_match else None,
+        "lmsys_elo": lmsys_match.get("elo") if lmsys_match else None,
+        "openrouter_speed_hint": top_speed,
+        "source_count": source_count,
+        "availability_hint": availability,
+        "stability_hint": stability,
+    }
     return {
         "model": model_id,
         "family_id": family_id,
         "provider": provider,
         "display_name": model.get("name") or model_id,
-        "source_attribution": {
-            "catalog": [source_kind],
-            "intelligence": intelligence_source,
-            "speed": speed_source,
-            "pricing": source_kind,
-            "context_length": source_kind,
-            "merge_priority": deepcopy(_FIELD_SOURCE_PRIORITY),
-        },
-        "raw_metrics": {
-            "intelligence_base": intelligence,
-            "context_length": context_length,
-            "prompt_cost": prompt_cost,
-            "completion_cost": completion_cost,
-            "average_cost": average_cost,
-            "aa_quality": aa_match.get("quality") if aa_match else None,
-            "aa_speed": aa_match.get("speed") if aa_match else None,
-            "lmsys_elo": lmsys_match.get("elo") if lmsys_match else None,
-            "openrouter_speed_hint": top_speed,
-            "source_count": source_count,
-            "availability_hint": availability,
-            "stability_hint": stability,
-        },
+        "source_attribution": source_attribution,
+        "raw_metrics": raw_metrics,
         "task_metadata": task_metadata,
         "helper_metadata": {
             "helper_tasks_applied": list(helper_task_map.get(model_id, [])),
         },
+        "self_hosting": derive_self_hosting_profile(
+            model_id,
+            source_attribution=source_attribution,
+            raw_metrics=raw_metrics,
+            source_kind=source_kind,
+        ),
     }
 
 

@@ -74,7 +74,7 @@ class TestEncoderScorer:
 
 
 # ── Layer 4: Cloud Classifier ──
-from aichaind.routing.cloud_classifier import CloudClassifier
+from aichaind.routing.cloud_classifier import CloudClassifier, CLASSIFIER_PROMPT
 
 
 class TestCloudClassifier:
@@ -171,3 +171,7 @@ class TestMsgPackCodec:
         raw = encode(data, use_msgpack=False)
         result = decode(raw, use_msgpack=False)
         assert result["text"] == data["text"]
+
+    def test_prompt_template_escapes_json_example(self):
+        rendered = CLASSIFIER_PROMPT.format(query='hello')
+        assert '{"category": "CATEGORY_NAME", "confidence": 0.0-1.0}' in rendered

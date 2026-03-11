@@ -176,3 +176,28 @@ def redact_messages(messages: list[dict], redactor: PIIRedactor = None,
             redacted_msgs.append(msg)
 
     return redacted_msgs, merged_map, list(set(all_categories))
+
+
+def scan_messages(messages: list[dict], redactor: PIIRedactor = None) -> list[str]:
+    """
+    Scan a list of chat messages for PII without modifying message content.
+
+    Returns:
+        Unique list of detected PII categories.
+    """
+    if redactor is None:
+        redactor = PIIRedactor()
+
+    all_categories = []
+    for msg in messages:
+        content = msg.get("content", "")
+        if isinstance(content, str) and content:
+            result = redactor.scan_only(content)
+            all_categories.extend(result.pii_categories)
+        elif isinstance(content, list):
+            for part in content:
+                if isinstance(part, dict) and part.get("type") == "text":
+                    result = redactor.scan_only(part.get("text", ""))
+                    all_categories.extend(result.pii_categories)
+
+    return list(set(all_categories))

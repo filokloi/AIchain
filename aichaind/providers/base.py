@@ -113,9 +113,10 @@ class ProviderAdapter(ABC):
     - Circuit breaker: per-provider failure tracking
     """
 
-    def __init__(self, name: str, api_key: str = ""):
+    def __init__(self, name: str, api_key: str = "", access_methods: set[str] | None = None):
         self.name = name
         self._api_key = api_key or ""
+        self._access_methods = set(access_methods or {"api_key"})
         self.circuit_breaker = ProviderCircuitBreaker()
 
     @property
@@ -145,6 +146,13 @@ class ProviderAdapter(ABC):
         """Override to True if the adapter supports streaming."""
         return False
 
+    @property
+    def access_methods(self) -> set[str]:
+        return set(self._access_methods)
+
+    def supports_access_method(self, method: str) -> bool:
+        return str(method or "").strip().lower() in self._access_methods
+
     def format_model_id(self, model_id: str) -> str:
         """Normalize OpenRouter-derived model IDs for native provider APIs."""
         normalized = (model_id or "").strip()
@@ -163,3 +171,4 @@ class ProviderAdapter(ABC):
             normalized = normalized[:-5]
 
         return normalized
+

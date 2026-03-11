@@ -1437,6 +1437,36 @@
                 <div id="changelogHint" class="changelog-hint" style="display: none;"></div>
             </div>
 
+            <div class="operational-grid" style="margin-bottom: 16px;">
+                <div class="plane-card">
+                    <div class="plane-card-title">Artifact Source</div>
+                    <div class="plane-card-value" id="artifactSource">Loading...</div>
+                    <div class="plane-card-meta" id="artifactMeta">Waiting for canonical artifact metadata.</div>
+                </div>
+                <div class="plane-card">
+                    <div class="plane-card-title">Dashboard Switch</div>
+                    <div class="plane-card-value" id="switchReadiness">Loading...</div>
+                    <div class="plane-card-meta" id="switchMeta">Evaluating readiness gates.</div>
+                </div>
+                <div class="plane-card">
+                    <div class="plane-card-title">Global Plane</div>
+                    <div class="plane-card-value" id="globalPlaneValue">Loading...</div>
+                    <div class="plane-card-meta" id="globalPlaneMeta">Checking degradation state.</div>
+                </div>
+            </div>
+
+            <div class="operational-grid" id="operationalGrid">
+                <div class="operational-card">
+                    <div class="operational-head">
+                        <div class="operational-name">CONTROL PLANE</div>
+                        <span class="mode-badge mode-unknown">loading</span>
+                    </div>
+                    <div class="operational-body">
+                        <div class="operational-line"><strong>Status:</strong> Loading source and helper verification...</div>
+                    </div>
+                </div>
+            </div>
+
             <!-- Stats Bar -->
             <div class="stats-bar" id="statsBar">
                 <div class="stat-card">
@@ -1512,6 +1542,46 @@
                         </tr>
                     </tbody>
                 </table>
+            </div>
+
+            <div class="section-header" style="margin-top: 28px;">
+                <span class="section-marker">//</span>
+                <h2 class="section-title">Provider Access & Limits</h2>
+            </div>
+            <div class="plane-card-meta" style="margin-bottom: 16px; max-width: 980px;">
+                Global rank stays independent. Access methods only describe how users can legitimately reach a provider,
+                how cost and quota visibility work, and when OAuth or sign-in windows must fall back to API keys, local
+                runtimes, or the next ranked model.
+            </div>
+            <div class="operational-grid" id="accessMatrixGrid">
+                <div class="operational-card">
+                    <div class="operational-head">
+                        <div class="operational-name">ACCESS MATRIX</div>
+                        <span class="mode-badge mode-unknown">loading</span>
+                    </div>
+                    <div class="operational-body">
+                        <div class="operational-line"><strong>Status:</strong> Loading provider access metadata...</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section-header" style="margin-top: 28px;">
+                <span class="section-marker">//</span>
+                <h2 class="section-title">Self-Hosted Model Index</h2>
+            </div>
+            <div class="plane-card-meta" style="margin-bottom: 16px; max-width: 980px;">
+                This index tracks globally known self-hostable/open-weight models as first-class catalog entries. It does not claim per-machine performance; local profiling still happens inside aichaind.
+            </div>
+            <div class="operational-grid" id="selfHostedGrid">
+                <div class="operational-card">
+                    <div class="operational-head">
+                        <div class="operational-name">SELF-HOSTED INDEX</div>
+                        <span class="mode-badge mode-unknown">loading</span>
+                    </div>
+                    <div class="operational-body">
+                        <div class="operational-line"><strong>Status:</strong> Loading self-hosted model metadata...</div>
+                    </div>
+                </div>
             </div>
         </div>
     </section>
@@ -1747,6 +1817,8 @@
                     degradation_reasons: observability.degradation_reasons || [],
                     helper_ai: observability.helper_ai || {},
                     operational_status: payload.operational_status || {},
+                    provider_access_matrix: payload.provider_access_matrix || {},
+                    self_hosted_model_index: payload.self_hosted_model_index || { total_models: 0, family_breakdown: {}, entries: [] },
                     public_artifact_readiness: payload.public_artifact_readiness || {},
                     canonical_public_artifact: payload.canonical_public_artifact || {},
                 };
@@ -1768,6 +1840,8 @@
                 degradation_reasons: payload.degradation_reasons || [],
                 helper_ai: payload.helper_ai || {},
                 operational_status: payload.operational_status || {},
+                provider_access_matrix: payload.provider_access_matrix || {},
+                self_hosted_model_index: payload.self_hosted_model_index || { total_models: 0, family_breakdown: {}, entries: [] },
                 public_artifact_readiness: payload.public_artifact_readiness || {},
                 canonical_public_artifact: payload.canonical_public_artifact || {},
             };
@@ -1786,6 +1860,7 @@
                 cost: entry.metrics?.cost ?? entry.raw_metrics?.average_cost ?? 0,
             };
             normalized.value_score = entry.value_score || 0;
+            normalized.self_hosting = entry.self_hosting || {};
             return normalized;
         }
 
@@ -1820,6 +1895,23 @@
 
         function formatMode(mode) {
             return String(mode || 'unknown').replaceAll('_', ' ');
+        }
+
+        function formatBool(val) {
+            return val ? 'yes' : 'no';
+        }
+
+        function formatList(val) {
+            if (Array.isArray(val)) {
+                return val.length > 0 ? val.join(' → ') : 'n/a';
+            }
+            return val ? String(val) : 'n/a';
+        }
+
+        function formatTimestamp(val) {
+            if (!val) return 'n/a';
+            const d = new Date(val);
+            return Number.isNaN(d.getTime()) ? String(val) : d.toISOString().replace('T', ' ').replace('.000Z', 'Z');
         }
 
         function updateDashboard() {
@@ -1882,6 +1974,8 @@
 
             updatePlaneSummary();
             renderOperationalStatus();
+            renderProviderAccessMatrix();
+            renderSelfHostedIndex();
             renderTable();
         }
 
@@ -1943,6 +2037,144 @@
                         </div>
                     `);
                 });
+            });
+
+            grid.innerHTML = cards.join('');
+        }
+
+
+        function formatHardwareHint(val) {
+            if (!val) return 'n/a';
+            return String(val).replaceAll('_', ' ');
+        }
+
+        function renderSelfHostedIndex() {
+            const grid = document.getElementById('selfHostedGrid');
+            if (!grid) return;
+            const index = routingData.self_hosted_model_index || {};
+            const entries = Array.isArray(index.entries) ? index.entries : [];
+            if (entries.length === 0) {
+                grid.innerHTML = `
+                    <div class="operational-card">
+                        <div class="operational-head">
+                            <div class="operational-name">SELF-HOSTED INDEX</div>
+                            <span class="mode-badge mode-unknown">unknown</span>
+                        </div>
+                        <div class="operational-body">
+                            <div class="operational-line"><strong>Status:</strong> No self-hosted model metadata available in the current catalog artifact.</div>
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+
+            const familyBreakdown = Object.entries(index.family_breakdown || {}).map(([family, count]) => `${family}: ${count}`).join(' | ');
+            const cards = entries.slice(0, 12).map((entry) => {
+                const metrics = entry.metrics || {};
+                return `
+                    <div class="operational-card">
+                        <div class="operational-head">
+                            <div class="operational-name">${escHtml(entry.display_name || entry.model || 'Unknown')}</div>
+                            <span class="mode-badge mode-runtime_confirmed">rank #${escHtml(String(entry.rank || '?'))}</span>
+                        </div>
+                        <div class="operational-body">
+                            <div class="operational-line"><strong>Model:</strong> ${escHtml(entry.model || 'n/a')}</div>
+                            <div class="operational-line"><strong>Family:</strong> ${escHtml(entry.family || 'n/a')}</div>
+                            <div class="operational-line"><strong>Task:</strong> ${escHtml(entry.task_label || 'GENERAL-CHAT')}</div>
+                            <div class="operational-line"><strong>Hosting:</strong> ${escHtml(formatList(entry.hosting_modes || []))}</div>
+                            <div class="operational-line"><strong>Sources:</strong> ${escHtml(formatList(entry.download_sources || []))}</div>
+                            <div class="operational-line"><strong>Runtimes:</strong> ${escHtml(formatList(entry.preferred_runtimes || []))}</div>
+                            <div class="operational-line"><strong>Quantizations:</strong> ${escHtml(formatList(entry.quantizations_known || []))}</div>
+                            <div class="operational-line"><strong>Hardware Hint:</strong> ${escHtml(formatHardwareHint(entry.hardware_profile_hint))}</div>
+                            <div class="operational-line"><strong>Evidence:</strong> ${escHtml(formatList(entry.benchmark_evidence_sources || []))}</div>
+                            <div class="operational-line"><strong>Metrics:</strong> IQ ${escHtml(String(metrics.intelligence || 0))} / SPD ${escHtml(String(metrics.speed || 0))} / STB ${escHtml(String(metrics.stability || 0))}</div>
+                            ${entry.self_hosting_notes ? `<div class="operational-line">${escHtml(entry.self_hosting_notes)}</div>` : ''}
+                        </div>
+                    </div>
+                `;
+            });
+
+            const summaryCard = `
+                <div class="operational-card">
+                    <div class="operational-head">
+                        <div class="operational-name">SELF-HOSTED SUMMARY</div>
+                        <span class="mode-badge mode-runtime_confirmed">catalog</span>
+                    </div>
+                    <div class="operational-body">
+                        <div class="operational-line"><strong>Total Models:</strong> ${escHtml(String(index.total_models || entries.length))}</div>
+                        <div class="operational-line"><strong>Families:</strong> ${escHtml(familyBreakdown || 'n/a')}</div>
+                        <div class="operational-line"><strong>Scope:</strong> Global self-hostable metadata only; machine-specific profiling remains local.</div>
+                    </div>
+                </div>
+            `;
+
+            grid.innerHTML = summaryCard + cards.join('');
+        }
+
+        function renderProviderAccessMatrix() {
+            const grid = document.getElementById('accessMatrixGrid');
+            if (!grid) return;
+            const matrix = routingData.provider_access_matrix || {};
+            const entries = Object.entries(matrix);
+            if (entries.length === 0) {
+                grid.innerHTML = `
+                    <div class="operational-card">
+                        <div class="operational-head">
+                            <div class="operational-name">ACCESS MATRIX</div>
+                            <span class="mode-badge mode-unknown">unknown</span>
+                        </div>
+                        <div class="operational-body">
+                            <div class="operational-line"><strong>Status:</strong> No provider access metadata available.</div>
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+
+            const cards = entries.map(([provider, info]) => {
+                const methods = Object.entries(info.methods || {}).map(([method, methodInfo]) => {
+                    const verifiedModels = (methodInfo.verified_models || []).join(', ');
+                    return `
+                        <div class="operational-line" style="margin-top:10px; padding-top:10px; border-top:1px solid var(--border-color);">
+                            <strong>${escHtml(String(method || '').replaceAll('_', ' '))}:</strong>
+                            <span class="mode-badge mode-${escHtml(methodInfo.mode || info.overall_mode || 'unknown')}">${escHtml(formatMode(methodInfo.mode || info.overall_mode))}</span>
+                            <div><strong>Official:</strong> ${escHtml(formatBool(Boolean(methodInfo.official_support)))}</div>
+                            <div><strong>Runtime Confirmed:</strong> ${escHtml(formatBool(Boolean(methodInfo.runtime_confirmed)))}</div>
+                            <div><strong>Limit Type:</strong> ${escHtml(methodInfo.limit_type || info.limit_type || 'n/a')}</div>
+                            <div><strong>Quota Visibility:</strong> ${escHtml(methodInfo.quota_visibility || info.quota_visibility || 'n/a')}</div>
+                            <div><strong>Last Verified:</strong> ${escHtml(formatTimestamp(methodInfo.last_verified_at || info.last_verified_at))}</div>
+                            <div><strong>Fallback:</strong> ${escHtml(formatList(methodInfo.fallback_path || info.fallback_path))}</div>
+                            ${methodInfo.verification_basis ? `<div><strong>Evidence:</strong> ${escHtml(methodInfo.verification_basis)}</div>` : ''}
+                            ${methodInfo.note ? `<div>${escHtml(methodInfo.note)}</div>` : ''}
+                            ${verifiedModels ? `<div><strong>Verified Models:</strong> ${escHtml(verifiedModels)}</div>` : ''}
+                            ${methodInfo.target_model ? `<div><strong>Target:</strong> ${escHtml(methodInfo.target_model)}</div>` : ''}
+                        </div>
+                    `;
+                }).join('');
+                const limitations = (info.limitations || []).slice(0, 4);
+                return `
+                    <div class="operational-card">
+                        <div class="operational-head">
+                            <div class="operational-name">${escHtml(info.label || provider)}</div>
+                            <span class="mode-badge mode-${escHtml(info.overall_mode || 'unknown')}">${escHtml(formatMode(info.overall_mode))}</span>
+                        </div>
+                        <div class="operational-body">
+                            <div class="operational-line"><strong>Factual State:</strong> ${escHtml(formatMode(info.factual_state || info.overall_mode || 'unknown'))}</div>
+                            <div class="operational-line"><strong>Official Methods:</strong> ${escHtml(formatList(info.officially_supported_methods || []))}</div>
+                            <div class="operational-line"><strong>Runtime Methods:</strong> ${escHtml(formatList(info.runtime_confirmed_methods || []))}</div>
+                            <div class="operational-line"><strong>Billing:</strong> ${escHtml(info.billing_basis || 'n/a')}</div>
+                            <div class="operational-line"><strong>Usage:</strong> ${escHtml(info.usage_tracking || 'n/a')}</div>
+                            <div class="operational-line"><strong>Quota View:</strong> ${escHtml(info.quota_visibility || 'n/a')}</div>
+                            <div class="operational-line"><strong>Limit Type:</strong> ${escHtml(info.limit_type || 'n/a')}</div>
+                            <div class="operational-line"><strong>Last Verified:</strong> ${escHtml(formatTimestamp(info.last_verified_at))}</div>
+                            <div class="operational-line"><strong>Fallback:</strong> ${escHtml(formatList(info.fallback_path || []))}</div>
+                            ${info.verification_scope ? `<div class="operational-line"><strong>Verification Scope:</strong> ${escHtml(info.verification_scope)}</div>` : ''}
+                            ${info.project_verification ? `<div class="operational-line"><strong>Verification:</strong> ${escHtml(info.project_verification)}</div>` : ''}
+                            ${methods}
+                            ${limitations.length > 0 ? `<ul class="operational-list">${limitations.map(item => `<li>${escHtml(item)}</li>`).join('')}</ul>` : ''}
+                        </div>
+                    </div>
+                `;
             });
 
             grid.innerHTML = cards.join('');

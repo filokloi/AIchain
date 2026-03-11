@@ -5,7 +5,7 @@ Tests for aichaind.core.policy — PolicyEngine
 Covers:
 - Model blacklisting
 - Provider blacklisting
-- PII blocks cloud routing
+- PII handling is redact-first by default and supports optional local preference or strict cloud blocking
 - Budget enforcement (exhausted, warning)
 - Default permissive behavior
 """
@@ -37,17 +37,31 @@ class TestPolicyEngine:
         r = pe.evaluate(target_provider="sketchy_provider")
         assert r.allowed is False
 
-    def test_pii_blocks_cloud(self):
-        pe = PolicyEngine({"pii_blocks_cloud": True})
+    def test_pii_is_redact_first_by_default(self):
+        pe = PolicyEngine()
         r = pe.evaluate(contains_pii=True)
         assert r.allowed is True
-        assert r.block_cloud is True
-        assert "pii" in r.reason.lower()
+        assert r.block_cloud is False
+        assert r.prefer_local is False
 
-    def test_pii_no_block_when_disabled(self):
-        pe = PolicyEngine({"pii_blocks_cloud": False})
+    def test_pii_prefers_local_when_enabled(self):
+        pe = PolicyEngine({"pii_prefer_local": True})
         r = pe.evaluate(contains_pii=True)
         assert r.block_cloud is False
+        assert r.prefer_local is True
+        assert "pii" in r.reason.lower()
+
+    def test_pii_blocks_cloud_in_strict_mode(self):
+        pe = PolicyEngine({"pii_blocks_cloud": True, "pii_prefer_local": True})
+        r = pe.evaluate(contains_pii=True)
+        assert r.block_cloud is True
+        assert r.prefer_local is True
+
+    def test_pii_no_local_preference_when_disabled(self):
+        pe = PolicyEngine({"pii_blocks_cloud": False, "pii_prefer_local": False})
+        r = pe.evaluate(contains_pii=True)
+        assert r.block_cloud is False
+        assert r.prefer_local is False
 
     def test_budget_exhausted(self):
         pe = PolicyEngine()

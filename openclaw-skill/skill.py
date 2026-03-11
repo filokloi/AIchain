@@ -28,6 +28,18 @@ DEFAULT_SIDECAR_URL = "http://127.0.0.1:8080"
 TOKEN_PATH = Path.home() / ".openclaw" / "aichain" / ".auth_token"
 
 
+def configure_stdio():
+    """Prefer UTF-8 console output and degrade safely on Windows code pages."""
+    for stream_name in ("stdout", "stderr"):
+        stream = getattr(sys, stream_name, None)
+        reconfigure = getattr(stream, "reconfigure", None)
+        if callable(reconfigure):
+            try:
+                reconfigure(encoding="utf-8", errors="replace")
+            except Exception:
+                pass
+
+
 def read_auth_token() -> str:
     """Read the aichaind per-startup auth token."""
     if TOKEN_PATH.exists():
@@ -106,6 +118,7 @@ def cmd_start(args):
 
 
 def main():
+    configure_stdio()
     parser = argparse.ArgumentParser(
         prog="aichain-skill",
         description="AIchain OpenClaw Skill — Thin Bridge to aichaind sidecar"

@@ -20,6 +20,7 @@ class PolicyResult:
     force_model: str = ""          # If set, override routing to this model
     force_provider: str = ""       # If set, restrict to this provider
     block_cloud: bool = False      # Block all cloud providers
+    prefer_local: bool = False     # Prefer local execution when available
     max_cost_per_turn: float = 0.0 # 0 = no limit
 
 
@@ -40,7 +41,8 @@ class PolicyEngine:
         self._provider_blacklist: set = set(self.rules.get("provider_blacklist", []))
         self._max_cost_per_turn: float = self.rules.get("max_cost_per_turn", 1.0)
         self._max_cost_per_session: float = self.rules.get("max_cost_per_session", 10.0)
-        self._pii_blocks_cloud: bool = self.rules.get("pii_blocks_cloud", True)
+        self._pii_blocks_cloud: bool = self.rules.get("pii_blocks_cloud", False)
+        self._pii_prefer_local: bool = self.rules.get("pii_prefer_local", False)
 
     def evaluate(
         self,
@@ -60,13 +62,21 @@ class PolicyEngine:
         if target_provider in self._provider_blacklist:
             return PolicyResult(allowed=False, reason=f"provider_blacklisted: {target_provider}")
 
-        # PII → block cloud
-        if contains_pii and self._pii_blocks_cloud:
-            return PolicyResult(
-                allowed=True,
-                block_cloud=True,
-                reason="pii_detected_cloud_blocked",
-            )
+        # PII handling: redact-first by default, prefer local if available.
+        if contains_pii:
+            if self._pii_blocks_cloud:
+                return PolicyResult(
+                    allowed=True,
+                    block_cloud=True,
+                    prefer_local=self._pii_prefer_local,
+                    reason="pii_detected_cloud_blocked",
+                )
+            if self._pii_prefer_local:
+                return PolicyResult(
+                    allowed=True,
+                    prefer_local=True,
+                    reason="pii_detected_local_preferred",
+                )
 
         # Budget enforcement
         if budget_spent >= budget_limit:

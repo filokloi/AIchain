@@ -62,6 +62,7 @@ def test_daemon_end_to_end():
     _check(failures, "wrong auth -> 401", wrong_auth.status_code == 401, f"status={wrong_auth.status_code}")
 
     # 3. PII redaction + privacy enforcement pipeline
+    # Local privacy-safe fallback on a small LM Studio model can be materially slower than cloud routes.
     pii_resp = requests.post(
         f"{BASE}/v1/chat/completions",
         headers=headers,
@@ -69,7 +70,7 @@ def test_daemon_end_to_end():
             "messages": [{"role": "user", "content": "Email test@secret.com SSN 123-45-6789"}],
             "max_tokens": 50,
         },
-        timeout=30,
+        timeout=60,
     )
     pii_ok = pii_resp.status_code == 200
     pii_blocked = False
@@ -87,23 +88,29 @@ def test_daemon_end_to_end():
     )
 
     # 4. Layer 2/3 routing request
+    # When coding-heavy routing correctly upgrades to OpenAI Codex OAuth, latency can be materially higher
+    # than the old weak-local fallback. Keep this as a realistic smoke test instead of a brittle short timeout.
     code_resp = requests.post(
         f"{BASE}/v1/chat/completions",
         headers=headers,
         json={
-            "messages": [{"role": "user", "content": "Write code for REST API endpoint with unit test and database schema"}],
-            "max_tokens": 50,
+            "messages": [{"role": "user", "content": "Write only Python code for a function add(a, b) with a unit test."}],
+            "max_tokens": 120,
         },
-        timeout=30,
+        timeout=120,
     )
     _check(failures, "code request routed", code_resp.status_code == 200, f"status={code_resp.status_code}")
+    if code_resp.status_code == 200:
+        code_meta = code_resp.json().get("_aichaind", {})
+        _check(failures, "code metadata exists", "routed_model" in code_meta)
+        _check(failures, "code routed provider exists", "routed_provider" in code_meta)
 
     # 5. Simple chat should no longer 502 via OpenRouter fallback
     hello_resp = requests.post(
         f"{BASE}/v1/chat/completions",
         headers=headers,
         json={"messages": [{"role": "user", "content": "hello"}], "max_tokens": 50},
-        timeout=30,
+        timeout=60,
     )
     _check(failures, "hello routed", hello_resp.status_code == 200, f"status={hello_resp.status_code}")
     if hello_resp.status_code == 200:

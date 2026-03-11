@@ -20,11 +20,11 @@ import hashlib
 import logging
 import re
 from datetime import datetime, timezone
-from http.server import BaseHTTPRequestHandler, HTTPServer
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 from aichaind.security.auth import AuthTokenManager, validate_origin
 from aichaind.security.rate_limiter import TokenBucketRateLimiter
-from aichaind.security.redactor import PIIRedactor, redact_messages
+from aichaind.security.redactor import PIIRedactor, redact_messages, scan_messages
 from aichaind.security.injection_guard import PromptInjectionGuard
 from aichaind.core.policy import PolicyEngine, PolicyResult
 from aichaind.core.state_machine import Controller
@@ -52,9 +52,12 @@ _discovery_report = None
 _route_eval_collector = None
 _summarizer = None
 _injection_guard: PromptInjectionGuard = None
+_provider_access_layer = None
+_local_profile_store = None
+_input_redaction_enabled = True
 
 _CLOUD_PROVIDERS = {
-    "openrouter", "openai", "google", "anthropic", "deepseek", "groq",
+    "openrouter", "openai", "openai-codex", "google", "anthropic", "deepseek", "groq",
     "mistral", "xai", "cohere", "moonshot", "zhipu",
 }
 _LOCAL_PROVIDERS = {"local", "vllm", "ollama", "lmstudio", "llamacpp"}
@@ -106,14 +109,23 @@ class AichainDHandler(BaseHTTPRequestHandler):
             "heavy_brain": _roles.get("heavy_brain", ""),
             "local_brain": _roles.get("local_brain", ""),
             "auth_active": _auth_manager.is_active if _auth_manager else False,
+            "provider_access": _provider_access_summary(),
+            "local_profiles": _local_profile_summary(),
         }
         self._send_json(200, health)
 
     def do_POST(self):
-        if self.path == "/v1/chat/completions":
-            self._handle_chat()
-        else:
-            self.send_error(404, "Not Found")
+        try:
+            if self.path == "/v1/chat/completions":
+                self._handle_chat()
+            else:
+                self.send_error(404, "Not Found")
+        except Exception as exc:
+            log.exception("Unhandled request error")
+            try:
+                self._send_json(500, {"error": f"Internal server error: {type(exc).__name__}"})
+            except Exception:
+                self.close_connection = True
 
     def _handle_chat(self):
         origin = self.headers.get("Origin", "")
@@ -162,11 +174,18 @@ class AichainDHandler(BaseHTTPRequestHandler):
 
         redaction_map = {}
         pii_categories = []
+        pii_redacted = False
         if _pii_redactor:
             existing_map = session.redaction_map if session else None
-            messages, redaction_map, pii_categories = redact_messages(messages, _pii_redactor, existing_map)
-            if pii_categories:
-                log.info(f"PII detected & redacted: {pii_categories}")
+            if _input_redaction_enabled:
+                messages, redaction_map, pii_categories = redact_messages(messages, _pii_redactor, existing_map)
+                pii_redacted = bool(pii_categories)
+                if pii_categories:
+                    log.info(f"PII detected & redacted: {pii_categories}")
+            else:
+                pii_categories = scan_messages(messages, _pii_redactor)
+                if pii_categories:
+                    log.info(f"PII detected (redaction disabled): {pii_categories}")
 
         contains_pii = bool(pii_categories)
         if session:
@@ -217,6 +236,7 @@ class AichainDHandler(BaseHTTPRequestHandler):
             available_free_model=_roles.get("fast_brain", ""),
             available_heavy_model=_roles.get("heavy_brain", ""),
             available_visual_model=_roles.get("visual_brain", ""),
+            available_local_model=_roles.get("local_brain", ""),
             privacy_context=privacy_ctx,
             balance_report=balance_report,
             budget_state=session.budget_state if session else None,
@@ -230,6 +250,47 @@ class AichainDHandler(BaseHTTPRequestHandler):
             target_model=target_model,
             target_provider=target_provider,
         )
+        decision, target_model, target_provider, codex_bridge_used = _maybe_route_openai_codex_oauth(
+            decision=decision,
+            target_model=target_model,
+            target_provider=target_provider,
+        )
+        decision, target_model, target_provider, access_decision, access_failover_used, access_block_reason = _ensure_provider_access(
+            decision=decision,
+            payload=payload,
+            target_model=target_model,
+            target_provider=target_provider,
+            balance_report=balance_report,
+        )
+        if access_block_reason:
+            _record_route_eval(
+                session=session,
+                messages=messages,
+                decision=decision,
+                exec_status="provider_access_blocked",
+                exec_latency_ms=0.0,
+                pii_detected=contains_pii,
+                godmode=bool(godmode_model),
+            )
+            if _audit_logger:
+                _audit_logger.record("provider_access_blocked", {
+                    "provider": target_provider or _infer_provider(target_model),
+                    "reason": access_block_reason,
+                }, session_id=session.session_id if session else "")
+            _save_session(session)
+            self._send_json(503, {
+                "error": access_block_reason,
+                "session_id": session.session_id if session else "",
+                "_aichaind": {
+                    "routed_model": target_model,
+                    "routed_provider": target_provider or _infer_provider(target_model),
+                    "route_confidence": decision.confidence,
+                    "route_layers": decision.decision_layers,
+                    "estimated_cost_usd": round(getattr(decision, "estimated_cost_usd", 0.0), 6),
+                    "provider_access": access_decision.to_dict() if access_decision else {},
+                },
+            })
+            return
 
         final_policy, policy_block_reason = _enforce_final_route_policy(
             session=session,
@@ -259,6 +320,8 @@ class AichainDHandler(BaseHTTPRequestHandler):
                     "route_confidence": decision.confidence,
                     "route_layers": decision.decision_layers,
                     "estimated_cost_usd": round(getattr(decision, "estimated_cost_usd", 0.0), 6),
+                    "provider_access_method": access_decision.selected_method if access_decision else "",
+                    "provider_access_status": access_decision.status if access_decision else "",
                 },
             })
             return
@@ -266,7 +329,7 @@ class AichainDHandler(BaseHTTPRequestHandler):
         target_provider = target_provider or _infer_provider(target_model)
         log.info(
             f"Route: {target_model} via {target_provider or 'auto'} "
-            f"(confidence={decision.confidence:.2f}, layers={decision.decision_layers}, pii={contains_pii})"
+            f"(confidence={decision.confidence:.2f}, layers={decision.decision_layers}, pii={contains_pii}, access={access_decision.selected_method if access_decision else ''})"
         )
 
         if _audit_logger:
@@ -355,10 +418,12 @@ class AichainDHandler(BaseHTTPRequestHandler):
                         "route_layers": decision.decision_layers,
                         "route_latency_ms": round(decision.latency_ms, 2),
                         "exec_latency_ms": round(exec_latency, 2),
-                        "pii_redacted": contains_pii,
+                        "pii_detected": contains_pii,
+                    "pii_redacted": pii_redacted,
                         "estimated_cost_usd": round(getattr(decision, "estimated_cost_usd", 0.0), 6),
                         "output_blocked": True,
                         "local_reroute_used": local_reroute_used,
+                        "codex_oauth_bridge_used": codex_bridge_used,
                         "compression": compression_meta,
                     },
                 })
@@ -380,14 +445,19 @@ class AichainDHandler(BaseHTTPRequestHandler):
                 "route_layers": decision.decision_layers,
                 "route_latency_ms": round(decision.latency_ms, 2),
                 "exec_latency_ms": round(exec_latency, 2),
-                "pii_redacted": contains_pii,
+                "pii_detected": contains_pii,
+                    "pii_redacted": pii_redacted,
                 "estimated_cost_usd": round(getattr(decision, "estimated_cost_usd", 0.0), 6),
                 "cost_tier": getattr(decision, "cost_tier", ""),
                 "model_preference": getattr(decision, "model_preference", ""),
                 "providers_with_credits": balance_report.providers_with_credits if balance_report else [],
                 "failover_used": failover_used,
+                "provider_access_failover_used": access_failover_used,
+                "provider_access_method": access_decision.selected_method if access_decision else "",
+                "provider_access_status": access_decision.status if access_decision else "",
                 "fallback_chain": getattr(decision, "fallback_chain", []),
                 "local_reroute_used": local_reroute_used,
+                "codex_oauth_bridge_used": codex_bridge_used,
                 "compression": compression_meta,
             }
             _record_route_eval(
@@ -458,6 +528,38 @@ def _load_or_create_session(payload: dict):
     return session
 
 
+def _provider_access_summary() -> dict:
+    if not _provider_access_layer:
+        return {}
+    summary = {}
+    for provider, decision in _provider_access_layer.summary().items():
+        summary[provider] = {
+            "method": decision.get("selected_method", "disabled"),
+            "status": decision.get("status", "disabled"),
+            "reason": decision.get("reason", ""),
+            "runtime_confirmed": bool(decision.get("runtime_confirmed", False)),
+            "target_form_reached": bool(decision.get("target_form_reached", False)),
+            "configured_methods": decision.get("configured_methods", []),
+            "available_methods": decision.get("available_methods", []),
+            "fallback_methods": decision.get("fallback_methods", []),
+            "billing_basis": decision.get("billing_basis", ""),
+            "usage_tracking": decision.get("usage_tracking", ""),
+            "quota_visibility": decision.get("quota_visibility", ""),
+            "limitations": decision.get("limitations", []),
+            "project_verification": decision.get("project_verification", ""),
+        }
+    return summary
+
+
+def _local_profile_summary() -> dict:
+    if not _local_profile_store:
+        return {}
+    try:
+        return _local_profile_store.summary(_roles.get('local_brain', ''))
+    except Exception as exc:
+        return {'error': str(exc)}
+
+
 def _save_session(session) -> None:
     if not session or not _session_store:
         return
@@ -496,6 +598,7 @@ def _merge_policy_results(initial: PolicyResult | None, final: PolicyResult | No
         force_model=final.force_model or initial.force_model,
         force_provider=final.force_provider or initial.force_provider,
         block_cloud=initial.block_cloud or final.block_cloud,
+        prefer_local=initial.prefer_local or final.prefer_local,
         max_cost_per_turn=0.0,
     )
 
@@ -695,7 +798,7 @@ def _inject_pinned_artifacts(messages: list[dict], artifacts: list[str]) -> list
 
 
 def _maybe_force_local_privacy_route(decision, initial_policy: PolicyResult | None, target_model: str, target_provider: str):
-    if not initial_policy or not initial_policy.block_cloud:
+    if not initial_policy or not (initial_policy.block_cloud or initial_policy.prefer_local):
         return decision, target_model, target_provider, False
     if not _is_cloud_route(target_provider, target_model):
         return decision, target_model, target_provider, False
@@ -714,6 +817,129 @@ def _maybe_force_local_privacy_route(decision, initial_policy: PolicyResult | No
         decision.fallback_chain = getattr(decision, "fallback_chain", []) + [prior_model]
     decision.reason = f"{decision.reason}|privacy_local_reroute" if decision.reason else "privacy_local_reroute"
     return decision, local_model, local_provider, True
+
+
+def _maybe_route_openai_codex_oauth(decision, target_model: str, target_provider: str):
+    if not _provider_access_layer:
+        return decision, target_model, target_provider, False
+
+    provider = (target_provider or _infer_provider(target_model)).lower()
+    normalized_model = (target_model or "").strip().lower()
+    if provider not in {"openai", "openai-codex"}:
+        return decision, target_model, target_provider, False
+    if not normalized_model or ("gpt-5" not in normalized_model and "codex" not in normalized_model):
+        return decision, target_model, target_provider, False
+
+    codex_access = _provider_access_layer.resolve("openai-codex")
+    if codex_access.selected_method == "disabled" or not codex_access.runtime_confirmed:
+        return decision, target_model, target_provider, False
+
+    codex_adapter = get_adapter("openai-codex")
+    if not codex_adapter:
+        return decision, target_model, target_provider, False
+
+    try:
+        discovery = codex_adapter.discover()
+        available_models = list(getattr(discovery, "available_models", []) or [])
+        resolved_model = codex_adapter.resolve_preferred_model(target_model, available_models)
+    except Exception:
+        return decision, target_model, target_provider, False
+
+    if not resolved_model:
+        return decision, target_model, target_provider, False
+    if provider == "openai-codex" and resolved_model == target_model:
+        return decision, target_model, target_provider, False
+
+    prior_model = target_model
+    decision.target_model = resolved_model
+    decision.target_provider = "openai-codex"
+    decision.estimated_cost_usd = 0.0
+    decision.cost_tier = "oauth_window"
+    if prior_model and prior_model != resolved_model:
+        decision.fallback_chain = getattr(decision, "fallback_chain", []) + [prior_model]
+    decision.reason = (
+        f"{decision.reason}|oauth_bridge:openai-codex"
+        if decision.reason else "oauth_bridge:openai-codex"
+    )
+    return decision, resolved_model, "openai-codex", True
+
+def _ensure_provider_access(decision, payload: dict, target_model: str, target_provider: str, balance_report):
+    provider = (target_provider or _infer_provider(target_model)).lower()
+    if not _provider_access_layer:
+        return decision, target_model, provider, None, False, ""
+
+    access_decision = _provider_access_layer.resolve(provider)
+    if (
+        access_decision.selected_method != "disabled"
+        and (
+            access_decision.status != "target_form_not_reached"
+            or access_decision.runtime_confirmed
+        )
+    ):
+        return decision, target_model, provider, access_decision, False, ""
+
+    cost_optimizer = getattr(_cascade_router, "_cost_optimizer", None)
+    if not cost_optimizer or not balance_report:
+        return (
+            decision,
+            target_model,
+            provider,
+            access_decision,
+            False,
+            f"provider_access_unavailable:{provider}:{access_decision.reason}",
+        )
+
+    available_models = {
+        "free": _roles.get("fast_brain", ""),
+        "heavy": _roles.get("heavy_brain", ""),
+        "visual": _roles.get("visual_brain", ""),
+        "local": _roles.get("local_brain", ""),
+    }
+    excluded_providers = {provider}
+    excluded_models = {target_model}
+    model_preference = getattr(decision, "model_preference", "free") or "free"
+
+    for _ in range(4):
+        alt = cost_optimizer.optimize(
+            model_preference=model_preference,
+            balance_report=balance_report,
+            available_models=available_models,
+            estimated_tokens=max(128, payload.get("max_tokens", 512)),
+            exclude_providers=excluded_providers,
+            exclude_models=excluded_models,
+            current_model=target_model,
+            current_provider=provider,
+        )
+        if not alt or not alt.model:
+            break
+
+        alt_provider = (alt.provider or _infer_provider(alt.model)).lower()
+        alt_access = _provider_access_layer.resolve(alt_provider)
+        if alt_access.selected_method == "disabled":
+            excluded_providers.add(alt_provider)
+            excluded_models.add(alt.model)
+            continue
+
+        prior_model = target_model
+        decision.target_model = alt.model
+        decision.target_provider = alt_provider
+        decision.estimated_cost_usd = alt.estimated_cost_usd
+        decision.cost_tier = alt.tier
+        decision.fallback_chain = getattr(decision, "fallback_chain", []) + [prior_model]
+        decision.reason = (
+            f"{decision.reason}|access_failover:{provider}:{access_decision.reason}->{alt.reason}"
+            if decision.reason else f"access_failover:{provider}:{access_decision.reason}->{alt.reason}"
+        )
+        return decision, alt.model, alt_provider, alt_access, True, ""
+
+    return (
+        decision,
+        target_model,
+        provider,
+        access_decision,
+        False,
+        f"provider_access_unavailable:{provider}:{access_decision.reason}",
+    )
 
 
 def _record_session_run(
@@ -852,12 +1078,28 @@ def _record_route_eval(
 
 
 def _build_request(payload: dict, messages: list[dict], target_model: str, adapter) -> CompletionRequest:
+    extra = {}
+    provider_name = str(getattr(adapter, "name", "") or "").lower()
+    if provider_name in _LOCAL_PROVIDERS and _local_profile_store:
+        try:
+            profile = _local_profile_store.get(target_model)
+            if not profile:
+                normalized_model = f"{provider_name}/{adapter.format_model_id(target_model)}"
+                profile = _local_profile_store.get(normalized_model)
+            if isinstance(profile, dict):
+                timeout_ms = profile.get("safe_timeout_ms")
+                if timeout_ms:
+                    extra["timeout_ms"] = int(timeout_ms)
+        except Exception:
+            pass
+
     return CompletionRequest(
         model=adapter.format_model_id(target_model),
         messages=messages,
         max_tokens=payload.get("max_tokens", 4096),
         temperature=payload.get("temperature", 0.7),
         stream=payload.get("stream", False),
+        extra=extra,
     )
 
 
@@ -868,7 +1110,7 @@ def _should_retry_provider_error(response) -> bool:
     retryable_tokens = (
         "429", "quota", "rate limit", "rate_limit", "too many requests",
         "must be verified", "unauthorized", "forbidden", "insufficient",
-        "billing", "credits", "not found", "unavailable",
+        "billing", "credits", "not found", "unavailable", "timeout", "timed out",
     )
     return any(token in error_text for token in retryable_tokens)
 
@@ -892,6 +1134,7 @@ def _attempt_provider_failover(
         "free": _roles.get("fast_brain", ""),
         "heavy": _roles.get("heavy_brain", ""),
         "visual": _roles.get("visual_brain", ""),
+        "local": _roles.get("local_brain", ""),
     }
     model_preference = getattr(decision, "model_preference", "free") or "free"
     tried_providers = {target_provider or adapter.name}
@@ -947,6 +1190,11 @@ def _attempt_provider_failover(
     return decision, target_model, target_provider, adapter, response, exec_latency, False
 
 
+class AichainThreadingHTTPServer(ThreadingHTTPServer):
+    daemon_threads = True
+    allow_reuse_address = True
+
+
 # ─────────────────────────────────────────
 # OUTPUT VALIDATION
 # ─────────────────────────────────────────
@@ -983,11 +1231,14 @@ def start_server(
     discovery_report=None,
     route_eval_collector=None,
     summarizer=None,
+    provider_access_layer=None,
+    local_profile_store=None,
+    input_redaction_enabled: bool = True,
 ):
     global _auth_manager, _rate_limiter, _cascade_router, _audit_logger
     global _policy_engine, _controller, _session_store, _pii_redactor
     global _roles, _version, _balance_checker, _discovery_report
-    global _route_eval_collector, _summarizer, _injection_guard
+    global _route_eval_collector, _summarizer, _injection_guard, _provider_access_layer, _local_profile_store, _input_redaction_enabled
 
     _auth_manager = auth_manager
     _rate_limiter = rate_limiter or TokenBucketRateLimiter()
@@ -1004,9 +1255,12 @@ def start_server(
     _route_eval_collector = route_eval_collector
     _summarizer = summarizer
     _injection_guard = injection_guard
+    _provider_access_layer = provider_access_layer
+    _local_profile_store = local_profile_store
+    _input_redaction_enabled = bool(input_redaction_enabled)
 
     server_address = ("127.0.0.1", port)
-    httpd = HTTPServer(server_address, AichainDHandler)
+    httpd = AichainThreadingHTTPServer(server_address, AichainDHandler)
 
     log.info("=" * 60)
     log.info(f"aichaind v{version} listening on 127.0.0.1:{port}")
@@ -1021,6 +1275,12 @@ def start_server(
     log.info("=" * 60)
 
     return httpd
+
+
+
+
+
+
 
 
 

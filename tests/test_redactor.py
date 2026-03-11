@@ -14,7 +14,7 @@ Covers:
 """
 
 import pytest
-from aichaind.security.redactor import PIIRedactor, redact_messages
+from aichaind.security.redactor import PIIRedactor, redact_messages, scan_messages
 
 
 class TestPIIRedactor:
@@ -131,3 +131,10 @@ class TestRedactMessages:
         redacted, rmap, cats = redact_messages(msgs)
         assert redacted[0]["content"] == "Hello world"
         assert len(rmap) == 0
+
+    def test_scan_messages_detects_without_modifying(self):
+        msgs = [{"role": "user", "content": "My SSN is 123-45-6789 and email is x@test.com"}]
+        cats = scan_messages(msgs)
+        assert "ssn" in cats
+        assert "email" in cats
+

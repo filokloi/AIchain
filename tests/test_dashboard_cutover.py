@@ -45,3 +45,20 @@ def test_dashboard_table_and_exports_use_normalized_filtered_models() -> None:
     assert "const models = getFilteredModels();" in html
     assert "const payload = routingRawData || routingData;" in html
     assert "const taskMeta = getTaskMeta(m.task_label);" in html
+
+
+def test_dashboard_exposes_provider_access_matrix_and_limits() -> None:
+    html = _html()
+    assert 'Provider Access & Limits' in html
+    assert 'accessMatrixGrid' in html
+    assert 'provider_access_matrix' in html
+    assert 'renderProviderAccessMatrix();' in html
+    assert 'Global rank stays independent.' in html
+
+
+def test_dashboard_exposes_self_hosted_model_index() -> None:
+    html = _html()
+    assert 'Self-Hosted Model Index' in html
+    assert 'self_hosted_model_index' in html
+    assert 'renderSelfHostedIndex();' in html
+    assert 'selfHostedGrid' in html
