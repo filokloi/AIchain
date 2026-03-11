@@ -25,7 +25,12 @@ def test_build_expected_routing_prefers_runtime_confirmed_codex_for_coding():
             'openai-codex': {
                 'runtime_confirmed': True,
                 'target_form_reached': True,
+                'billing_basis': 'subscription_plan_window',
             }
+        },
+        'routing_preferences': {
+            'prefer_prepaid_premium': True,
+            'prepaid_premium_providers': ['openai-codex'],
         },
         'local_brain': 'lmstudio/qwen/qwen3-4b-thinking-2507',
         'local_profiles': {
@@ -137,7 +142,12 @@ def test_verify_case_requires_codex_target_model_for_coding(monkeypatch):
             'openai-codex': {
                 'runtime_confirmed': True,
                 'target_form_reached': True,
+                'billing_basis': 'subscription_plan_window',
             }
+        },
+        'routing_preferences': {
+            'prefer_prepaid_premium': True,
+            'prepaid_premium_providers': ['openai-codex'],
         }
     }
     result = verify_case(

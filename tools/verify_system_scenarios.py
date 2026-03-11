@@ -97,6 +97,24 @@ def classify_provider(provider: str) -> str:
     return "local" if normalized in LOCAL_PROVIDERS else "cloud"
 
 
+def _preferred_premium_target(health: dict) -> tuple[str, str] | tuple[str, str]:
+    prefs = health.get("routing_preferences") or {}
+    if not prefs.get("prefer_prepaid_premium"):
+        return "", ""
+    configured = set(prefs.get("prepaid_premium_providers") or [])
+    provider_access = health.get("provider_access") or {}
+    for provider, info in provider_access.items():
+        billing_basis = str(info.get("billing_basis") or "").lower()
+        implicit = any(token in billing_basis for token in ("subscription", "entitlement", "workspace", "enterprise"))
+        if provider not in configured and not implicit:
+            continue
+        if not info.get("runtime_confirmed") or not info.get("target_form_reached"):
+            continue
+        if provider == "openai-codex":
+            return provider, "gpt-5.4"
+    return "", ""
+
+
 def detect_live_feature_set(index_html: str) -> dict:
     return {
         "has_provider_access_panel": "Provider Access & Limits" in (index_html or ""),
@@ -106,21 +124,29 @@ def detect_live_feature_set(index_html: str) -> dict:
 
 def build_expected_routing(health: dict, case: dict) -> ScenarioExpectation:
     name = case["name"]
-    provider_access = health.get("provider_access", {}) or {}
     local_profiles = health.get("local_profiles", {}) or {}
     active_profile = local_profiles.get("active_profile") or {}
     coding_profile = (active_profile.get("task_profiles") or {}).get("coding") or {}
     coding_suitability = float(((active_profile.get("prompt_type_suitability") or {}).get("coding") or 0.0))
     local_model = str(health.get("local_brain") or "")
-    codex = provider_access.get("openai-codex", {}) or {}
+    premium_provider, premium_model_contains = _preferred_premium_target(health)
+
+    if premium_provider:
+        expectation = ScenarioExpectation(
+            provider_class="cloud",
+            provider=premium_provider,
+            model_contains=premium_model_contains,
+        )
+        if name == "pii_cloud_allowed":
+            expectation.pii_detected = True
+            expectation.pii_redacted = False
+            expectation.local_reroute_used = False
+        elif name == "credential_use":
+            expectation.pii_redacted = False
+            expectation.local_reroute_used = False
+        return expectation
 
     if name == "coding":
-        if codex.get("runtime_confirmed") and codex.get("target_form_reached"):
-            return ScenarioExpectation(
-                provider_class="cloud",
-                provider="openai-codex",
-                model_contains="gpt-5.4",
-            )
         if local_model and active_profile.get("runtime_confirmed") and coding_profile.get("success") is True and coding_suitability >= 85.0:
             return ScenarioExpectation(
                 provider_class="local",
@@ -288,6 +314,7 @@ def main() -> int:
             "local_brain": health.get("local_brain"),
             "openai_codex_status": ((health.get("provider_access") or {}).get("openai-codex") or {}).get("status"),
             "openai_codex_target_form_reached": ((health.get("provider_access") or {}).get("openai-codex") or {}).get("target_form_reached"),
+            "routing_preferences": health.get("routing_preferences") or {},
         },
         "live_dashboard": {
             **asdict(live_dashboard),

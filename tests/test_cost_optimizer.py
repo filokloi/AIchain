@@ -757,3 +757,125 @@ def test_runtime_confirmed_openai_codex_does_not_override_simple_structured_rout
 
     assert result.provider == 'deepseek'
     assert result.model == 'deepseek/deepseek-chat'
+
+
+def test_prepaid_premium_preference_can_prefer_general_chat_when_enabled():
+    class _Decision:
+        def __init__(self, provider, selected_method='disabled', runtime_confirmed=False, billing_basis=''):
+            self.provider = provider
+            self.selected_method = selected_method
+            self.status = 'runtime_confirmed' if runtime_confirmed else 'disabled'
+            self.reason = ''
+            self.runtime_confirmed = runtime_confirmed
+            self.target_form_reached = runtime_confirmed
+            self.quota_visibility = 'provider_ui_or_openclaw_sign_in_window_not_fully_machine_readable'
+            self.billing_basis = billing_basis
+
+    class _Layer:
+        def summary(self):
+            return {
+                'openai-codex': {
+                    'selected_method': 'oauth',
+                    'runtime_confirmed': True,
+                    'target_form_reached': True,
+                    'billing_basis': 'subscription_plan_window',
+                }
+            }
+
+        def resolve(self, provider):
+            if provider == 'openai-codex':
+                return _Decision(provider, selected_method='oauth', runtime_confirmed=True, billing_basis='subscription_plan_window')
+            return _Decision(provider, selected_method='api_key', runtime_confirmed=True, billing_basis='metered_api_billing')
+
+    optimizer = CostOptimizer({'routing_hierarchy': []})
+    optimizer.configure_provider_access_layer(_Layer())
+    optimizer.configure_provider_capabilities({
+        'openai-codex': {'openai-codex/gpt-5.4'},
+        'deepseek': {'deepseek/deepseek-chat'},
+    })
+    optimizer.configure_routing_preferences({
+        'prefer_prepaid_premium': True,
+        'prepaid_premium_providers': ['openai-codex'],
+    })
+    report = BalanceReport(
+        balances={
+            'deepseek': ProviderBalance(provider='deepseek', has_credits=True, balance_usd=3.0, source='api'),
+        },
+        providers_with_credits=['deepseek'],
+    )
+
+    result = optimizer.optimize(
+        model_preference='free',
+        balance_report=report,
+        available_models={
+            'free': 'deepseek/deepseek-chat',
+            'heavy': 'deepseek/deepseek-reasoner',
+        },
+        estimated_tokens=64,
+        task_hint='casual_general_chat',
+    )
+
+    assert result.provider == 'openai-codex'
+    assert result.model == 'openai-codex/gpt-5.4'
+    assert result.reason == 'prepaid_premium_preference:openai-codex'
+    assert result.access_method == 'oauth'
+
+
+def test_prepaid_premium_preference_can_be_inferred_from_billing_basis():
+    class _Decision:
+        def __init__(self, provider, selected_method='disabled', runtime_confirmed=False, billing_basis=''):
+            self.provider = provider
+            self.selected_method = selected_method
+            self.status = 'runtime_confirmed' if runtime_confirmed else 'disabled'
+            self.reason = ''
+            self.runtime_confirmed = runtime_confirmed
+            self.target_form_reached = runtime_confirmed
+            self.quota_visibility = 'provider_ui'
+            self.billing_basis = billing_basis
+
+    class _Layer:
+        def summary(self):
+            return {
+                'openai-codex': {
+                    'selected_method': 'oauth',
+                    'runtime_confirmed': True,
+                    'target_form_reached': True,
+                    'billing_basis': 'subscription_plan_window',
+                }
+            }
+
+        def resolve(self, provider):
+            if provider == 'openai-codex':
+                return _Decision(provider, selected_method='oauth', runtime_confirmed=True, billing_basis='subscription_plan_window')
+            return _Decision(provider, selected_method='api_key', runtime_confirmed=True, billing_basis='metered_api_billing')
+
+    optimizer = CostOptimizer({'routing_hierarchy': []})
+    optimizer.configure_provider_access_layer(_Layer())
+    optimizer.configure_provider_capabilities({
+        'openai-codex': {'openai-codex/gpt-5.4'},
+        'deepseek': {'deepseek/deepseek-chat'},
+    })
+    optimizer.configure_routing_preferences({
+        'prefer_prepaid_premium': True,
+    })
+    report = BalanceReport(
+        balances={
+            'deepseek': ProviderBalance(provider='deepseek', has_credits=True, balance_usd=3.0, source='api'),
+        },
+        providers_with_credits=['deepseek'],
+    )
+
+    result = optimizer.optimize(
+        model_preference='free',
+        balance_report=report,
+        available_models={
+            'free': 'deepseek/deepseek-chat',
+            'heavy': 'deepseek/deepseek-reasoner',
+        },
+        estimated_tokens=64,
+        task_hint='casual_general_chat',
+    )
+
+    assert result.provider == 'openai-codex'
+    assert result.model == 'openai-codex/gpt-5.4'
+    assert result.reason == 'prepaid_premium_preference:openai-codex'

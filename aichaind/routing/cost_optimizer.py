@@ -111,6 +111,7 @@ class _AccessSnapshot:
     runtime_confirmed: bool = True
     target_form_reached: bool = True
     quota_visibility: str = "provider_console"
+    billing_basis: str = ""
 
 
 class CostOptimizer:
@@ -122,6 +123,10 @@ class CostOptimizer:
         self._provider_capabilities: dict[str, set[str]] = {}
         self._provider_access_layer = None
         self._local_profiles: dict[str, dict] = {}
+        self._routing_preferences: dict[str, object] = {
+            "prefer_prepaid_premium": False,
+            "prepaid_premium_providers": set(),
+        }
         if pricing_table:
             self._load_pricing(pricing_table)
 
@@ -141,6 +146,18 @@ class CostOptimizer:
             self._local_profiles = dict(snapshot)
         else:
             self._local_profiles = {}
+
+    def configure_routing_preferences(self, routing_cfg: dict | None) -> None:
+        cfg = routing_cfg if isinstance(routing_cfg, dict) else {}
+        providers = {
+            self._normalize_provider(provider)
+            for provider in (cfg.get("prepaid_premium_providers") or [])
+            if str(provider or "").strip()
+        }
+        self._routing_preferences = {
+            "prefer_prepaid_premium": bool(cfg.get("prefer_prepaid_premium", False)),
+            "prepaid_premium_providers": providers,
+        }
 
     def _load_pricing(self, table: dict):
         self._pricing.clear()
@@ -236,18 +253,6 @@ class CostOptimizer:
                 task_hint=task_hint,
             )
 
-        runtime_route = self._select_runtime_zero_marginal_route(
-            model_preference=model_preference,
-            available_models=available_models,
-            estimated_tokens=estimated_tokens,
-            balance_report=balance_report,
-            exclude_providers=exclude_providers,
-            exclude_models=exclude_models,
-            task_hint=task_hint,
-        )
-        if runtime_route:
-            return runtime_route
-
         if model_preference == "visual":
             visual_model = available_models.get("visual", default_model)
             if (
@@ -265,6 +270,30 @@ class CostOptimizer:
                     reason="visual_route_preserved",
                     task_hint=task_hint,
                 )
+
+        prepaid_route = self._select_prepaid_premium_route(
+            model_preference=model_preference,
+            available_models=available_models,
+            estimated_tokens=estimated_tokens,
+            balance_report=balance_report,
+            exclude_providers=exclude_providers,
+            exclude_models=exclude_models,
+            task_hint=task_hint,
+        )
+        if prepaid_route:
+            return prepaid_route
+
+        runtime_route = self._select_runtime_zero_marginal_route(
+            model_preference=model_preference,
+            available_models=available_models,
+            estimated_tokens=estimated_tokens,
+            balance_report=balance_report,
+            exclude_providers=exclude_providers,
+            exclude_models=exclude_models,
+            task_hint=task_hint,
+        )
+        if runtime_route:
+            return runtime_route
 
         for provider in ["google", "anthropic", "openai", "openai-codex"]:
             if provider in exclude_providers:
@@ -442,7 +471,10 @@ class CostOptimizer:
 
     def _provider_task_allowed(self, provider: str, model_preference: str, task_hint: str = "") -> bool:
         normalized_provider = self._normalize_provider(provider)
-        if normalized_provider != "openai-codex":
+        access = self._resolve_access(normalized_provider)
+        if self._prepaid_premium_enabled(normalized_provider, access) and model_preference in {"free", "heavy"}:
+            return True
+        if access.selected_method not in {"oauth", "workspace_connector", "enterprise_connector"}:
             return True
         if model_preference != "heavy":
             return False
@@ -498,11 +530,12 @@ class CostOptimizer:
                 runtime_confirmed=bool(getattr(decision, "runtime_confirmed", False)),
                 target_form_reached=bool(getattr(decision, "target_form_reached", False)),
                 quota_visibility=getattr(decision, "quota_visibility", ""),
+                billing_basis=getattr(decision, "billing_basis", ""),
             )
         if normalized_provider in _LOCAL_PROVIDERS:
-            return _AccessSnapshot(provider=normalized_provider, selected_method="local", quota_visibility="local_only")
+            return _AccessSnapshot(provider=normalized_provider, selected_method="local", quota_visibility="local_only", billing_basis="local_inference_hardware")
         if normalized_provider in _DIRECT_PROVIDERS or normalized_provider == "openrouter":
-            return _AccessSnapshot(provider=normalized_provider, selected_method="api_key", quota_visibility="provider_console")
+            return _AccessSnapshot(provider=normalized_provider, selected_method="api_key", quota_visibility="provider_console", billing_basis="metered_api_billing")
         return _AccessSnapshot(provider=normalized_provider, selected_method="disabled", status="disabled", runtime_confirmed=False, target_form_reached=False)
 
     def _access_candidate_allowed(self, provider: str, access: _AccessSnapshot) -> bool:
@@ -968,6 +1001,90 @@ class CostOptimizer:
             reason=f"{access.selected_method}_access:{provider}",
             task_hint=task_hint,
         )
+
+    def _select_prepaid_premium_route(
+        self,
+        model_preference: str,
+        available_models: dict,
+        estimated_tokens: int,
+        balance_report,
+        exclude_providers: set[str],
+        exclude_models: set[str],
+        task_hint: str = "",
+    ) -> CostRoute | None:
+        if model_preference == "visual":
+            return None
+        if not self._routing_preferences.get("prefer_prepaid_premium"):
+            return None
+
+        candidates = []
+        configured_providers = set(self._routing_preferences.get("prepaid_premium_providers", set()))
+        providers = set(configured_providers)
+        if self._provider_access_layer:
+            providers.update(self._normalize_provider(provider) for provider in self._provider_access_layer.summary().keys())
+
+        for provider in sorted(providers):
+            if provider in exclude_providers:
+                continue
+            access = self._resolve_access(provider)
+            if not self._prepaid_premium_enabled(provider, access):
+                continue
+            if not self._provider_task_allowed(provider, model_preference, task_hint):
+                continue
+            model_id = self._find_verified_direct_fallback_model(provider, model_preference, available_models)
+            if not model_id or model_id in exclude_models:
+                continue
+            if not self._model_supported(provider, model_id):
+                continue
+            pricing = self._pricing_for_candidate(model_id, provider)
+            est_cost = self._estimate_effective_cost(model_id, provider, estimated_tokens, access, balance_report, pricing)
+            local_score = self._local_effective_score(
+                pricing=pricing,
+                model_preference=model_preference,
+                model_id=model_id,
+                provider=provider,
+                access=access,
+                estimated_cost_usd=est_cost,
+                available_models=available_models,
+                task_hint=task_hint,
+            )
+            candidates.append((
+                -local_score,
+                self._provider_rank(provider, balance_report, access),
+                provider,
+                model_id,
+            ))
+
+        if not candidates:
+            return None
+
+        candidates.sort()
+        _, _, provider, model_id = candidates[0]
+        return self._build_route(
+            model_id=model_id,
+            model_preference=model_preference,
+            available_models=available_models,
+            balance_report=balance_report,
+            estimated_tokens=estimated_tokens,
+            reason=f"prepaid_premium_preference:{provider}",
+            task_hint=task_hint,
+        )
+
+    def _prepaid_premium_enabled(self, provider: str, access: _AccessSnapshot | None = None) -> bool:
+        if not bool(self._routing_preferences.get("prefer_prepaid_premium")):
+            return False
+        normalized = self._normalize_provider(provider)
+        access = access or self._resolve_access(normalized)
+        if access.selected_method not in {"oauth", "workspace_connector", "enterprise_connector"}:
+            return False
+        if not access.runtime_confirmed or not access.target_form_reached:
+            return False
+        configured = self._routing_preferences.get("prepaid_premium_providers", set())
+        if normalized in configured:
+            return True
+        billing_basis = (access.billing_basis or "").lower()
+        billing_tokens = ("subscription", "entitlement", "workspace", "enterprise")
+        return any(token in billing_basis for token in billing_tokens)
 
     def _model_is_credible(self, model_id: str, balance_report) -> bool:
         provider = self._get_provider(model_id)

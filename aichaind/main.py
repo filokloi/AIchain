@@ -292,6 +292,7 @@ def main():
     cost_optimizer.configure_provider_capabilities(provider_capabilities)
     cost_optimizer.configure_provider_access_layer(provider_access_layer)
     cost_optimizer.configure_local_profiles(local_profile_store.snapshot())
+    cost_optimizer.configure_routing_preferences(routing_cfg)
     local_profile_summary = local_profile_store.summary(roles.get("local_brain", ""))
     log.info(f"Local profiles loaded: {local_profile_summary['total_profiles']}")
     if roles.get("local_brain") and not local_profile_summary.get("active_profile"):
@@ -348,6 +349,7 @@ def main():
         provider_access_layer=provider_access_layer,
         local_profile_store=local_profile_store,
         input_redaction_enabled=cfg.get("security", {}).get("redact_inputs_before_cloud", False),
+        routing_preferences=cost_optimizer._routing_preferences,
     )
 
     def shutdown(signum, frame):

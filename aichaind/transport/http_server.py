@@ -55,6 +55,7 @@ _injection_guard: PromptInjectionGuard = None
 _provider_access_layer = None
 _local_profile_store = None
 _input_redaction_enabled = True
+_routing_preferences = {}
 
 _CLOUD_PROVIDERS = {
     "openrouter", "openai", "openai-codex", "google", "anthropic", "deepseek", "groq",
@@ -111,6 +112,7 @@ class AichainDHandler(BaseHTTPRequestHandler):
             "auth_active": _auth_manager.is_active if _auth_manager else False,
             "provider_access": _provider_access_summary(),
             "local_profiles": _local_profile_summary(),
+            "routing_preferences": _routing_preferences_summary(),
         }
         self._send_json(200, health)
 
@@ -558,6 +560,14 @@ def _local_profile_summary() -> dict:
         return _local_profile_store.summary(_roles.get('local_brain', ''))
     except Exception as exc:
         return {'error': str(exc)}
+
+
+def _routing_preferences_summary() -> dict:
+    providers = list(_routing_preferences.get('prepaid_premium_providers', [])) if isinstance(_routing_preferences, dict) else []
+    return {
+        'prefer_prepaid_premium': bool((_routing_preferences or {}).get('prefer_prepaid_premium', False)),
+        'prepaid_premium_providers': sorted(providers),
+    }
 
 
 def _save_session(session) -> None:
@@ -1234,11 +1244,12 @@ def start_server(
     provider_access_layer=None,
     local_profile_store=None,
     input_redaction_enabled: bool = True,
+    routing_preferences: dict | None = None,
 ):
     global _auth_manager, _rate_limiter, _cascade_router, _audit_logger
     global _policy_engine, _controller, _session_store, _pii_redactor
     global _roles, _version, _balance_checker, _discovery_report
-    global _route_eval_collector, _summarizer, _injection_guard, _provider_access_layer, _local_profile_store, _input_redaction_enabled
+    global _route_eval_collector, _summarizer, _injection_guard, _provider_access_layer, _local_profile_store, _input_redaction_enabled, _routing_preferences
 
     _auth_manager = auth_manager
     _rate_limiter = rate_limiter or TokenBucketRateLimiter()
@@ -1258,6 +1269,7 @@ def start_server(
     _provider_access_layer = provider_access_layer
     _local_profile_store = local_profile_store
     _input_redaction_enabled = bool(input_redaction_enabled)
+    _routing_preferences = dict(routing_preferences or {})
 
     server_address = ("127.0.0.1", port)
     httpd = AichainThreadingHTTPServer(server_address, AichainDHandler)
