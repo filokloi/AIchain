@@ -3,7 +3,6 @@ from __future__ import annotations
 import pickle
 from pathlib import Path
 
-import pandas as pd
 
 from tools.catalog_pipeline import pipeline as catalog_pipeline
 from tools.catalog_pipeline.helper_ai.service import AIHelperService
@@ -16,6 +15,14 @@ from tools.catalog_pipeline.sources import lmsys as lmsys_source
 from tools.catalog_pipeline.sources import openrouter as openrouter_source
 from tools.catalog_pipeline.types import SourceHealth, SourceResult
 
+
+class _FakeDataFrame:
+    def __init__(self, rows):
+        self._rows = rows
+
+    def iterrows(self):
+        for index, row in self._rows:
+            yield index, row
 
 class _FakeProvider:
     def __init__(self, name: str, payload=None, error: str | None = None):
@@ -123,19 +130,21 @@ def test_lmsys_legacy_and_artificial_analysis_adapters_report_runtime_ready(monk
 
 
 def test_lmsys_pickle_target_form_is_runtime_confirmed(monkeypatch, tmp_path):
-    df = pd.DataFrame(
+    df = _FakeDataFrame(
         [
-            {
-                'rating': 1466.2 - idx,
-                'variance': 5.8 + idx,
-                'rating_upper': 1470.9 - idx,
-                'rating_lower': 1461.5 - idx,
-                'num_battles': 35586 - idx,
-                'final_ranking': idx + 1,
-            }
+            (
+                f'model-{idx}',
+                {
+                    'rating': 1466.2 - idx,
+                    'variance': 5.8 + idx,
+                    'rating_upper': 1470.9 - idx,
+                    'rating_lower': 1461.5 - idx,
+                    'num_battles': 35586 - idx,
+                    'final_ranking': idx + 1,
+                },
+            )
             for idx in range(10)
-        ],
-        index=[f'model-{idx}' for idx in range(10)],
+        ]
     )
     payload = {'text': {'full': {'leaderboard_table_df': df}}}
     pkl_bytes = pickle.dumps(payload)
@@ -344,6 +353,9 @@ def test_helper_alias_resolution_is_applied_in_pipeline(tmp_path):
 def test_site_formula_matches_backend_constant():
     index_html = Path('C:/Users/filok/OneDrive/Desktop/AI chain for Open Claw envirement/index.html').read_text(encoding='utf-8')
     assert SCORING_DISPLAY_FORMULA in index_html
+
+
+
 
 
 
