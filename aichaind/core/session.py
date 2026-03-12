@@ -91,6 +91,9 @@ class CanonicalSession:
     turn_index: int = 0
     created_at: str = ""
     updated_at: str = ""
+    routing_mode: str = "auto"
+    locked_model: str = ""
+    locked_provider: str = ""
     provider_runs: list[ProviderRun] = field(default_factory=list)
     privacy_context: PrivacyContext = field(default_factory=PrivacyContext)
     budget_state: BudgetState = field(default_factory=BudgetState)
@@ -129,11 +132,11 @@ class SessionStore:
         self.session_dir = session_dir
         self.session_dir.mkdir(parents=True, exist_ok=True)
 
-    def create(self) -> CanonicalSession:
+    def create(self, session_id: str = "") -> CanonicalSession:
         """Create a new session."""
         now = datetime.now(timezone.utc).isoformat()
         session = CanonicalSession(
-            session_id=str(uuid.uuid4()),
+            session_id=str(session_id or uuid.uuid4()),
             created_at=now,
             updated_at=now,
         )
@@ -153,6 +156,9 @@ class SessionStore:
                 turn_index=data.get("turn_index", 0),
                 created_at=data.get("created_at", ""),
                 updated_at=data.get("updated_at", ""),
+                routing_mode=str(data.get("routing_mode", "auto") or "auto"),
+                locked_model=str(data.get("locked_model", "") or ""),
+                locked_provider=str(data.get("locked_provider", "") or ""),
                 privacy_context=PrivacyContext(**data.get("privacy_context", {})),
                 budget_state=BudgetState(**{k: v for k, v in data.get("budget_state", {}).items()
                                            if k in BudgetState.__dataclass_fields__}),

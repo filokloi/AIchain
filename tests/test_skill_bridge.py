@@ -50,3 +50,82 @@ def test_forward_to_sidecar_handles_json_response(monkeypatch):
     result = skill.forward_to_sidecar('/v1/chat/completions', {'messages': []})
 
     assert result == {'status': 200, 'body': {'ok': True}}
+
+
+def test_build_chat_payload_supports_manual_override():
+    args = SimpleNamespace(
+        message='hello',
+        max_tokens=123,
+        temperature=0.3,
+        session_id='sess-1',
+        manual=True,
+        auto=False,
+        manual_model='openai-codex/gpt-5.4',
+        manual_provider='openai-codex',
+        persist=True,
+    )
+
+    payload = skill.build_chat_payload(args)
+
+    assert payload['session_id'] == 'sess-1'
+    assert payload['_aichain_control'] == {
+        'mode': 'manual',
+        'model': 'openai-codex/gpt-5.4',
+        'provider': 'openai-codex',
+        'persist_for_session': True,
+    }
+
+
+def test_build_chat_payload_supports_return_to_auto():
+    args = SimpleNamespace(
+        message='hello',
+        max_tokens=123,
+        temperature=0.3,
+        session_id='sess-2',
+        manual=False,
+        auto=True,
+        manual_model='',
+        manual_provider='',
+        persist=True,
+    )
+
+    payload = skill.build_chat_payload(args)
+
+    assert payload['_aichain_control'] == {
+        'mode': 'auto',
+        'persist_for_session': True,
+    }
+
+
+def test_cmd_chat_forwards_manual_control(monkeypatch, capsys):
+    captured = {}
+
+    def fake_forward(endpoint, payload, sidecar_url=skill.DEFAULT_SIDECAR_URL):
+        captured['endpoint'] = endpoint
+        captured['payload'] = payload
+        return {
+            'status': 200,
+            'body': {'choices': [{'message': {'content': 'LOCK_OK'}}]},
+        }
+
+    monkeypatch.setattr(skill, 'forward_to_sidecar', fake_forward)
+
+    args = SimpleNamespace(
+        message='Lock this model',
+        max_tokens=321,
+        temperature=0.1,
+        session_id='sess-3',
+        manual=True,
+        auto=False,
+        manual_model='openai-codex/gpt-5.4',
+        manual_provider='openai-codex',
+        persist=False,
+    )
+
+    skill.cmd_chat(args)
+    out = capsys.readouterr().out.strip()
+
+    assert out == 'LOCK_OK'
+    assert captured['endpoint'] == '/v1/chat/completions'
+    assert captured['payload']['_aichain_control']['mode'] == 'manual'
+    assert captured['payload']['_aichain_control']['model'] == 'openai-codex/gpt-5.4'

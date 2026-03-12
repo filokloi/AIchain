@@ -70,13 +70,39 @@ def forward_to_sidecar(endpoint: str, payload: dict, sidecar_url: str = DEFAULT_
         return {"status": 500, "body": {"error": str(e)}}
 
 
-def cmd_chat(args):
-    """Send a chat message via the sidecar."""
+def build_chat_payload(args) -> dict:
+    """Build sidecar payload for chat, including optional manual routing control."""
     payload = {
         "messages": [{"role": "user", "content": args.message}],
         "max_tokens": args.max_tokens,
         "temperature": args.temperature,
     }
+    session_id = str(getattr(args, "session_id", "") or "").strip()
+    if session_id:
+        payload["session_id"] = session_id
+
+    manual_model = str(getattr(args, "manual_model", "") or "").strip()
+    manual_provider = str(getattr(args, "manual_provider", "") or "").strip()
+    control = {}
+    if getattr(args, "auto", False):
+        control["mode"] = "auto"
+    elif getattr(args, "manual", False) or manual_model or manual_provider:
+        control["mode"] = "manual"
+        if manual_model:
+            control["model"] = manual_model
+        if manual_provider:
+            control["provider"] = manual_provider
+
+    if control and getattr(args, "persist", False):
+        control["persist_for_session"] = True
+    if control:
+        payload["_aichain_control"] = control
+    return payload
+
+
+def cmd_chat(args):
+    """Send a chat message via the sidecar."""
+    payload = build_chat_payload(args)
     result = forward_to_sidecar("/v1/chat/completions", payload)
 
     if result["status"] == 200:
@@ -130,6 +156,12 @@ def main():
     chat_p.add_argument("message", help="Message to send")
     chat_p.add_argument("--max-tokens", type=int, default=4096)
     chat_p.add_argument("--temperature", type=float, default=0.7)
+    chat_p.add_argument("--session-id", default="", help="Reuse an existing AIchain session")
+    chat_p.add_argument("--manual", action="store_true", help="Disable auto routing for this request and use the chosen model")
+    chat_p.add_argument("--auto", action="store_true", help="Re-enable AIchain automatic routing")
+    chat_p.add_argument("--manual-model", default="", help="Explicit model to lock, for example openai-codex/gpt-5.4")
+    chat_p.add_argument("--manual-provider", default="", help="Explicit provider for manual mode")
+    chat_p.add_argument("--persist", action="store_true", help="Persist manual/auto routing mode to the session")
 
     # status
     sub.add_parser("status", help="Check sidecar status")
@@ -139,6 +171,8 @@ def main():
     start_p.add_argument("--config", help="Config file path")
 
     args = parser.parse_args()
+    if getattr(args, "manual", False) and getattr(args, "auto", False):
+        parser.error("--manual and --auto cannot be used together")
     if args.command == "chat":
         cmd_chat(args)
     elif args.command == "status":

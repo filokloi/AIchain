@@ -30,7 +30,7 @@ from aichaind.core.policy import PolicyEngine, PolicyResult
 from aichaind.core.state_machine import Controller
 from aichaind.core.session import SessionStore, ProviderRun, PrivacyContext
 from aichaind.routing.cascade import CascadeRouter
-from aichaind.routing.rules import detect_visual_content
+from aichaind.routing.rules import RouteDecision, detect_visual_content
 from aichaind.providers.registry import get_adapter, get_adapter_for_model
 from aichaind.providers.base import CompletionRequest
 from aichaind.telemetry.audit import AuditLogger
@@ -160,6 +160,17 @@ class AichainDHandler(BaseHTTPRequestHandler):
         messages = payload.get("messages", [])
         session = _load_or_create_session(payload)
         _update_session_summary_state(session, messages)
+        routing_control, routing_control_error, routing_control_persisted = _resolve_routing_control(session, payload)
+        if routing_control_error:
+            _save_session(session)
+            self._send_json(400, {
+                "error": routing_control_error,
+                "session_id": session.session_id if session else "",
+            })
+            return
+        if routing_control_persisted:
+            _save_session(session)
+        routing_control_meta = _routing_control_response_meta(routing_control)
 
         injection_result = _scan_for_prompt_injection(messages)
         if injection_result and injection_result.blocked:
@@ -232,26 +243,30 @@ class AichainDHandler(BaseHTTPRequestHandler):
             cloud_routing_allowed=not (policy_result and policy_result.block_cloud),
         )
 
-        decision = _cascade_router.route(
-            messages=messages,
-            godmode_model=godmode_model,
-            available_free_model=_roles.get("fast_brain", ""),
-            available_heavy_model=_roles.get("heavy_brain", ""),
-            available_visual_model=_roles.get("visual_brain", ""),
-            available_local_model=_roles.get("local_brain", ""),
-            privacy_context=privacy_ctx,
-            balance_report=balance_report,
-            budget_state=session.budget_state if session else None,
-        )
+        local_reroute_used = False
+        if routing_control.get("manual_override_active"):
+            decision, target_model, target_provider = _build_manual_route_decision(routing_control)
+        else:
+            decision = _cascade_router.route(
+                messages=messages,
+                godmode_model=godmode_model,
+                available_free_model=_roles.get("fast_brain", ""),
+                available_heavy_model=_roles.get("heavy_brain", ""),
+                available_visual_model=_roles.get("visual_brain", ""),
+                available_local_model=_roles.get("local_brain", ""),
+                privacy_context=privacy_ctx,
+                balance_report=balance_report,
+                budget_state=session.budget_state if session else None,
+            )
 
-        target_model = decision.target_model or _roles.get("fast_brain", "openrouter/google/gemini-2.5-flash:free")
-        target_provider = getattr(decision, "target_provider", "") or ""
-        decision, target_model, target_provider, local_reroute_used = _maybe_force_local_privacy_route(
-            decision=decision,
-            initial_policy=policy_result,
-            target_model=target_model,
-            target_provider=target_provider,
-        )
+            target_model = decision.target_model or _roles.get("fast_brain", "openrouter/google/gemini-2.5-flash:free")
+            target_provider = getattr(decision, "target_provider", "") or ""
+            decision, target_model, target_provider, local_reroute_used = _maybe_force_local_privacy_route(
+                decision=decision,
+                initial_policy=policy_result,
+                target_model=target_model,
+                target_provider=target_provider,
+            )
         decision, target_model, target_provider, codex_bridge_used = _maybe_route_openai_codex_oauth(
             decision=decision,
             target_model=target_model,
@@ -263,6 +278,7 @@ class AichainDHandler(BaseHTTPRequestHandler):
             target_model=target_model,
             target_provider=target_provider,
             balance_report=balance_report,
+            allow_failover=not routing_control.get("manual_override_active", False),
         )
         if access_block_reason:
             _record_route_eval(
@@ -290,6 +306,7 @@ class AichainDHandler(BaseHTTPRequestHandler):
                     "route_layers": decision.decision_layers,
                     "estimated_cost_usd": round(getattr(decision, "estimated_cost_usd", 0.0), 6),
                     "provider_access": access_decision.to_dict() if access_decision else {},
+                    **routing_control_meta,
                 },
             })
             return
@@ -324,6 +341,7 @@ class AichainDHandler(BaseHTTPRequestHandler):
                     "estimated_cost_usd": round(getattr(decision, "estimated_cost_usd", 0.0), 6),
                     "provider_access_method": access_decision.selected_method if access_decision else "",
                     "provider_access_status": access_decision.status if access_decision else "",
+                    **routing_control_meta,
                 },
             })
             return
@@ -366,6 +384,7 @@ class AichainDHandler(BaseHTTPRequestHandler):
             adapter=adapter,
             response=response,
             exec_latency=exec_latency,
+            allow_failover=not routing_control.get("manual_override_active", False),
         )
 
         if _controller:
@@ -427,6 +446,7 @@ class AichainDHandler(BaseHTTPRequestHandler):
                         "local_reroute_used": local_reroute_used,
                         "codex_oauth_bridge_used": codex_bridge_used,
                         "compression": compression_meta,
+                        **routing_control_meta,
                     },
                 })
                 return
@@ -461,6 +481,7 @@ class AichainDHandler(BaseHTTPRequestHandler):
                 "local_reroute_used": local_reroute_used,
                 "codex_oauth_bridge_used": codex_bridge_used,
                 "compression": compression_meta,
+                **routing_control_meta,
             }
             _record_route_eval(
                 session=session,
@@ -509,6 +530,11 @@ class AichainDHandler(BaseHTTPRequestHandler):
             self._send_json(502, {
                 "error": response.error,
                 "session_id": session.session_id if session else "",
+                "_aichaind": {
+                    **routing_control_meta,
+                    "routed_model": target_model,
+                    "routed_provider": target_provider or adapter.name,
+                },
             })
 
     def _send_json(self, status_code: int, data: dict):
@@ -525,9 +551,118 @@ def _load_or_create_session(payload: dict):
     session_id = str(payload.get("session_id", "") or "").strip()
     session = _session_store.load(session_id) if session_id else None
     if session is None:
-        session = _session_store.create()
+        session = _session_store.create(session_id=session_id)
     session.advance_turn()
     return session
+
+
+def _parse_routing_control(payload: dict) -> tuple[dict, str]:
+    raw = payload.get("_aichain_control")
+    if raw is None:
+        return {}, ""
+    if not isinstance(raw, dict):
+        return {}, "invalid_routing_control"
+
+    mode = str(raw.get("mode", "") or "").strip().lower()
+    model = str(raw.get("model", "") or raw.get("locked_model", "") or "").strip()
+    provider = str(raw.get("provider", "") or raw.get("locked_provider", "") or "").strip().lower()
+    persist_for_session = bool(raw.get("persist_for_session", False))
+
+    if mode and mode not in {"auto", "manual"}:
+        return {}, "invalid_routing_mode"
+    if not mode and (model or provider):
+        mode = "manual"
+
+    return {
+        "mode": mode,
+        "model": model,
+        "provider": provider,
+        "persist_for_session": persist_for_session,
+    }, ""
+
+
+def _resolve_routing_control(session, payload: dict) -> tuple[dict, str, bool]:
+    parsed, error = _parse_routing_control(payload)
+    if error:
+        return {}, error, False
+
+    session_mode = str(getattr(session, "routing_mode", "auto") or "auto") if session else "auto"
+    session_model = str(getattr(session, "locked_model", "") or "") if session else ""
+    session_provider = str(getattr(session, "locked_provider", "") or "").strip().lower() if session else ""
+
+    effective_mode = session_mode if session_mode in {"auto", "manual"} else "auto"
+    locked_model = session_model
+    locked_provider = session_provider
+    changed = False
+
+    if parsed:
+        requested_mode = parsed.get("mode", "")
+        if requested_mode == "auto":
+            effective_mode = "auto"
+            locked_model = ""
+            locked_provider = ""
+            if parsed.get("persist_for_session") and session:
+                changed = (
+                    session.routing_mode != "auto"
+                    or bool(session.locked_model)
+                    or bool(session.locked_provider)
+                )
+                session.routing_mode = "auto"
+                session.locked_model = ""
+                session.locked_provider = ""
+        elif requested_mode == "manual":
+            effective_mode = "manual"
+            locked_model = parsed.get("model", "") or session_model
+            locked_provider = parsed.get("provider", "") or session_provider or _infer_provider(locked_model)
+            if not locked_model:
+                return {}, "manual_mode_requires_model", changed
+            if parsed.get("persist_for_session") and session:
+                changed = (
+                    session.routing_mode != "manual"
+                    or session.locked_model != locked_model
+                    or session.locked_provider != locked_provider
+                )
+                session.routing_mode = "manual"
+                session.locked_model = locked_model
+                session.locked_provider = locked_provider
+
+    if effective_mode != "manual" or not locked_model:
+        effective_mode = "auto"
+        locked_model = ""
+        locked_provider = ""
+
+    return {
+        "mode": effective_mode,
+        "manual_override_active": effective_mode == "manual" and bool(locked_model),
+        "locked_model": locked_model,
+        "locked_provider": locked_provider,
+    }, "", changed
+
+
+def _build_manual_route_decision(control: dict):
+    locked_model = str(control.get("locked_model", "") or "").strip()
+    locked_provider = str(control.get("locked_provider", "") or _infer_provider(locked_model)).strip().lower()
+    decision = RouteDecision(
+        target_model=locked_model,
+        target_provider=locked_provider,
+        confidence=1.0,
+        decision_layers=["manual_override"],
+        reason="manual_override",
+    )
+    decision.estimated_cost_usd = 0.0
+    decision.cost_tier = "manual"
+    decision.model_preference = "manual"
+    return decision, locked_model, locked_provider
+
+
+def _routing_control_response_meta(control: dict) -> dict:
+    control = control or {}
+    return {
+        "routing_mode": control.get("mode", "auto"),
+        "manual_override_active": bool(control.get("manual_override_active", False)),
+        "manual_locked_model": control.get("locked_model", "") if control.get("manual_override_active") else "",
+        "manual_locked_provider": control.get("locked_provider", "") if control.get("manual_override_active") else "",
+    }
 
 
 def _provider_access_summary() -> dict:
@@ -873,7 +1008,7 @@ def _maybe_route_openai_codex_oauth(decision, target_model: str, target_provider
     )
     return decision, resolved_model, "openai-codex", True
 
-def _ensure_provider_access(decision, payload: dict, target_model: str, target_provider: str, balance_report):
+def _ensure_provider_access(decision, payload: dict, target_model: str, target_provider: str, balance_report, allow_failover: bool = True):
     provider = (target_provider or _infer_provider(target_model)).lower()
     if not _provider_access_layer:
         return decision, target_model, provider, None, False, ""
@@ -889,7 +1024,7 @@ def _ensure_provider_access(decision, payload: dict, target_model: str, target_p
         return decision, target_model, provider, access_decision, False, ""
 
     cost_optimizer = getattr(_cascade_router, "_cost_optimizer", None)
-    if not cost_optimizer or not balance_report:
+    if not allow_failover or not cost_optimizer or not balance_report:
         return (
             decision,
             target_model,
@@ -1135,9 +1270,10 @@ def _attempt_provider_failover(
     adapter,
     response,
     exec_latency: float,
+    allow_failover: bool = True,
 ):
     cost_optimizer = getattr(_cascade_router, "_cost_optimizer", None)
-    if not cost_optimizer or not balance_report or not _should_retry_provider_error(response):
+    if not allow_failover or not cost_optimizer or not balance_report or not _should_retry_provider_error(response):
         return decision, target_model, target_provider, adapter, response, exec_latency, False
 
     available_models = {

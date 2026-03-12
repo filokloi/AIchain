@@ -40,6 +40,9 @@ class TestCanonicalSession:
         s = CanonicalSession(session_id="test-123", created_at="2026-01-01T00:00:00Z")
         assert s.session_id == "test-123"
         assert s.turn_index == 0
+        assert s.routing_mode == "auto"
+        assert s.locked_model == ""
+        assert s.locked_provider == ""
         assert s.system_state == "NORMAL"
         assert s.circuit_state == "CLOSED"
 
@@ -72,10 +75,16 @@ class TestCanonicalSession:
         s.privacy_context.contains_pii = True
         s.privacy_context.pii_categories = ["email"]
         s.summary_state.pinned_facts = ["fact_one"]
+        s.routing_mode = "manual"
+        s.locked_model = "openai-codex/gpt-5.4"
+        s.locked_provider = "openai-codex"
 
         d = s.to_dict()
         assert d["session_id"] == "rt1"
         assert d["turn_index"] == 1
+        assert d["routing_mode"] == "manual"
+        assert d["locked_model"] == "openai-codex/gpt-5.4"
+        assert d["locked_provider"] == "openai-codex"
         assert d["privacy_context"]["contains_pii"] is True
         assert d["summary_state"]["pinned_facts"] == ["fact_one"]
 
@@ -106,6 +115,13 @@ class TestSessionStore:
         assert s.session_id != ""
         assert s.created_at != ""
 
+    def test_create_session_with_explicit_id(self, store):
+        s = store.create(session_id="manual-lock-demo")
+        assert s.session_id == "manual-lock-demo"
+        loaded = store.load("manual-lock-demo")
+        assert loaded is not None
+        assert loaded.session_id == "manual-lock-demo"
+
     def test_save_and_load(self, store):
         s = store.create()
         s.advance_turn()
@@ -117,6 +133,19 @@ class TestSessionStore:
         assert loaded is not None
         assert loaded.turn_index == 2
         assert loaded.summary_state.pinned_facts == ["important_fact"]
+
+    def test_persist_manual_routing_state(self, store):
+        s = store.create()
+        s.routing_mode = "manual"
+        s.locked_model = "openai-codex/gpt-5.4"
+        s.locked_provider = "openai-codex"
+        store.save(s)
+
+        loaded = store.load(s.session_id)
+        assert loaded is not None
+        assert loaded.routing_mode == "manual"
+        assert loaded.locked_model == "openai-codex/gpt-5.4"
+        assert loaded.locked_provider == "openai-codex"
 
     def test_load_nonexistent_returns_none(self, store):
         assert store.load("nonexistent-id") is None
