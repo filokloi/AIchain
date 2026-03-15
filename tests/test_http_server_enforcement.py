@@ -755,3 +755,42 @@ def test_start_server_uses_threading_http_server(monkeypatch):
     assert isinstance(server, FakeServer)
     assert captured['address'] == ('127.0.0.1', 9999)
     assert captured['handler'] is http_server.AichainDHandler
+
+
+def test_status_endpoint_returns_rich_operational_data():
+    captured = {}
+    
+    class FakeAuthManager:
+        is_active = True
+        
+    class FakeDiscoveryReport:
+        timestamp = 1710000000.0  # mock time
+    
+    http_server._auth_manager = FakeAuthManager()
+    http_server._discovery_report = FakeDiscoveryReport()
+    http_server._roles = {"fast_brain": "mock/model"}
+    http_server._version = "9.9.9"
+    http_server._controller = DummyController()
+    
+    handler = object.__new__(http_server.AichainDHandler)
+    handler.path = '/status'
+    handler._server_start_time = 1700000000.0
+    handler._send_json = lambda status, data: captured.update({'status': status, 'data': data})
+    
+    # We call the internal method since do_GET parses url
+    handler._handle_status()
+    
+    assert captured["status"] == 200
+    data = captured["data"]
+    assert data["status"] == "ok"
+    assert data["version"] == "9.9.9"
+    assert data["auth_active"] is True
+    assert data["system_state"] == "NORMAL"
+    assert data["routing_mode"] == "cascade"
+    assert "catalog_age_seconds" in data
+    assert "uptime_seconds" in data
+    assert data["roles"]["fast_brain"] == "mock/model"
+    # Basic check for provider health, it should enumerate registry
+    assert "provider_health" in data
+    assert "openrouter" in data["provider_health"]
+    assert "state" in data["provider_health"]["openrouter"]

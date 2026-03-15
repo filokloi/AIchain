@@ -123,6 +123,8 @@ class AichainDHandler(BaseHTTPRequestHandler):
         parsed = urlparse(self.path)
         if parsed.path == "/health":
             self._handle_health()
+        elif parsed.path == "/status":
+            self._handle_status()
         elif parsed.path == "/ui/control-state":
             self._handle_ui_control_state(parsed)
         elif parsed.path == "/ui/openclaw-bridge.js":
@@ -163,6 +165,41 @@ class AichainDHandler(BaseHTTPRequestHandler):
             "routing_preferences": _routing_preferences_summary(),
         }
         self._send_json(200, health)
+
+    def _handle_status(self):
+        """Rich operational visibility endpoint."""
+        state = _controller.state if _controller else {}
+        
+        # Catalog age
+        catalog_age_seconds = 0.0
+        if _discovery_report and hasattr(_discovery_report, "timestamp"):
+            catalog_age_seconds = time.time() - getattr(_discovery_report, "timestamp", time.time())
+            
+        # Provider health (circuit breakers)
+        provider_health = {}
+        from aichaind.providers.registry import list_providers, get_adapter
+        for p in list_providers():
+            adapter = get_adapter(p)
+            if adapter and hasattr(adapter, "circuit_breaker"):
+                provider_health[p] = {
+                    "state": adapter.circuit_breaker.state,
+                    "is_available": adapter.circuit_breaker.is_available,
+                    "failures": getattr(adapter.circuit_breaker, "_failures", 0),
+                }
+
+        status_data = {
+            "status": "ok",
+            "version": _version,
+            "uptime_seconds": time.time() - getattr(self, "_server_start_time", time.time()), # Will be approx if not set
+            "system_state": str(state.get("system", "UNKNOWN")),
+            "routing_mode": "godmode" if state.get("godmode") else "cascade",
+            "catalog_age_seconds": round(catalog_age_seconds, 2),
+            "provider_health": provider_health,
+            "roles": _roles.copy(),
+            "auth_active": _auth_manager.is_active if _auth_manager else False,
+            "provider_access": _provider_access_summary(),
+        }
+        self._send_json(200, status_data)
 
     def _handle_ui_openclaw_bridge(self):
         token = getattr(_auth_manager, "_current_token", "") if _auth_manager else ""
