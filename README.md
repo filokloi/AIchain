@@ -8,7 +8,7 @@
 [![Status](https://img.shields.io/badge/Status-OPERATIONAL-00ff41?style=flat-square&labelColor=0a0a0a)](https://filokloi.github.io/AIchain/)
 [![Manifest](https://img.shields.io/badge/v5-Catalog_Manifest-FFD700?style=flat-square&labelColor=0a0a0a)](https://filokloi.github.io/AIchain/catalog_manifest.json)
 
-**[Live Dashboard](https://filokloi.github.io/AIchain/)** · **[Catalog Manifest](https://filokloi.github.io/AIchain/catalog_manifest.json)** · **[Legacy Feed](https://filokloi.github.io/AIchain/ai_routing_table.json)** · **[Issues](https://github.com/filokloi/AIchain/issues)**
+**[Live Dashboard](https://filokloi.github.io/AIchain/)** · **[Catalog Manifest](https://filokloi.github.io/AIchain/catalog_manifest.json)** · **[v5 Technical Index](docs/V5_INDEX.md)** · **[Issues](https://github.com/filokloi/AIchain/issues)**
 
 </div>
 
@@ -121,9 +121,9 @@ Not finished yet:
 - canonical session lifecycle in the request path
 - hard fail-closed privacy and policy enforcement
 - stronger injection defense and output enforcement
-- full observability/metrics pipeline
+- full observability/metrics pipeline (`/status` endpoint)
 - agent adapters beyond stubs
-- packaging and distribution path for other users with their own credentials
+- packaging and distribution path for other operators (`setup.ps1` / `install.sh`)
 
 ---
 
