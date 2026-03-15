@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Build a native v5 catalog manifest from the legacy AIchain routing table."""
 
-from _import re
+import re
 
 def scrub_sensitive_data(obj):
         """Recursively scrub API keys and tokens from the manifest."""
