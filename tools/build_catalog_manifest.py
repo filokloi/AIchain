@@ -1,7 +1,25 @@
 #!/usr/bin/env python3
 """Build a native v5 catalog manifest from the legacy AIchain routing table."""
 
-from __future__ import annotations
+from _import re
+
+def scrub_sensitive_data(obj):
+        """Recursively scrub API keys and tokens from the manifest."""
+        if isinstance(obj, dict):
+                    return {k: scrub_sensitive_data(v) for k, v in obj.items()}
+elif isinstance(obj, list):
+        return [scrub_sensitive_data(i) for i in obj]
+elif isinstance(obj, str):
+        # Scrub Google API keys (AIza...)
+        obj = re.sub(r'AIza[0-9A-Za-z_-]{20,}', '[REDACTED_API_KEY]', obj)
+        # Scrub OpenAI keys (sk-...)
+        obj = re.sub(r'sk-[A-Za-z0-9]{20,}', '[REDACTED_API_KEY]', obj)
+        # Scrub Bearer tokens
+        obj = re.sub(r'Bearer\s+[A-Za-z0-9._-]{20,}', 'Bearer [REDACTED_TOKEN]', obj)
+        return obj
+    return obj
+
+_future__ import annotations
 
 import json
 import sys
@@ -162,6 +180,7 @@ def build_manifest(table: dict, base_url: str = DEFAULT_BASE_URL, provider_acces
         "routing_hierarchy": deepcopy(table.get("routing_hierarchy", [])),
     }
 
+        manifest = scrub_sensitive_data(manifest)
     validation = validate_catalog_manifest(manifest)
     if not validation.valid:
         joined = "; ".join(validation.issues)
