@@ -42,10 +42,14 @@ if [ ! -f "$OC_CONFIG" ]; then
 fi
 
 # 5. Check Port Availability
-if lsof -Pi :8080 -sTCP:LISTEN -t >/dev/null; then
-    echo -e "\033[33mWARNING: Port 8080 is currently in use. aichaind usually requires it.\033[0m"
+if command -v lsof &> /dev/null; then
+    if lsof -Pi :8080 -sTCP:LISTEN -t >/dev/null; then
+        echo -e "\033[33mWARNING: Port 8080 is currently in use. aichaind usually requires it.\033[0m"
+    else
+        echo -e "\033[32m4. Port 8080 is free.\033[0m"
+    fi
 else
-    echo -e "\033[32m4. Port 8080 is free.\033[0m"
+    echo -e "\033[33m4. Cannot auto-verify port 8080 (lsof missing). Please ensure it is free.\033[0m"
 fi
 
 echo -e "\n\033[36mBootstrap Complete! You can now run aichaind using: ./start-aichain.sh\033[0m"
