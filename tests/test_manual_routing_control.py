@@ -49,6 +49,27 @@ def test_resolve_routing_control_uses_session_manual_lock():
     assert control['locked_provider'] == 'openai-codex'
 
 
+def test_resolve_routing_control_clears_invalid_stale_manual_lock():
+    session = CanonicalSession(
+        session_id='sess-stale',
+        routing_mode='manual',
+        locked_model='users/filok',
+        locked_provider='users',
+    )
+
+    control, error, changed = http_server._resolve_routing_control(session, {'messages': []})
+
+    assert error == ''
+    assert changed is True
+    assert control['manual_override_active'] is False
+    assert control['mode'] == 'auto'
+    assert control['locked_model'] == ''
+    assert control['locked_provider'] == ''
+    assert session.routing_mode == 'auto'
+    assert session.locked_model == ''
+    assert session.locked_provider == ''
+
+
 def test_resolve_routing_control_persists_manual_lock():
     session = CanonicalSession(session_id='sess-2')
     payload = {
@@ -68,6 +89,24 @@ def test_resolve_routing_control_persists_manual_lock():
     assert session.routing_mode == 'manual'
     assert session.locked_model == 'openai-codex/gpt-5.4'
     assert session.locked_provider == 'openai-codex'
+
+
+def test_resolve_routing_control_rejects_invalid_manual_lock_target():
+    session = CanonicalSession(session_id='sess-invalid')
+    payload = {
+        '_aichain_control': {
+            'mode': 'manual',
+            'model': 'users/filok',
+            'provider': 'users',
+            'persist_for_session': True,
+        }
+    }
+
+    control, error, changed = http_server._resolve_routing_control(session, payload)
+
+    assert control == {}
+    assert error == 'invalid_manual_lock_target'
+    assert changed is False
 
 
 def test_resolve_routing_control_can_return_to_auto():

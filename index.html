@@ -1921,8 +1921,16 @@
 
             if (routingData.last_synopsis) {
                 const d = new Date(routingData.last_synopsis);
-                document.getElementById('lastUpdate').textContent =
-                    `LAST SYNC: ${d.toISOString().replace('T', ' ').substring(0, 19)} UTC`;
+                const lastUpdateEl = document.getElementById('lastUpdate');
+                const syncLabel = `LAST SYNC: ${d.toISOString().replace('T', ' ').substring(0, 19)} UTC`;
+                const ageHours = (Date.now() - d.getTime()) / (1000 * 60 * 60);
+                if (ageHours > 72) {
+                    lastUpdateEl.innerHTML = `${escHtml(syncLabel)} <span style="color: #ff4444; font-weight: 800; margin-left: 8px;">⚠ DATA ${Math.floor(ageHours / 24)}d STALE</span>`;
+                } else if (ageHours > 24) {
+                    lastUpdateEl.innerHTML = `${escHtml(syncLabel)} <span style="color: #ffaa00; font-weight: 800; margin-left: 8px;">⚠ DATA ${Math.floor(ageHours)}h OLD</span>`;
+                } else {
+                    lastUpdateEl.textContent = syncLabel;
+                }
             }
 
             const breakdown = routingData.tier_breakdown || {};

@@ -92,6 +92,7 @@ class CanonicalSession:
     created_at: str = ""
     updated_at: str = ""
     routing_mode: str = "auto"
+    routing_preference: str = "balanced"
     locked_model: str = ""
     locked_provider: str = ""
     provider_runs: list[ProviderRun] = field(default_factory=list)
@@ -157,6 +158,7 @@ class SessionStore:
                 created_at=data.get("created_at", ""),
                 updated_at=data.get("updated_at", ""),
                 routing_mode=str(data.get("routing_mode", "auto") or "auto"),
+                routing_preference=str(data.get("routing_preference", "balanced") or "balanced"),
                 locked_model=str(data.get("locked_model", "") or ""),
                 locked_provider=str(data.get("locked_provider", "") or ""),
                 privacy_context=PrivacyContext(**data.get("privacy_context", {})),

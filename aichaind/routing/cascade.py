@@ -86,6 +86,7 @@ class CascadeRouter:
         available_visual_model: str = "",
         available_local_model: str = "",
         balance_report=None,
+        routing_preference: str = "balanced",
     ) -> RouteDecision:
         """Run the cascading router. Returns the best RouteDecision."""
         start_t = time.time()
@@ -117,6 +118,7 @@ class CascadeRouter:
                 available_models=available_models,
                 balance_report=balance_report,
                 messages=messages,
+                routing_preference=routing_preference,
             )
             if all_layers:
                 decision.decision_layers = all_layers
@@ -224,12 +226,15 @@ class CascadeRouter:
         available_models: dict,
         balance_report,
         messages: list[dict],
+        routing_preference: str = "balanced",
     ) -> RouteDecision:
         if not decision.target_provider and decision.target_model:
             decision.target_provider = self._infer_provider(decision.target_model)
 
         effective_preference = model_preference or self._infer_preference(decision, available_models)
+        effective_preference = self._apply_routing_preference(effective_preference, routing_preference, available_models)
         decision.model_preference = effective_preference
+        decision.routing_preference = routing_preference
 
         if not self._cost_optimizer or not balance_report or not effective_preference:
             return decision
@@ -244,6 +249,7 @@ class CascadeRouter:
             current_model=decision.target_model,
             current_provider=decision.target_provider,
             task_hint=self._build_task_hint(decision, messages),
+            routing_preference=routing_preference,
         )
         if not optimized or not optimized.model:
             return decision
@@ -304,6 +310,21 @@ class CascadeRouter:
         if prefix in _DIRECT_PROVIDERS:
             return prefix
         return "openrouter"
+
+
+    def _apply_routing_preference(self, model_preference: str, routing_preference: str, available_models: dict) -> str:
+        preference = (routing_preference or "balanced").strip().lower()
+        if not model_preference:
+            model_preference = self._infer_preference(RouteDecision(reason=""), available_models)
+        if model_preference == "visual":
+            return "visual"
+        if preference == "max_intelligence":
+            return "heavy" if available_models.get("heavy") else model_preference
+        if preference == "min_cost":
+            return "free" if available_models.get("free") else model_preference
+        if preference == "prefer_local":
+            return "local" if available_models.get("local") else model_preference
+        return model_preference
 
     def _build_task_hint(self, decision: RouteDecision, messages: list[dict]) -> str:
         parts = []

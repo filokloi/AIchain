@@ -75,7 +75,7 @@ def test_codex_cli_resolution_prefers_resolved_command(monkeypatch):
     assert calls['cmd'][0] == 'C:/Users/test/openclaw.cmd'
     assert calls['cmd'][1:] == ['models', 'list', '--all', '--provider', 'openai-codex', '--json']
 
-def test_codex_adapter_discovers_models_and_marks_target_form_not_reached(tmp_path: Path, monkeypatch):
+def test_codex_adapter_discovers_verified_fallback_when_target_form_not_reached(tmp_path: Path, monkeypatch):
     cfg_path = tmp_path / 'openclaw.json'
     auth_path = tmp_path / 'auth-profiles.json'
     _write_json(cfg_path, _config_payload())
@@ -84,22 +84,51 @@ def test_codex_adapter_discovers_models_and_marks_target_form_not_reached(tmp_pa
     monkeypatch.setattr(openai_codex, '_list_models_from_openclaw_cli', lambda: ['openai-codex/gpt-5.3-codex'])
 
     class ProbeResponse:
-        status_code = 404
+        def __init__(self, status_code):
+            self.status_code = status_code
 
         def json(self):
             return {}
 
-    monkeypatch.setattr(openai_codex, 'requests', SimpleNamespace(post=lambda *args, **kwargs: ProbeResponse(), Timeout=TimeoutError))
+    def fake_post(url, json=None, headers=None, timeout=None):
+        if json['model'] == 'openai-codex/gpt-5.4':
+            return ProbeResponse(404)
+        return ProbeResponse(200)
 
-    adapter = OpenAICodexOAuthAdapter(config_path=cfg_path, auth_profiles_path=auth_path)
+    monkeypatch.setattr(openai_codex, 'requests', SimpleNamespace(post=fake_post, Timeout=TimeoutError))
+
+    adapter = OpenAICodexOAuthAdapter(config_path=cfg_path, auth_profiles_path=auth_path, cache_path=tmp_path / 'runtime-cache.json')
     result = adapter.discover()
 
     assert result.status == 'authenticated'
     assert result.available_models == ['openai-codex/gpt-5.3-codex']
     assert result.limits['preferred_model'] == 'openai-codex/gpt-5.3-codex'
+    assert result.limits['verified_models'] == ['openai-codex/gpt-5.3-codex']
     assert result.limits['target_form_reached'] is False
     assert result.limits['target_probe_status'] == 'unverified'
     assert result.limits['chat_endpoint_enabled'] is True
+
+
+def test_codex_adapter_does_not_claim_runtime_when_gateway_is_unreachable(tmp_path: Path, monkeypatch):
+    cfg_path = tmp_path / 'openclaw.json'
+    auth_path = tmp_path / 'auth-profiles.json'
+    _write_json(cfg_path, _config_payload())
+    _write_json(auth_path, _auth_payload())
+
+    monkeypatch.setattr(openai_codex, '_list_models_from_openclaw_cli', lambda: ['openai-codex/gpt-5.3-codex'])
+
+    def fake_post(*args, **kwargs):
+        raise RuntimeError('connection refused')
+
+    monkeypatch.setattr(openai_codex, 'requests', SimpleNamespace(post=fake_post, Timeout=TimeoutError))
+
+    adapter = OpenAICodexOAuthAdapter(config_path=cfg_path, auth_profiles_path=auth_path, cache_path=tmp_path / 'runtime-cache.json')
+    result = adapter.discover()
+
+    assert result.status == 'error'
+    assert result.limits['reason'] == 'runtime_probe_failed'
+    assert result.limits['preferred_model'] == ''
+    assert result.limits['verified_models'] == []
 
 
 def test_codex_adapter_prefers_target_model_when_available(tmp_path: Path, monkeypatch):
@@ -109,7 +138,7 @@ def test_codex_adapter_prefers_target_model_when_available(tmp_path: Path, monke
     _write_json(auth_path, _auth_payload())
     monkeypatch.setattr(openai_codex, '_list_models_from_openclaw_cli', lambda: [])
 
-    adapter = OpenAICodexOAuthAdapter(config_path=cfg_path, auth_profiles_path=auth_path)
+    adapter = OpenAICodexOAuthAdapter(config_path=cfg_path, auth_profiles_path=auth_path, cache_path=tmp_path / 'runtime-cache.json')
     resolved = adapter.resolve_preferred_model('openai/gpt-5.4', [
         'openai-codex/gpt-5.3-codex',
         'openai-codex/gpt-5.4',
@@ -146,7 +175,7 @@ def test_codex_adapter_executes_via_openclaw_gateway_chat_completions(tmp_path: 
 
     monkeypatch.setattr(openai_codex, 'requests', SimpleNamespace(post=fake_post, Timeout=TimeoutError))
 
-    adapter = OpenAICodexOAuthAdapter(config_path=cfg_path, auth_profiles_path=auth_path)
+    adapter = OpenAICodexOAuthAdapter(config_path=cfg_path, auth_profiles_path=auth_path, cache_path=tmp_path / 'runtime-cache.json')
     response = adapter.execute(CompletionRequest(
         model='openai/gpt-5.4',
         messages=[{'role': 'user', 'content': 'Say hi'}],
@@ -160,6 +189,85 @@ def test_codex_adapter_executes_via_openclaw_gateway_chat_completions(tmp_path: 
     assert calls[-1]['headers']['Authorization'] == 'Bearer gateway-token'
     assert calls[-1]['headers']['X-OpenClaw-Token'] == 'gateway-token'
 
+
+
+def test_codex_adapter_execute_respects_request_timeout_budget(tmp_path: Path, monkeypatch):
+    cfg_path = tmp_path / 'openclaw.json'
+    auth_path = tmp_path / 'auth-profiles.json'
+    _write_json(cfg_path, _config_payload())
+    _write_json(auth_path, _auth_payload())
+    monkeypatch.setattr(openai_codex, '_list_models_from_openclaw_cli', lambda: ['openai-codex/gpt-5.4'])
+
+    calls = []
+
+    class FakeResponse:
+        status_code = 200
+
+        def json(self):
+            return {
+                'choices': [{'message': {'content': 'OK'}, 'finish_reason': 'stop'}],
+                'usage': {'prompt_tokens': 1, 'completion_tokens': 1},
+                'model': 'openai-codex/gpt-5.4',
+            }
+
+    def fake_post(url, json=None, headers=None, timeout=None):
+        calls.append(timeout)
+        return FakeResponse()
+
+    monkeypatch.setattr(openai_codex, 'requests', SimpleNamespace(post=fake_post, Timeout=TimeoutError))
+
+    adapter = OpenAICodexOAuthAdapter(config_path=cfg_path, auth_profiles_path=auth_path, cache_path=tmp_path / 'runtime-cache.json')
+    response = adapter.execute(CompletionRequest(
+        model='openai-codex/gpt-5.4',
+        messages=[{'role': 'user', 'content': 'hi'}],
+        max_tokens=8,
+        extra={'timeout_ms': 31000},
+    ))
+
+    assert response.status == 'success'
+    assert calls[-1] == 31.0
+
+
+def test_codex_adapter_retries_once_after_timeout_then_succeeds(tmp_path: Path, monkeypatch):
+    cfg_path = tmp_path / 'openclaw.json'
+    auth_path = tmp_path / 'auth-profiles.json'
+    _write_json(cfg_path, _config_payload())
+    _write_json(auth_path, _auth_payload())
+    monkeypatch.setattr(openai_codex, '_list_models_from_openclaw_cli', lambda: ['openai-codex/gpt-5.4'])
+
+    calls = {'count': 0}
+
+    class FakeTimeout(Exception):
+        pass
+
+    class FakeResponse:
+        status_code = 200
+
+        def json(self):
+            return {
+                'choices': [{'message': {'content': 'RETRY_OK'}, 'finish_reason': 'stop'}],
+                'usage': {'prompt_tokens': 1, 'completion_tokens': 1},
+                'model': 'openai-codex/gpt-5.4',
+            }
+
+    def fake_post(url, json=None, headers=None, timeout=None):
+        calls['count'] += 1
+        if calls['count'] == 1:
+            raise FakeTimeout()
+        return FakeResponse()
+
+    monkeypatch.setattr(openai_codex, 'requests', SimpleNamespace(post=fake_post, Timeout=FakeTimeout))
+
+    adapter = OpenAICodexOAuthAdapter(config_path=cfg_path, auth_profiles_path=auth_path, cache_path=tmp_path / 'runtime-cache.json')
+    response = adapter.execute(CompletionRequest(
+        model='openai-codex/gpt-5.4',
+        messages=[{'role': 'user', 'content': 'hi'}],
+        max_tokens=8,
+    ))
+
+    assert response.status == 'success'
+    assert response.content == 'RETRY_OK'
+    assert calls['count'] == 2
 
 
 def test_codex_adapter_discovers_target_form_via_runtime_probe(tmp_path: Path, monkeypatch):
@@ -182,7 +290,7 @@ def test_codex_adapter_discovers_target_form_via_runtime_probe(tmp_path: Path, m
 
     monkeypatch.setattr(openai_codex, 'requests', SimpleNamespace(post=lambda *args, **kwargs: ProbeResponse(), Timeout=TimeoutError))
 
-    adapter = OpenAICodexOAuthAdapter(config_path=cfg_path, auth_profiles_path=auth_path)
+    adapter = OpenAICodexOAuthAdapter(config_path=cfg_path, auth_profiles_path=auth_path, cache_path=tmp_path / 'runtime-cache.json')
     result = adapter.discover()
 
     assert result.status == 'authenticated'
@@ -190,6 +298,48 @@ def test_codex_adapter_discovers_target_form_via_runtime_probe(tmp_path: Path, m
     assert result.limits['preferred_model'] == 'openai-codex/gpt-5.4'
     assert result.limits['target_form_reached'] is True
     assert result.limits['target_probe_status'] == 'ok'
+
+
+def test_codex_adapter_uses_last_good_cache_when_cli_discovery_is_unavailable(tmp_path: Path, monkeypatch):
+    cfg_path = tmp_path / 'openclaw.json'
+    auth_path = tmp_path / 'auth-profiles.json'
+    cache_path = tmp_path / 'openai_codex_runtime_cache.json'
+    _write_json(cfg_path, _config_payload())
+    _write_json(auth_path, _auth_payload())
+    _write_json(cache_path, {
+        'available_models': ['openai-codex/gpt-5.4'],
+        'preferred_model': 'openai-codex/gpt-5.4',
+        'verified_models': ['openai-codex/gpt-5.4'],
+        'target_form_reached': True,
+        'source': 'runtime_execution',
+    })
+
+    monkeypatch.setattr(openai_codex, '_list_models_from_openclaw_cli', lambda: [])
+
+    class ProbeResponse:
+        status_code = 200
+
+        def json(self):
+            return {
+                'choices': [{'message': {'content': 'OK'}, 'finish_reason': 'stop'}],
+                'usage': {'prompt_tokens': 1, 'completion_tokens': 1},
+                'model': 'openai-codex/gpt-5.4',
+            }
+
+    monkeypatch.setattr(openai_codex, 'requests', SimpleNamespace(post=lambda *args, **kwargs: ProbeResponse(), Timeout=TimeoutError))
+
+    adapter = OpenAICodexOAuthAdapter(
+        config_path=cfg_path,
+        auth_profiles_path=auth_path,
+        cache_path=cache_path,
+    )
+    result = adapter.discover()
+
+    assert result.status == 'authenticated'
+    assert result.limits['preferred_model'] == 'openai-codex/gpt-5.4'
+    assert result.limits['verified_models'] == ['openai-codex/gpt-5.4']
+    assert result.available_models == ['openai-codex/gpt-5.4']
+    assert result.limits['model_source'] == 'last_good_cache+runtime_probe'
 
 
 def test_discover_provider_capabilities_accepts_oauth_adapter_and_marks_target_form(tmp_path: Path, monkeypatch):
@@ -226,7 +376,12 @@ def test_discover_provider_capabilities_accepts_oauth_adapter_and_marks_target_f
             return DiscoveryResult(
                 status='authenticated',
                 available_models=['openai-codex/gpt-5.3-codex'],
-                limits={'target_form_reached': False},
+                limits={
+                    'target_form_reached': False,
+                    'preferred_model': 'openai-codex/gpt-5.3-codex',
+                    'verified_models': ['openai-codex/gpt-5.3-codex'],
+                    'target_model': 'openai-codex/gpt-5.4',
+                },
             )
 
     monkeypatch.setattr('aichaind.providers.registry.get_adapter', lambda provider: FakeCodexAdapter() if provider == 'openai-codex' else None)
@@ -237,6 +392,9 @@ def test_discover_provider_capabilities_accepts_oauth_adapter_and_marks_target_f
     assert capabilities['openai-codex'] == {'openai-codex/gpt-5.3-codex'}
     assert decision.runtime_confirmed is True
     assert decision.target_form_reached is False
+    assert decision.preferred_model == 'openai-codex/gpt-5.3-codex'
+    assert decision.verified_models == ['openai-codex/gpt-5.3-codex']
+    assert decision.target_model == 'openai-codex/gpt-5.4'
     assert decision.status == 'target_form_not_reached'
 
 
@@ -257,6 +415,9 @@ def test_http_server_routes_openai_gpt5_family_to_verified_codex_oauth(monkeypat
             reason='discover:authenticated:models=2',
             runtime_confirmed=True,
             target_form_reached=True,
+            preferred_model='openai-codex/gpt-5.4' if provider == 'openai-codex' else '',
+            verified_models=['openai-codex/gpt-5.4'] if provider == 'openai-codex' else [],
+            target_model='openai-codex/gpt-5.4' if provider == 'openai-codex' else '',
         )
     )
 
@@ -305,6 +466,9 @@ def test_http_server_codex_oauth_keeps_fallback_when_target_form_not_reached(mon
             reason='discover:authenticated:models=1',
             runtime_confirmed=True,
             target_form_reached=False if provider == 'openai-codex' else True,
+            preferred_model='openai-codex/gpt-5.3-codex' if provider == 'openai-codex' else '',
+            verified_models=['openai-codex/gpt-5.3-codex'] if provider == 'openai-codex' else [],
+            target_model='openai-codex/gpt-5.4' if provider == 'openai-codex' else '',
         )
     )
 
@@ -313,7 +477,12 @@ def test_http_server_codex_oauth_keeps_fallback_when_target_form_not_reached(mon
             return DiscoveryResult(
                 status='authenticated',
                 available_models=['openai-codex/gpt-5.3-codex'],
-                limits={'target_form_reached': False},
+                limits={
+                    'target_form_reached': False,
+                    'preferred_model': 'openai-codex/gpt-5.3-codex',
+                    'verified_models': ['openai-codex/gpt-5.3-codex'],
+                    'target_model': 'openai-codex/gpt-5.4',
+                },
             )
 
         def resolve_preferred_model(self, requested='', available_models=None):

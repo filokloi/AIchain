@@ -112,6 +112,9 @@ class _AccessSnapshot:
     target_form_reached: bool = True
     quota_visibility: str = "provider_console"
     billing_basis: str = ""
+    preferred_model: str = ""
+    verified_models: list[str] = None
+    target_model: str = ""
 
 
 class CostOptimizer:
@@ -220,9 +223,11 @@ class CostOptimizer:
         current_model: str = "",
         current_provider: str = "",
         task_hint: str = "",
+        routing_preference: str = "balanced",
     ) -> CostRoute:
         if not available_models:
             available_models = {}
+        routing_preference = self._normalize_user_routing_preference(routing_preference)
         exclude_providers = {self._normalize_provider(p) for p in (exclude_providers or set())}
         exclude_models = set(exclude_models or set())
         providers_with_money = [
@@ -271,6 +276,19 @@ class CostOptimizer:
                     task_hint=task_hint,
                 )
 
+        if routing_preference == "prefer_local":
+            local_route = self._select_user_preferred_local_route(
+                model_preference=model_preference,
+                available_models=available_models,
+                estimated_tokens=estimated_tokens,
+                balance_report=balance_report,
+                exclude_providers=exclude_providers,
+                exclude_models=exclude_models,
+                task_hint=task_hint,
+            )
+            if local_route:
+                return local_route
+
         prepaid_route = self._select_prepaid_premium_route(
             model_preference=model_preference,
             available_models=available_models,
@@ -300,7 +318,7 @@ class CostOptimizer:
                 continue
             balance = balance_report.balances.get(provider)
             if balance and balance.is_subscription and self._is_verified_balance(balance):
-                sub_model = self._find_subscription_model(provider, model_preference, available_models)
+                sub_model = self._find_subscription_model(provider, model_preference, available_models, self._resolve_access(provider))
                 if sub_model and sub_model not in exclude_models and self._model_supported(provider, sub_model) and self._provider_task_allowed(provider, model_preference, task_hint):
                     return self._build_route(
                         model_id=sub_model,
@@ -312,7 +330,7 @@ class CostOptimizer:
                         task_hint=task_hint,
                     )
 
-        if model_preference == "free":
+        if model_preference == "free" and routing_preference != "max_intelligence":
             free_model = available_models.get("free", "")
             if (
                 free_model
@@ -342,7 +360,7 @@ class CostOptimizer:
                 continue
             access = self._resolve_access(provider)
             if provider in _LOCAL_PROVIDERS:
-                if not self._local_candidate_is_viable_for_task(model_id, model_preference, task_hint):
+                if not self._local_candidate_is_viable_for_task(model_id, model_preference, task_hint, estimated_tokens):
                     continue
             elif provider not in providers_with_money:
                 continue
@@ -398,7 +416,7 @@ class CostOptimizer:
         for provider in providers_with_money:
             if provider == "openrouter":
                 continue
-            fallback_model = self._find_verified_direct_fallback_model(provider, model_preference, available_models)
+            fallback_model = self._find_verified_direct_fallback_model(provider, model_preference, available_models, access)
             if not fallback_model or fallback_model in exclude_models:
                 continue
             access = self._resolve_access(provider)
@@ -454,11 +472,19 @@ class CostOptimizer:
             reason="default_routing",
             task_hint=task_hint,
         )
-    def _find_subscription_model(self, provider: str, preference: str, available: dict) -> str:
+    def _find_subscription_model(self, provider: str, preference: str, available: dict, access: _AccessSnapshot | None = None) -> str:
+        access = access or self._resolve_access(provider)
+        preferred = str(access.preferred_model or "").strip()
+        if preferred and self._model_supported(provider, preferred):
+            return preferred
         preferred = _VERIFIED_DIRECT_MODELS.get(provider, {}).get(preference, "")
         return preferred or available.get(preference, "")
 
-    def _find_verified_direct_fallback_model(self, provider: str, preference: str, available: dict) -> str:
+    def _find_verified_direct_fallback_model(self, provider: str, preference: str, available: dict, access: _AccessSnapshot | None = None) -> str:
+        access = access or self._resolve_access(provider)
+        preferred = str(access.preferred_model or "").strip()
+        if preferred and self._model_supported(provider, preferred):
+            return preferred
         preferred = _VERIFIED_DIRECT_MODELS.get(provider, {}).get(preference, "")
         if preferred and self._model_supported(provider, preferred):
             return preferred
@@ -512,7 +538,32 @@ class CostOptimizer:
     def _model_supported(self, provider: str, model_id: str) -> bool:
         normalized_provider = self._normalize_provider(provider)
         if normalized_provider not in self._provider_capabilities:
-            return True
+            if normalized_provider in _LOCAL_PROVIDERS:
+                return model_id.lower().startswith(f"{normalized_provider}/")
+            if not self._provider_access_layer:
+                return True
+            access = self._resolve_access(normalized_provider)
+            trusted_models = set()
+            if access.preferred_model:
+                trusted_models.add(str(access.preferred_model).strip())
+            if access.target_model:
+                trusted_models.add(str(access.target_model).strip())
+            trusted_models.update(
+                str(item).strip()
+                for item in (access.verified_models or [])
+                if str(item).strip()
+            )
+            trusted_models.update(
+                str(item).strip()
+                for item in (_VERIFIED_DIRECT_MODELS.get(normalized_provider, {}) or {}).values()
+                if str(item).strip()
+            )
+            aliases = self._normalize_model_aliases(provider, model_id)
+            return any(
+                alias in self._normalize_model_aliases(normalized_provider, trusted_model)
+                for trusted_model in trusted_models
+                for alias in aliases
+            )
         capabilities = self._provider_capabilities.get(normalized_provider) or set()
         if not capabilities:
             return normalized_provider in _LOCAL_PROVIDERS and model_id.lower().startswith(f"{normalized_provider}/")
@@ -531,6 +582,9 @@ class CostOptimizer:
                 target_form_reached=bool(getattr(decision, "target_form_reached", False)),
                 quota_visibility=getattr(decision, "quota_visibility", ""),
                 billing_basis=getattr(decision, "billing_basis", ""),
+                preferred_model=str(getattr(decision, "preferred_model", "") or ""),
+                verified_models=list(getattr(decision, "verified_models", []) or []),
+                target_model=str(getattr(decision, "target_model", "") or ""),
             )
         if normalized_provider in _LOCAL_PROVIDERS:
             return _AccessSnapshot(provider=normalized_provider, selected_method="local", quota_visibility="local_only", billing_basis="local_inference_hardware")
@@ -868,11 +922,19 @@ class CostOptimizer:
         suitability_penalty = 10.0 if suitability_score is not None and suitability_score < 40.0 else 0.0
         return max(12.0, min(100.0, (fallback_access * 0.20) + (success_rate * 0.25) + (effective_success * 0.55) + runtime_bonus - capacity_penalty - suitability_penalty))
 
-    def _local_candidate_is_viable_for_task(self, model_id: str, model_preference: str, task_hint: str = "") -> bool:
+    def _local_candidate_is_viable_for_task(
+        self,
+        model_id: str,
+        model_preference: str,
+        task_hint: str = "",
+        estimated_tokens: int | None = None,
+    ) -> bool:
         profile = self._local_profile(model_id)
         if not profile:
             return False
         if not profile.get('runtime_confirmed'):
+            return False
+        if estimated_tokens is not None and estimated_tokens > 3000:
             return False
         if model_preference == "local":
             return True
@@ -885,6 +947,43 @@ class CostOptimizer:
         if task_success_score is not None and task_success_score < min_success:
             return False
         return True
+
+    def _normalize_user_routing_preference(self, value: str) -> str:
+        normalized = str(value or "balanced").strip().lower()
+        if normalized in {"balanced", "max_intelligence", "min_cost", "prefer_local"}:
+            return normalized
+        return "balanced"
+
+    def _select_user_preferred_local_route(
+        self,
+        model_preference: str,
+        available_models: dict,
+        estimated_tokens: int,
+        balance_report,
+        exclude_providers: set[str],
+        exclude_models: set[str],
+        task_hint: str = "",
+    ) -> CostRoute | None:
+        model_id = available_models.get("local", "")
+        if not model_id or model_id in exclude_models:
+            return None
+        provider = self._normalize_provider(self._get_provider(model_id))
+        if provider in exclude_providers:
+            return None
+        access = self._resolve_access(provider)
+        if access.selected_method not in _ZERO_MARGINAL_METHODS or not access.runtime_confirmed:
+            return None
+        if not self._local_candidate_is_viable_for_task(model_id, model_preference, task_hint, estimated_tokens):
+            return None
+        return self._build_route(
+            model_id=model_id,
+            model_preference="local",
+            available_models=available_models,
+            balance_report=balance_report,
+            estimated_tokens=estimated_tokens,
+            reason="user_prefer_local",
+            task_hint=task_hint,
+        )
 
     def _local_effective_score(
         self,
@@ -960,10 +1059,10 @@ class CostOptimizer:
                 if not allow_local_runtime:
                     continue
                 model_id = available_models.get("local", "")
-                if model_id and not self._local_candidate_is_viable_for_task(model_id, model_preference, task_hint):
+                if model_id and not self._local_candidate_is_viable_for_task(model_id, model_preference, task_hint, estimated_tokens):
                     continue
             else:
-                model_id = self._find_verified_direct_fallback_model(provider, model_preference, available_models)
+                model_id = self._find_verified_direct_fallback_model(provider, model_preference, available_models, access)
             if not model_id or model_id in exclude_models or not self._model_supported(provider, model_id):
                 continue
             pricing = self._pricing_for_candidate(model_id, provider)
@@ -1031,7 +1130,7 @@ class CostOptimizer:
                 continue
             if not self._provider_task_allowed(provider, model_preference, task_hint):
                 continue
-            model_id = self._find_verified_direct_fallback_model(provider, model_preference, available_models)
+            model_id = self._find_verified_direct_fallback_model(provider, model_preference, available_models, access)
             if not model_id or model_id in exclude_models:
                 continue
             if not self._model_supported(provider, model_id):
@@ -1077,7 +1176,7 @@ class CostOptimizer:
         access = access or self._resolve_access(normalized)
         if access.selected_method not in {"oauth", "workspace_connector", "enterprise_connector"}:
             return False
-        if not access.runtime_confirmed or not access.target_form_reached:
+        if not access.runtime_confirmed:
             return False
         configured = self._routing_preferences.get("prepaid_premium_providers", set())
         if normalized in configured:

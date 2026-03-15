@@ -129,3 +129,20 @@ def test_cmd_chat_forwards_manual_control(monkeypatch, capsys):
     assert captured['endpoint'] == '/v1/chat/completions'
     assert captured['payload']['_aichain_control']['mode'] == 'manual'
     assert captured['payload']['_aichain_control']['model'] == 'openai-codex/gpt-5.4'
+
+def test_build_chat_payload_defaults_to_openclaw_session_id():
+    args = SimpleNamespace(
+        message='hello',
+        max_tokens=32,
+        temperature=0.2,
+        session_id='',
+        manual=False,
+        auto=False,
+        manual_model='',
+        manual_provider='',
+        persist=False,
+    )
+
+    payload = skill.build_chat_payload(args)
+
+    assert payload['session_id'] == skill.DEFAULT_OPENCLAW_SESSION_ID

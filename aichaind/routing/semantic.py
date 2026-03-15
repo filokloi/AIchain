@@ -70,6 +70,8 @@ INTENT_CLUSTERS = [
             "unit test", "integration test", "API endpoint",
             "database schema", "migration", "deploy", "dockerfile",
             "CI/CD", "github actions", "webpack", "vite",
+            "python", "javascript", "typescript", "program",
+            "build a game", "terminal game", "tetris",
         ],
         model_preference="heavy",
         confidence=0.80,

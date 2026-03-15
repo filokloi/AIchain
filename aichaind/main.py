@@ -10,6 +10,7 @@ import os
 import sys
 import logging
 import signal
+import threading
 from pathlib import Path
 
 from aichaind.core.state_machine import load_config, get_paths, Controller
@@ -43,6 +44,11 @@ _LOCAL_BASE_ENV = {
     "ollama": "OLLAMA_BASE_URL",
     "lmstudio": "LMSTUDIO_BASE_URL",
     "llamacpp": "LLAMACPP_BASE_URL",
+}
+_DEFAULT_RUNTIME_ROLES = {
+    "fast_brain": "minimax/minimax-01",
+    "heavy_brain": "openrouter/google/gemini-2.5-pro",
+    "visual_brain": "openai/gpt-4o:extended",
 }
 
 
@@ -86,12 +92,8 @@ def release_single_instance(pid_file: Path) -> None:
 
 def resolve_roles(cfg: dict, log: logging.Logger) -> tuple[dict, dict]:
     """Fetch routing table and assign Fast/Heavy/Visual brain roles."""
-    roles = {
-        "fast_brain": "openrouter/google/gemini-2.5-flash:free",
-        "heavy_brain": "openrouter/google/gemini-2.5-pro",
-        "visual_brain": "openrouter/openai/gpt-4o",
-        "local_brain": "",
-    }
+    roles = dict(_DEFAULT_RUNTIME_ROLES)
+    roles["local_brain"] = ""
 
     url = cfg.get("routing_url", "")
     if not url:
@@ -141,6 +143,46 @@ def resolve_roles(cfg: dict, log: logging.Logger) -> tuple[dict, dict]:
             break
 
     return roles, table
+
+
+def _role_provider_runtime_allowed(model_id: str, provider_access_layer) -> bool:
+    normalized = str(model_id or "").strip()
+    if not normalized or "/" not in normalized:
+        return False
+    provider = normalized.split("/", 1)[0].lower()
+    if provider in {"openrouter", "openai", "deepseek", "groq", "mistral", "zhipu", "lmstudio", "ollama", "local", "vllm", "llamacpp"}:
+        if not provider_access_layer:
+            return True
+        decision = provider_access_layer.resolve(provider)
+        if decision.selected_method == "disabled":
+            return False
+        if decision.status == "target_form_not_reached" and not decision.runtime_confirmed:
+            return False
+        return True
+    if not provider_access_layer:
+        return False
+    decision = provider_access_layer.resolve(provider)
+    if decision.selected_method == "disabled":
+        return False
+    if decision.status == "target_form_not_reached" and not decision.runtime_confirmed:
+        return False
+    return True
+
+
+def _sanitize_roles_for_runtime(roles: dict, provider_access_layer, log: logging.Logger) -> dict:
+    sanitized = dict(roles or {})
+    for role_name in ("fast_brain", "heavy_brain", "visual_brain"):
+        role_model = str(sanitized.get(role_name) or "").strip()
+        if role_model and _role_provider_runtime_allowed(role_model, provider_access_layer):
+            continue
+        fallback_model = _DEFAULT_RUNTIME_ROLES.get(role_name, "")
+        if fallback_model:
+            log.warning(
+                f"Role {role_name} model {role_model or 'N/A'} is not runtime-safe; "
+                f"falling back to {fallback_model}"
+            )
+            sanitized[role_name] = fallback_model
+    return sanitized
 
 
 def resolve_local_role(cfg: dict, log: logging.Logger) -> str:
@@ -209,6 +251,9 @@ def discover_provider_capabilities(provider_access_layer, discovery_report, log:
                     confirmed,
                     f"discover:{result.status}:models={len(models)}",
                     target_form_reached=result.limits.get("target_form_reached"),
+                    preferred_model=result.limits.get("preferred_model", ""),
+                    verified_models=result.limits.get("verified_models") or [],
+                    target_model=result.limits.get("target_model", ""),
                 )
             log.info(f"Capability discovery: {provider} status={result.status} models={len(models)}")
         except Exception as exc:
@@ -217,6 +262,52 @@ def discover_provider_capabilities(provider_access_layer, discovery_report, log:
             if provider_access_layer:
                 provider_access_layer.mark_runtime_result(provider, False, f"discover_error:{type(exc).__name__}")
     return capabilities
+
+
+def _bootstrap_runtime_state(
+    cfg: dict,
+    log: logging.Logger,
+    roles: dict,
+    discovery_report,
+    provider_access_layer,
+    local_profile_store: LocalProfileStore,
+    routing_cfg: dict,
+    cascade_router: CascadeRouter,
+    cost_optimizer: CostOptimizer,
+) -> None:
+    try:
+        roles["local_brain"] = resolve_local_role(cfg, log)
+        log.info(f"Fast Brain:  {roles['fast_brain']}")
+        log.info(f"Heavy Brain: {roles['heavy_brain']}")
+        log.info(f"Visual:      {roles['visual_brain']}")
+        log.info(f"Local:       {roles.get('local_brain') or 'N/A'}")
+
+        provider_capabilities = discover_provider_capabilities(provider_access_layer, discovery_report, log)
+        cost_optimizer.configure_provider_capabilities(provider_capabilities)
+        cost_optimizer.configure_local_profiles(local_profile_store.snapshot())
+        local_profile_summary = local_profile_store.summary(roles.get("local_brain", ""))
+        log.info(f"Local profiles loaded: {local_profile_summary['total_profiles']}")
+        if roles.get("local_brain") and not local_profile_summary.get("active_profile"):
+            log.warning(
+                "Local runtime is active but no profile exists yet; "
+                "run tools/profile_local_runtime.py to calibrate local routing"
+            )
+
+        if cascade_router._layer4_enabled and roles.get("fast_brain"):
+            from aichaind.providers.registry import get_adapter
+            try:
+                l4_adapter = get_adapter(roles["fast_brain"].split("/", 1)[0])
+                if not l4_adapter:
+                    l4_adapter = get_adapter(roles["fast_brain"])
+                cascade_router.configure_cloud(l4_adapter, roles["fast_brain"])
+                log.info(f"Layer 4 cloud classifier: ACTIVE (model={roles['fast_brain']})")
+            except Exception as exc:
+                log.warning(f"Layer 4 disabled: {exc}")
+                cascade_router._layer4_enabled = False
+
+        log.info("Runtime bootstrap: COMPLETE")
+    except Exception:
+        log.exception("Runtime bootstrap failed")
 
 
 def main():
@@ -273,9 +364,9 @@ def main():
         log.info(f"  {cred.provider}: priority={cred.priority}{sub_tag}")
 
     roles, routing_table = resolve_roles(cfg, log)
-    roles["local_brain"] = resolve_local_role(cfg, log)
 
     provider_access_layer = build_provider_access_layer(cfg, discovery_report, log)
+    roles = _sanitize_roles_for_runtime(roles, provider_access_layer, log)
     log.info(f"Fast Brain:  {roles['fast_brain']}")
     log.info(f"Heavy Brain: {roles['heavy_brain']}")
     log.info(f"Visual:      {roles['visual_brain']}")
@@ -288,29 +379,11 @@ def main():
 
     balance_checker = BalanceChecker()
     cost_optimizer = CostOptimizer(routing_table)
-    provider_capabilities = discover_provider_capabilities(provider_access_layer, discovery_report, log)
-    cost_optimizer.configure_provider_capabilities(provider_capabilities)
     cost_optimizer.configure_provider_access_layer(provider_access_layer)
     cost_optimizer.configure_local_profiles(local_profile_store.snapshot())
     cost_optimizer.configure_routing_preferences(routing_cfg)
-    local_profile_summary = local_profile_store.summary(roles.get("local_brain", ""))
-    log.info(f"Local profiles loaded: {local_profile_summary['total_profiles']}")
-    if roles.get("local_brain") and not local_profile_summary.get("active_profile"):
-        log.warning("Local runtime is active but no profile exists yet; run tools/profile_local_runtime.py to calibrate local routing")
     cascade_router.configure_cost_optimizer(cost_optimizer)
     log.info("Cost optimizer: ACTIVE")
-
-    if cascade_router._layer4_enabled and roles.get("fast_brain"):
-        from aichaind.providers.registry import get_adapter
-        try:
-            l4_adapter = get_adapter(roles["fast_brain"].split("/", 1)[0])
-            if not l4_adapter:
-                l4_adapter = get_adapter(roles["fast_brain"])
-            cascade_router.configure_cloud(l4_adapter, roles["fast_brain"])
-            log.info(f"Layer 4 cloud classifier: ACTIVE (model={roles['fast_brain']})")
-        except Exception as exc:
-            log.warning(f"Layer 4 disabled: {exc}")
-            cascade_router._layer4_enabled = False
 
     from aichaind.telemetry.route_eval import RouteEvalCollector
     route_eval_collector = RouteEvalCollector(paths["data_dir"] / "route_eval.jsonl")
@@ -351,6 +424,24 @@ def main():
         input_redaction_enabled=cfg.get("security", {}).get("redact_inputs_before_cloud", False),
         routing_preferences=cost_optimizer._routing_preferences,
     )
+
+    bootstrap_thread = threading.Thread(
+        target=_bootstrap_runtime_state,
+        args=(
+            cfg,
+            log,
+            roles,
+            discovery_report,
+            provider_access_layer,
+            local_profile_store,
+            routing_cfg,
+            cascade_router,
+            cost_optimizer,
+        ),
+        name="aichaind-bootstrap",
+        daemon=True,
+    )
+    bootstrap_thread.start()
 
     def shutdown(signum, frame):
         log.info("Shutdown signal received...")

@@ -3,12 +3,15 @@
 
 import tempfile
 from pathlib import Path
+from types import SimpleNamespace
 
 from aichaind.core.policy import PolicyEngine, PolicyResult
 from aichaind.core.session import CanonicalSession, SessionStore
+from aichaind.providers.access import ProviderAccessDecision
 from aichaind.providers.base import CompletionResponse
 from aichaind.core.summarizer import ContextSummarizer
 from aichaind.routing.rules import RouteDecision
+from aichaind.routing.cost_optimizer import CostRoute
 from aichaind.telemetry.route_eval import RouteEvalCollector
 from aichaind.providers.local_profile import LocalModelProfile, LocalProfileStore
 import aichaind.transport.http_server as http_server
@@ -16,6 +19,14 @@ import aichaind.transport.http_server as http_server
 
 class DummyController:
     state = {"system": "NORMAL", "circuit": "CLOSED"}
+
+
+class _DummyHandler:
+    def __init__(self, client_ip: str, authorization: str = ""):
+        self.client_address = (client_ip, 0)
+        self.headers = {}
+        if authorization:
+            self.headers["Authorization"] = authorization
 
 
 def test_merge_policy_results_combines_cloud_block_local_preference_and_cost_limit():
@@ -81,6 +92,218 @@ def test_final_policy_blocks_when_estimated_cost_exceeds_budget_warning_limit():
 
     assert effective.max_cost_per_turn == 0.5
     assert reason == "per_turn_cost_exceeds_policy"
+
+
+def test_provider_timeout_ms_scales_up_for_openai_codex_coding_tasks():
+    payload = {
+        "messages": [{"role": "user", "content": "Write only Python code for a function add(a, b) with a unit test."}],
+        "max_tokens": 120,
+    }
+
+    timeout_ms = http_server._provider_timeout_ms("openai-codex", payload)
+
+    assert timeout_ms >= 90000
+
+
+def test_provider_timeout_ms_stays_lower_for_openai_codex_simple_chat():
+    payload = {
+        "messages": [{"role": "user", "content": "Say exactly CLOUD_OK and nothing else."}],
+        "max_tokens": 20,
+    }
+
+    timeout_ms = http_server._provider_timeout_ms("openai-codex", payload)
+
+    assert 45000 <= timeout_ms <= 75000
+
+
+def test_provider_timeout_ms_scales_up_for_openai_codex_security_sensitive_tasks():
+    payload = {
+        "messages": [{"role": "user", "content": "Use password MyPassword123! to log into example.com and then reply exactly LOGIN_PATH_OK."}],
+        "max_tokens": 24,
+    }
+
+    timeout_ms = http_server._provider_timeout_ms("openai-codex", payload)
+
+    assert timeout_ms >= 80000
+
+
+class _ResolvedAccessLayer:
+    def resolve(self, provider_name):
+        class Decision:
+            selected_method = "api_key"
+            status = "runtime_confirmed"
+        return Decision()
+
+
+def test_refresh_access_decision_for_provider_uses_final_provider():
+    http_server._provider_access_layer = _ResolvedAccessLayer()
+    original = type("Decision", (), {"selected_method": "oauth", "status": "runtime_confirmed"})()
+
+    refreshed = http_server._refresh_access_decision_for_provider("deepseek", original)
+
+    assert refreshed.selected_method == "api_key"
+
+
+def test_build_success_response_payload_normalizes_openclaw_compat_shape():
+    session = CanonicalSession(session_id="compat-session")
+    response = CompletionResponse(
+        model="deepseek/deepseek-chat",
+        content="GUI_CHAT_OK",
+        input_tokens=11,
+        output_tokens=4,
+        finish_reason="stop",
+        raw_response={"id": "provider-native-id", "choices": [{"message": {"content": ""}}]},
+    )
+    decision = RouteDecision(
+        target_model="deepseek/deepseek-chat",
+        target_provider="deepseek",
+        confidence=0.91,
+        decision_layers=["L1:heuristic", "L2:semantic:quick_general"],
+        latency_ms=12.0,
+        reason="heuristic_quick",
+    )
+
+    payload = http_server._build_success_response_payload(
+        requested_model="aichain/dual-brain",
+        target_model="deepseek/deepseek-chat",
+        session=session,
+        response=response,
+        decision=decision,
+        target_provider="deepseek",
+        exec_latency=33.4,
+        contains_pii=False,
+        pii_redacted=False,
+        balance_report=None,
+        failover_used=False,
+        access_failover_used=False,
+        access_decision=type("Decision", (), {"selected_method": "api_key", "status": "runtime_confirmed"})(),
+        local_reroute_used=False,
+        codex_bridge_used=False,
+        compression_meta={"compressed": False},
+        routing_control_meta={"routing_mode": "auto"},
+    )
+
+    assert payload["id"] == "provider-native-id"
+    assert payload["object"] == "chat.completion"
+    assert payload["model"] == "aichain/dual-brain"
+    assert payload["choices"][0]["message"]["role"] == "assistant"
+    assert payload["choices"][0]["message"]["content"] == "GUI_CHAT_OK"
+    assert payload["_aichaind"]["routed_model"] == "deepseek/deepseek-chat"
+    assert payload["_aichaind"]["provider_model"] == "deepseek/deepseek-chat"
+
+
+def test_build_success_response_payload_can_omit_aichain_metadata_for_openclaw_compat():
+    session = CanonicalSession(session_id="compat-minimal")
+    response = CompletionResponse(
+        model="deepseek/deepseek-chat",
+        content="GUI_CHAT_OK",
+        input_tokens=11,
+        output_tokens=4,
+        finish_reason="stop",
+    )
+    decision = RouteDecision(
+        target_model="deepseek/deepseek-chat",
+        target_provider="deepseek",
+        confidence=0.91,
+        decision_layers=["L1:coding_intent"],
+        latency_ms=12.0,
+        reason="heuristic_code_generation",
+    )
+
+    payload = http_server._build_success_response_payload(
+        requested_model="aichain/dual-brain",
+        target_model="deepseek/deepseek-chat",
+        session=session,
+        response=response,
+        decision=decision,
+        target_provider="deepseek",
+        exec_latency=33.4,
+        contains_pii=False,
+        pii_redacted=False,
+        balance_report=None,
+        failover_used=False,
+        access_failover_used=False,
+        access_decision=None,
+        local_reroute_used=False,
+        codex_bridge_used=False,
+        compression_meta={"compressed": False},
+        routing_control_meta={"routing_mode": "auto"},
+        compat_openclaw_bridge=True,
+    )
+
+    assert payload["model"] == "aichain/dual-brain"
+    assert payload["choices"][0]["message"]["content"] == "GUI_CHAT_OK"
+    assert "_aichaind" not in payload
+
+
+def test_build_openai_stream_frames_emits_assistant_delta_content_and_done():
+    payload = {
+        "id": "chatcmpl_stream_test",
+        "created": 123,
+        "model": "aichain/dual-brain",
+        "choices": [{
+            "index": 0,
+            "message": {
+                "role": "assistant",
+                "content": "STREAM_OK",
+            },
+            "finish_reason": "stop",
+        }],
+    }
+
+    frames = http_server._build_openai_stream_frames(payload)
+
+    assert frames[0].startswith("data: ")
+    assert '"delta": {"role": "assistant"}' in frames[0]
+    assert any('"content": "STREAM_OK"' in frame for frame in frames)
+    assert '"finish_reason": "stop"' in frames[-2]
+    assert frames[-1] == "data: [DONE]\n\n"
+
+
+def test_maybe_route_openai_codex_oauth_uses_access_metadata_without_full_discovery(monkeypatch):
+    class _AccessLayer:
+        def resolve(self, provider_name):
+            if provider_name != "openai-codex":
+                raise AssertionError("unexpected provider lookup")
+            return SimpleNamespace(
+                selected_method="oauth",
+                runtime_confirmed=True,
+                verified_models=["openai-codex/gpt-5.4"],
+                preferred_model="openai-codex/gpt-5.4",
+                target_model="openai-codex/gpt-5.4",
+            )
+
+    class _CodexAdapter:
+        def discover(self):
+            raise AssertionError("full discover should not be called")
+
+        def resolve_preferred_model(self, requested_model="", available_models=None):
+            assert available_models == ["openai-codex/gpt-5.4"]
+            return "openai-codex/gpt-5.4"
+
+    http_server._provider_access_layer = _AccessLayer()
+    monkeypatch.setattr(http_server, "get_adapter", lambda provider_name: _CodexAdapter() if provider_name == "openai-codex" else None)
+
+    decision = RouteDecision(
+        target_model="openai/gpt-5.4",
+        target_provider="openai",
+        confidence=0.91,
+        decision_layers=["L1:semantic:coding"],
+        latency_ms=10.0,
+        reason="coding_intent",
+    )
+
+    updated, routed_model, routed_provider, bridged = http_server._maybe_route_openai_codex_oauth(
+        decision,
+        "openai/gpt-5.4",
+        "openai",
+    )
+
+    assert bridged is True
+    assert routed_model == "openai-codex/gpt-5.4"
+    assert routed_provider == "openai-codex"
+    assert updated.target_model == "openai-codex/gpt-5.4"
+    assert updated.target_provider == "openai-codex"
 
 
 def test_pii_metadata_can_distinguish_detected_from_redacted():
@@ -370,6 +593,122 @@ def test_build_request_includes_local_profile_timeout_override(tmp_path):
     assert request.extra["timeout_ms"] == 87000
 
 
+def test_build_request_defaults_to_concise_budget_for_simple_chat_when_max_tokens_missing():
+    adapter = SimpleNamespace(name="deepseek", format_model_id=lambda model_id: model_id)
+
+    request = http_server._build_request(
+        payload={"temperature": 0.1, "stream": False},
+        messages=[{"role": "user", "content": "What is DNS?"}],
+        target_model="deepseek/deepseek-chat",
+        adapter=adapter,
+    )
+
+    assert request.max_tokens == 64
+
+
+def test_build_request_defaults_to_wider_budget_for_coding_when_max_tokens_missing():
+    adapter = SimpleNamespace(name="openai-codex", format_model_id=lambda model_id: model_id)
+
+    request = http_server._build_request(
+        payload={"stream": False},
+        messages=[{"role": "user", "content": "Write Python code for a small snake game."}],
+        target_model="openai-codex/gpt-5.4",
+        adapter=adapter,
+    )
+
+    assert request.max_tokens == 900
+
+
+def test_build_request_respects_explicit_max_tokens():
+    adapter = SimpleNamespace(name="deepseek", format_model_id=lambda model_id: model_id)
+
+    request = http_server._build_request(
+        payload={"max_tokens": 640, "stream": False},
+        messages=[{"role": "user", "content": "What is DNS?"}],
+        target_model="deepseek/deepseek-chat",
+        adapter=adapter,
+    )
+
+    assert request.max_tokens == 640
+
+
+def test_ensure_provider_access_fails_over_when_local_runtime_is_unhealthy(monkeypatch):
+    class _AccessLayer:
+        def __init__(self):
+            self.decisions = {
+                "lmstudio": ProviderAccessDecision(
+                    provider="lmstudio",
+                    selected_method="local",
+                    status="runtime_confirmed",
+                    reason="discover:authenticated:models=1",
+                    runtime_confirmed=True,
+                    target_form_reached=True,
+                ),
+                "deepseek": ProviderAccessDecision(
+                    provider="deepseek",
+                    selected_method="api_key",
+                    status="runtime_confirmed",
+                    reason="discover:authenticated:models=2",
+                    runtime_confirmed=True,
+                    target_form_reached=True,
+                ),
+            }
+
+        def resolve(self, provider_name):
+            return self.decisions[provider_name]
+
+        def mark_runtime_result(self, provider, confirmed, reason="", target_form_reached=None, **kwargs):
+            decision = self.decisions[provider]
+            decision.runtime_confirmed = bool(confirmed)
+            decision.target_form_reached = bool(confirmed if target_form_reached is None else target_form_reached)
+            decision.status = "runtime_confirmed" if confirmed else "target_form_not_reached"
+            if reason:
+                decision.reason = reason
+
+    http_server._provider_access_layer = _AccessLayer()
+    http_server._LOCAL_RUNTIME_HEALTH_CACHE.clear()
+    http_server._cascade_router = SimpleNamespace(
+        _cost_optimizer=SimpleNamespace(
+            optimize=lambda **kwargs: CostRoute(
+                model="deepseek/deepseek-chat",
+                provider="deepseek",
+                estimated_cost_usd=0.001,
+                reason="verified_direct_fallback:deepseek",
+                tier="free",
+            )
+        )
+    )
+    monkeypatch.setattr(http_server, "_local_runtime_ready", lambda provider_name, adapter: (False, "runtime_health_check_failed"))
+
+    decision = RouteDecision(
+        target_model="lmstudio/qwen/qwen3-4b-thinking-2507",
+        target_provider="lmstudio",
+        confidence=0.91,
+        decision_layers=["L2:semantic:code_generation"],
+        reason="semantic_code_generation",
+    )
+    balance_report = SimpleNamespace(
+        total_available_usd=5.0,
+        providers_with_credits=["deepseek"],
+        balances={"deepseek": SimpleNamespace(has_credits=True)},
+    )
+
+    decision, target_model, target_provider, access_decision, failover_used, block_reason = http_server._ensure_provider_access(
+        decision=decision,
+        payload={"messages": [{"role": "user", "content": "Write code"}]},
+        target_model="lmstudio/qwen/qwen3-4b-thinking-2507",
+        target_provider="lmstudio",
+        balance_report=balance_report,
+        allow_failover=True,
+    )
+
+    assert failover_used is True
+    assert block_reason == ""
+    assert target_provider == "deepseek"
+    assert target_model == "deepseek/deepseek-chat"
+    assert access_decision.selected_method == "api_key"
+
+
 def test_do_post_returns_json_500_on_unhandled_exception(monkeypatch):
     captured = {}
     handler = object.__new__(http_server.AichainDHandler)
@@ -383,6 +722,20 @@ def test_do_post_returns_json_500_on_unhandled_exception(monkeypatch):
 
     assert captured['status'] == 500
     assert captured['data']['error'] == 'Internal server error: RuntimeError'
+
+
+def test_trusted_openclaw_provider_bridge_accepts_loopback_bearer_ignore():
+    handler = _DummyHandler("127.0.0.1", "Bearer ignore")
+
+    assert http_server._is_trusted_openclaw_provider_bridge(handler) is True
+
+
+def test_trusted_openclaw_provider_bridge_rejects_non_loopback_or_other_tokens():
+    remote = _DummyHandler("10.0.0.5", "Bearer ignore")
+    wrong_token = _DummyHandler("127.0.0.1", "Bearer abc123")
+
+    assert http_server._is_trusted_openclaw_provider_bridge(remote) is False
+    assert http_server._is_trusted_openclaw_provider_bridge(wrong_token) is False
 
 def test_start_server_uses_threading_http_server(monkeypatch):
     captured = {}

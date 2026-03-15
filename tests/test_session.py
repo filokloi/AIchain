@@ -41,6 +41,7 @@ class TestCanonicalSession:
         assert s.session_id == "test-123"
         assert s.turn_index == 0
         assert s.routing_mode == "auto"
+        assert s.routing_preference == "balanced"
         assert s.locked_model == ""
         assert s.locked_provider == ""
         assert s.system_state == "NORMAL"
@@ -76,6 +77,7 @@ class TestCanonicalSession:
         s.privacy_context.pii_categories = ["email"]
         s.summary_state.pinned_facts = ["fact_one"]
         s.routing_mode = "manual"
+        s.routing_preference = "min_cost"
         s.locked_model = "openai-codex/gpt-5.4"
         s.locked_provider = "openai-codex"
 
@@ -83,6 +85,7 @@ class TestCanonicalSession:
         assert d["session_id"] == "rt1"
         assert d["turn_index"] == 1
         assert d["routing_mode"] == "manual"
+        assert d["routing_preference"] == "min_cost"
         assert d["locked_model"] == "openai-codex/gpt-5.4"
         assert d["locked_provider"] == "openai-codex"
         assert d["privacy_context"]["contains_pii"] is True
@@ -137,6 +140,7 @@ class TestSessionStore:
     def test_persist_manual_routing_state(self, store):
         s = store.create()
         s.routing_mode = "manual"
+        s.routing_preference = "max_intelligence"
         s.locked_model = "openai-codex/gpt-5.4"
         s.locked_provider = "openai-codex"
         store.save(s)
@@ -144,6 +148,7 @@ class TestSessionStore:
         loaded = store.load(s.session_id)
         assert loaded is not None
         assert loaded.routing_mode == "manual"
+        assert loaded.routing_preference == "max_intelligence"
         assert loaded.locked_model == "openai-codex/gpt-5.4"
         assert loaded.locked_provider == "openai-codex"
 
@@ -174,3 +179,4 @@ class TestSessionStore:
         assert loaded.provider_runs[0].model == "openai/gpt-4o"
         assert loaded.provider_runs[0].latency_ms == 450.0
         assert loaded.budget_state.total_spent_usd == 0.003
+

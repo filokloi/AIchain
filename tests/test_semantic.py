@@ -43,6 +43,13 @@ class TestSemanticPreroute:
         assert result.cluster_name == "code_generation"
         assert result.model_preference == "heavy"
 
+    def test_code_generation_detected_for_programming_game_prompt(self):
+        msgs = [{"role": "user", "content": "Let's program a Tetris game in Python."}]
+        result = semantic_preroute(msgs)
+        assert result is not None
+        assert result.cluster_name == "code_generation"
+        assert result.model_preference == "heavy"
+
     def test_complex_reasoning_detected(self):
         msgs = [{"role": "user", "content": "Prove that the algorithm complexity is NP-hard using mathematical proof by contradiction"}]
         result = semantic_preroute(msgs)
@@ -97,7 +104,7 @@ class TestCascadeWithLayer2:
             available_heavy_model="heavy/m",
         )
         assert d.target_model == "heavy/m"
-        assert any("L2:semantic" in l for l in d.decision_layers)
+        assert any(layer.startswith("L1:coding_intent") or "L2:semantic" in layer for layer in d.decision_layers)
 
     def test_l2_routes_free_for_casual(self):
         cr = CascadeRouter()

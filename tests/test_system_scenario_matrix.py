@@ -46,7 +46,7 @@ def test_build_expected_routing_prefers_runtime_confirmed_codex_for_coding():
 
     assert expectation.provider_class == 'cloud'
     assert expectation.provider == 'openai-codex'
-    assert expectation.model_contains == 'gpt-5.4'
+    assert expectation.model_contains == 'openai-codex/gpt-5.4'
 
 
 def test_build_expected_routing_falls_back_to_local_when_codex_is_not_ready_and_local_is_strong():

@@ -37,6 +37,8 @@ log = logging.getLogger("aichaind.providers.openai_codex")
 OPENCLAW_CONFIG = Path.home() / ".openclaw" / "openclaw.json"
 OPENCLAW_AUTH_PROFILES = Path.home() / ".openclaw" / "agents" / "main" / "agent" / "auth-profiles.json"
 OPENCLAW_NPM_DIR = Path.home() / "AppData" / "Roaming" / "npm"
+OPENCLAW_AICHAIN_DIR = Path.home() / ".openclaw" / "aichain"
+OPENAI_CODEX_CACHE = OPENCLAW_AICHAIN_DIR / "openai_codex_runtime_cache.json"
 TARGET_MODEL = "openai-codex/gpt-5.4"
 DEFAULT_FALLBACK_MODEL = "openai-codex/gpt-5.3-codex"
 
@@ -50,20 +52,29 @@ class OpenAICodexOAuthAdapter(ProviderAdapter):
         gateway_token: str = "",
         config_path: str | Path | None = None,
         auth_profiles_path: str | Path | None = None,
+        cache_path: str | Path | None = None,
     ):
         self.config_path = Path(config_path).expanduser() if config_path else OPENCLAW_CONFIG
         self.auth_profiles_path = Path(auth_profiles_path).expanduser() if auth_profiles_path else OPENCLAW_AUTH_PROFILES
+        self.cache_path = Path(cache_path).expanduser() if cache_path else OPENAI_CODEX_CACHE
         self._config = _load_json_file(self.config_path)
         self._gateway_base_url = gateway_base_url or _resolve_gateway_http_base(self._config)
         self._gateway_token = gateway_token or _resolve_gateway_token(self._config)
         self._chat_endpoint_enabled = _resolve_gateway_endpoint_enabled(self._config, "chatCompletions")
         self._responses_endpoint_enabled = _resolve_gateway_endpoint_enabled(self._config, "responses")
         self._profile_id, self._profile = _load_codex_profile(self.auth_profiles_path)
-        self._timeout = 90
+        self._timeout = 150
         self._last_discovered_models: list[str] = []
         self._last_discovery_source = ""
+        self._last_discovered_at = 0.0
+        self._discovery_ttl_seconds = 300
         self._probe_ttl_seconds = 900
-        self._target_probe_cache: tuple[bool, float, str] = (False, 0.0, "")
+        self._probe_cache: dict[str, tuple[bool, float, str]] = {}
+        self._last_good_runtime = self._load_last_good_runtime()
+        if self._last_good_runtime.get("available_models"):
+            self._last_discovered_models = list(self._last_good_runtime.get("available_models") or [])
+            self._last_discovery_source = str(self._last_good_runtime.get("source") or "last_good_cache")
+            self._last_discovered_at = float(self._last_good_runtime.get("cached_at") or 0.0)
         super().__init__(name="openai-codex", api_key=self._gateway_token, access_methods={"oauth"})
 
     @property
@@ -105,25 +116,6 @@ class OpenAICodexOAuthAdapter(ProviderAdapter):
             result.limits["reason"] = "oauth_profile_missing"
             return result
 
-        models, source = self._discover_models()
-        target_probe_ok, target_probe_reason = self._probe_target_model()
-        if target_probe_ok:
-            models = self._merge_models_with_target(models, TARGET_MODEL)
-            source = f"{source}+runtime_probe" if source else "runtime_probe"
-        result.available_models = models
-        result.limits["model_source"] = source
-        result.limits["preferred_model"] = self.resolve_preferred_model(TARGET_MODEL, models)
-        result.limits["verified_models"] = list(models)
-        result.limits["target_form_reached"] = TARGET_MODEL in models
-        result.limits["target_probe_status"] = "ok" if target_probe_ok else "unverified"
-        if target_probe_reason:
-            result.limits["target_probe_reason"] = target_probe_reason
-
-        if not models:
-            result.status = "auth_failed"
-            result.limits["reason"] = "no_codex_models_visible"
-            return result
-
         if not self.gateway_base_url or not self.api_key:
             result.status = "error"
             result.limits["reason"] = "gateway_http_auth_missing"
@@ -134,8 +126,91 @@ class OpenAICodexOAuthAdapter(ProviderAdapter):
             result.limits["reason"] = "gateway_http_chat_completions_disabled"
             return result
 
+        models, source = self._discover_models()
+        if not models:
+            target_probe_ok, target_probe_reason = self._probe_target_model()
+            if target_probe_ok:
+                models = self._merge_models_with_target(models, TARGET_MODEL)
+                source = "runtime_probe"
+            else:
+                result.status = "auth_failed"
+                result.limits.update({
+                    "model_source": source,
+                    "preferred_model": "",
+                    "verified_models": [],
+                    "target_form_reached": False,
+                    "target_probe_status": "ok" if target_probe_ok else "unverified",
+                    "target_probe_reason": target_probe_reason,
+                    "reason": "no_codex_models_visible",
+                })
+                return result
+
+        attempt_models: list[str] = []
+        verified_models: list[str] = []
+
+        def add_attempt(model_id: str):
+            if model_id and model_id not in attempt_models:
+                attempt_models.append(model_id)
+
+        add_attempt(TARGET_MODEL)
+        preferred_candidate = self.resolve_preferred_model("", models)
+        add_attempt(preferred_candidate)
+        for candidate in sorted(models, key=_codex_model_rank, reverse=True):
+            add_attempt(candidate)
+
+        target_probe_ok = False
+        target_probe_reason = ""
+        preferred_model = ""
+        runtime_probe_status = "unverified"
+        probe_attempts: list[dict[str, object]] = []
+
+        for candidate in attempt_models:
+            ok, reason = self._probe_model(candidate)
+            probe_attempts.append({
+                "model": candidate,
+                "ok": ok,
+                "reason": reason,
+            })
+            if candidate == TARGET_MODEL:
+                target_probe_ok = ok
+                target_probe_reason = reason
+            if ok and not preferred_model:
+                preferred_model = candidate
+                verified_models.append(candidate)
+                runtime_probe_status = "ok"
+                break
+
+        if target_probe_ok:
+            models = self._merge_models_with_target(models, TARGET_MODEL)
+            source = f"{source}+runtime_probe" if source else "runtime_probe"
+        elif preferred_model and preferred_model not in models:
+            models = self._merge_models_with_target(models, preferred_model)
+
+        result.available_models = models
+        result.limits["model_source"] = source
+        result.limits["preferred_model"] = preferred_model
+        result.limits["verified_models"] = list(verified_models)
+        result.limits["target_form_reached"] = bool(target_probe_ok and preferred_model == TARGET_MODEL)
+        result.limits["target_probe_status"] = "ok" if target_probe_ok else "unverified"
+        if target_probe_reason:
+            result.limits["target_probe_reason"] = target_probe_reason
+        result.limits["runtime_probe_status"] = runtime_probe_status
+        result.limits["runtime_probe_attempts"] = probe_attempts
+
+        if not preferred_model:
+            result.status = "error"
+            result.limits["reason"] = "runtime_probe_failed"
+            return result
+
         result.status = "authenticated"
         result.cost_mode = "subscription-window"
+        self._persist_last_good_runtime(
+            models=models,
+            preferred_model=preferred_model,
+            verified_models=list(verified_models),
+            target_form_reached=bool(target_probe_ok and preferred_model == TARGET_MODEL),
+            source=source,
+        )
         return result
 
     def execute(self, request: CompletionRequest) -> CompletionResponse:
@@ -162,58 +237,79 @@ class OpenAICodexOAuthAdapter(ProviderAdapter):
             "temperature": request.temperature,
             "stream": False,
         }
+        timeout_seconds = self._resolve_timeout_seconds(request)
 
         start_t = time.time()
-        try:
-            resp = requests.post(
-                f"{self.gateway_base_url}/v1/chat/completions",
-                json=payload,
-                headers=self._headers(),
-                timeout=self._timeout,
-            )
-            latency = (time.time() - start_t) * 1000
-            if resp.status_code != 200:
-                self.circuit_breaker.record_failure()
+        last_error = ""
+        last_status = "error"
+        max_attempts = 2
+        for attempt in range(max_attempts):
+            try:
+                resp = requests.post(
+                    f"{self.gateway_base_url}/v1/chat/completions",
+                    json=payload,
+                    headers=self._headers(),
+                    timeout=timeout_seconds,
+                )
+                latency = (time.time() - start_t) * 1000
+                if resp.status_code != 200:
+                    last_error = f"HTTP {resp.status_code}: {resp.text[:200]}"
+                    last_status = "error"
+                    if resp.status_code >= 500 and attempt + 1 < max_attempts:
+                        continue
+                    self.circuit_breaker.record_failure()
+                    return CompletionResponse(
+                        model=selected_model,
+                        content="",
+                        error=last_error,
+                        status=last_status,
+                        latency_ms=latency,
+                    )
+
+                data = resp.json()
+                choice = (data.get("choices") or [{}])[0]
+                usage = data.get("usage") or {}
+                self.circuit_breaker.record_success()
+                self._record_successful_execution(selected_model)
                 return CompletionResponse(
                     model=selected_model,
-                    content="",
-                    error=f"HTTP {resp.status_code}: {resp.text[:200]}",
-                    status="error",
+                    content=choice.get("message", {}).get("content", ""),
+                    input_tokens=usage.get("prompt_tokens", 0),
+                    output_tokens=usage.get("completion_tokens", 0),
+                    finish_reason=choice.get("finish_reason", ""),
                     latency_ms=latency,
+                    raw_response=data,
+                    status="success",
                 )
+            except requests.Timeout:
+                last_error = "timeout"
+                last_status = "timeout"
+                if attempt + 1 < max_attempts:
+                    continue
+            except Exception as exc:
+                last_error = str(exc)
+                last_status = "error"
+                if attempt + 1 < max_attempts:
+                    continue
 
-            data = resp.json()
-            choice = (data.get("choices") or [{}])[0]
-            usage = data.get("usage") or {}
-            self.circuit_breaker.record_success()
-            return CompletionResponse(
-                model=selected_model,
-                content=choice.get("message", {}).get("content", ""),
-                input_tokens=usage.get("prompt_tokens", 0),
-                output_tokens=usage.get("completion_tokens", 0),
-                finish_reason=choice.get("finish_reason", ""),
-                latency_ms=latency,
-                raw_response=data,
-                status="success",
-            )
-        except requests.Timeout:
-            self.circuit_breaker.record_failure()
-            return CompletionResponse(
-                model=selected_model,
-                content="",
-                error="timeout",
-                status="timeout",
-                latency_ms=(time.time() - start_t) * 1000,
-            )
-        except Exception as exc:
-            self.circuit_breaker.record_failure()
-            return CompletionResponse(
-                model=selected_model,
-                content="",
-                error=str(exc),
-                status="error",
-                latency_ms=(time.time() - start_t) * 1000,
-            )
+        self.circuit_breaker.record_failure()
+        return CompletionResponse(
+            model=selected_model,
+            content="",
+            error=last_error or "unknown_error",
+            status=last_status,
+            latency_ms=(time.time() - start_t) * 1000,
+        )
+
+    def _resolve_timeout_seconds(self, request: CompletionRequest) -> float:
+        raw_timeout_ms = 0
+        try:
+            raw_timeout_ms = int((request.extra or {}).get("timeout_ms") or 0)
+        except Exception:
+            raw_timeout_ms = 0
+        if raw_timeout_ms > 0:
+            return max(5.0, min(float(self._timeout), raw_timeout_ms / 1000.0))
+        return float(self._timeout)
 
     def health_check(self) -> bool:
         result = self.discover()
@@ -246,26 +342,46 @@ class OpenAICodexOAuthAdapter(ProviderAdapter):
         return ranked[0] if ranked else ""
 
     def _discover_models(self) -> tuple[list[str], str]:
+        now = time.time()
+        if self._last_discovered_models and (now - self._last_discovered_at) < self._discovery_ttl_seconds:
+            return list(self._last_discovered_models), self._last_discovery_source or "memory_cache"
+
         models = _list_models_from_openclaw_cli()
         source = "openclaw_cli"
         if not models:
             models = _list_models_from_config(self._config)
             source = "openclaw_config"
+        if not models:
+            cached_models = list(self._last_good_runtime.get("available_models") or [])
+            if cached_models:
+                models = cached_models
+                source = "last_good_cache"
         self._last_discovered_models = models
         self._last_discovery_source = source
+        self._last_discovered_at = now if models else 0.0
         return models, source
 
     def _probe_target_model(self) -> tuple[bool, str]:
+        return self._probe_model(TARGET_MODEL)
+
+    def _probe_model(self, model_id: str) -> tuple[bool, str]:
+        normalized_model = str(model_id or "").strip()
+        if not normalized_model:
+            return False, "runtime_probe_model_missing"
         if not requests:
             return False, "requests_not_installed"
         if not self.gateway_ready:
             return False, "gateway_unavailable"
-        cached_ok, cached_at, cached_reason = self._target_probe_cache
-        if (time.time() - cached_at) < self._probe_ttl_seconds:
-            return cached_ok, cached_reason
+
+        cache_key = normalized_model.lower()
+        cached = self._probe_cache.get(cache_key)
+        if cached:
+            cached_ok, cached_at, cached_reason = cached
+            if (time.time() - cached_at) < self._probe_ttl_seconds:
+                return cached_ok, cached_reason
 
         payload = {
-            "model": TARGET_MODEL,
+            "model": normalized_model,
             "messages": [{"role": "user", "content": "Reply exactly with OK"}],
             "max_tokens": 4,
             "temperature": 0,
@@ -279,17 +395,17 @@ class OpenAICodexOAuthAdapter(ProviderAdapter):
                 timeout=min(self._timeout, 30),
             )
             if resp.status_code == 200:
-                self._target_probe_cache = (True, time.time(), "runtime_probe_ok")
+                self._probe_cache[cache_key] = (True, time.time(), "runtime_probe_ok")
                 return True, "runtime_probe_ok"
             reason = f"runtime_probe_http_{resp.status_code}"
-            self._target_probe_cache = (False, time.time(), reason)
+            self._probe_cache[cache_key] = (False, time.time(), reason)
             return False, reason
         except requests.Timeout:
-            self._target_probe_cache = (False, time.time(), "runtime_probe_timeout")
+            self._probe_cache[cache_key] = (False, time.time(), "runtime_probe_timeout")
             return False, "runtime_probe_timeout"
         except Exception as exc:
-            reason = f"runtime_probe_error:{exc}"
-            self._target_probe_cache = (False, time.time(), reason)
+            reason = f"runtime_probe_error:{type(exc).__name__}"
+            self._probe_cache[cache_key] = (False, time.time(), reason)
             return False, reason
 
     def _should_try_target_model(self, requested_model: str) -> bool:
@@ -302,6 +418,67 @@ class OpenAICodexOAuthAdapter(ProviderAdapter):
         if target_model and target_model not in merged:
             merged.append(target_model)
         return merged
+
+    def _load_last_good_runtime(self) -> dict:
+        data = _load_json_file(self.cache_path)
+        if not isinstance(data, dict):
+            return {}
+        payload = dict(data)
+        payload["available_models"] = [
+            str(item).strip()
+            for item in (payload.get("available_models") or [])
+            if str(item).strip()
+        ]
+        payload["verified_models"] = [
+            str(item).strip()
+            for item in (payload.get("verified_models") or [])
+            if str(item).strip()
+        ]
+        payload["preferred_model"] = str(payload.get("preferred_model") or "").strip()
+        payload["source"] = str(payload.get("source") or "").strip()
+        return payload
+
+    def _persist_last_good_runtime(
+        self,
+        models: list[str],
+        preferred_model: str,
+        verified_models: list[str],
+        target_form_reached: bool,
+        source: str,
+    ) -> None:
+        payload = {
+            "available_models": list(dict.fromkeys(str(item).strip() for item in (models or []) if str(item).strip())),
+            "preferred_model": str(preferred_model or "").strip(),
+            "verified_models": list(dict.fromkeys(str(item).strip() for item in (verified_models or []) if str(item).strip())),
+            "target_form_reached": bool(target_form_reached),
+            "source": str(source or "").strip(),
+            "cached_at": time.time(),
+        }
+        self._last_good_runtime = payload
+        try:
+            self.cache_path.parent.mkdir(parents=True, exist_ok=True)
+            self.cache_path.write_text(json.dumps(payload, indent=2), encoding="utf-8")
+        except Exception:
+            log.info("openai-codex runtime cache update skipped")
+
+    def _record_successful_execution(self, selected_model: str) -> None:
+        normalized_model = str(selected_model or "").strip()
+        if not normalized_model:
+            return
+        merged_models = self._merge_models_with_target(self._last_discovered_models, normalized_model)
+        verified_models = list(self._last_good_runtime.get("verified_models") or [])
+        if normalized_model not in verified_models:
+            verified_models.append(normalized_model)
+        self._last_discovered_models = merged_models
+        self._last_discovery_source = self._last_discovery_source or "runtime_execution"
+        self._last_discovered_at = time.time()
+        self._persist_last_good_runtime(
+            models=merged_models,
+            preferred_model=normalized_model,
+            verified_models=verified_models,
+            target_form_reached=normalized_model == TARGET_MODEL,
+            source=self._last_discovery_source or "runtime_execution",
+        )
 
 
 def _load_json_file(path: Path) -> dict:

@@ -12,7 +12,7 @@ Covers:
 import pytest
 from aichaind.routing.rules import (
     layer1_route, check_specialist_pin, detect_visual_content,
-    estimate_complexity, RouteDecision,
+    estimate_complexity, RouteDecision, detect_coding_intent,
 )
 from aichaind.routing.cascade import CascadeRouter
 from aichaind.routing.table_sync import (
@@ -124,6 +124,9 @@ class TestComplexityEstimation:
         assert cat == "quick"
         assert conf >= 0.8
 
+    def test_detect_coding_intent_handles_freeform_programming_prompt(self):
+        assert detect_coding_intent("hajmo nešto da programiramo tetris igricu") is True
+
 
 # ─── Cascade Router ───
 
@@ -162,6 +165,16 @@ class TestCascadeRouter:
         )
         # Should route to heavy since code is detected
         assert d.target_model in ("heavy/m", "free/m")  # either acceptable
+
+    def test_layer1_coding_intent_routes_freeform_programming_prompt_to_heavy(self):
+        cr = CascadeRouter()
+        d = cr.route(
+            messages=[{"role": "user", "content": "Hajmo nešto da programiramo tetris igricu u Pythonu."}],
+            available_free_model="free/m",
+            available_heavy_model="heavy/m",
+        )
+        assert d.target_model == "heavy/m"
+        assert "code" in (d.reason or "").lower()
 
 
 # ─── Table Sync Utilities ───

@@ -68,6 +68,9 @@ class PromptInjectionGuard:
     def scan_messages(self, messages: list[dict]) -> InjectionScanResult:
         parts: list[str] = []
         for msg in messages:
+            role = (msg.get("role") or "").lower()
+            if role and role not in {"user"}:
+                continue
             content = msg.get("content", "")
             if isinstance(content, str):
                 parts.append(content)

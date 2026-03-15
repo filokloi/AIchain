@@ -103,16 +103,25 @@ def _preferred_premium_target(health: dict) -> tuple[str, str] | tuple[str, str]
         return "", ""
     configured = set(prefs.get("prepaid_premium_providers") or [])
     provider_access = health.get("provider_access") or {}
+    candidates = []
     for provider, info in provider_access.items():
         billing_basis = str(info.get("billing_basis") or "").lower()
         implicit = any(token in billing_basis for token in ("subscription", "entitlement", "workspace", "enterprise"))
         if provider not in configured and not implicit:
             continue
-        if not info.get("runtime_confirmed") or not info.get("target_form_reached"):
+        if not info.get("runtime_confirmed"):
             continue
-        if provider == "openai-codex":
-            return provider, "gpt-5.4"
-    return "", ""
+        preferred_model = str(info.get("preferred_model") or info.get("target_model") or "").strip()
+        if not preferred_model and provider == "openai-codex" and info.get("target_form_reached"):
+            preferred_model = "openai-codex/gpt-5.4"
+        if not preferred_model:
+            continue
+        candidates.append((0 if info.get("target_form_reached") else 1, provider, preferred_model))
+    if not candidates:
+        return "", ""
+    candidates.sort()
+    _, provider, preferred_model = candidates[0]
+    return provider, preferred_model
 
 
 def detect_live_feature_set(index_html: str) -> dict:
@@ -314,6 +323,7 @@ def main() -> int:
             "local_brain": health.get("local_brain"),
             "openai_codex_status": ((health.get("provider_access") or {}).get("openai-codex") or {}).get("status"),
             "openai_codex_target_form_reached": ((health.get("provider_access") or {}).get("openai-codex") or {}).get("target_form_reached"),
+            "openai_codex_preferred_model": ((health.get("provider_access") or {}).get("openai-codex") or {}).get("preferred_model"),
             "routing_preferences": health.get("routing_preferences") or {},
         },
         "live_dashboard": {

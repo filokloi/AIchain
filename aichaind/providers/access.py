@@ -122,6 +122,9 @@ class ProviderAccessDecision:
     quota_visibility: str = ""
     limitations: list[str] = field(default_factory=list)
     project_verification: str = ""
+    preferred_model: str = ""
+    verified_models: list[str] = field(default_factory=list)
+    target_model: str = ""
     options: list[ProviderAccessOption] = field(default_factory=list)
 
     def to_dict(self) -> dict:
@@ -140,6 +143,9 @@ class ProviderAccessDecision:
             "quota_visibility": self.quota_visibility,
             "limitations": list(self.limitations),
             "project_verification": self.project_verification,
+            "preferred_model": self.preferred_model,
+            "verified_models": list(self.verified_models),
+            "target_model": self.target_model,
             "options": [
                 {
                     "method": option.method,
@@ -188,10 +194,20 @@ class ProviderAccessLayer:
         confirmed: bool,
         reason: str = "",
         target_form_reached: bool | None = None,
+        preferred_model: str = "",
+        verified_models: list[str] | None = None,
+        target_model: str = "",
     ) -> None:
         decision = self.resolve(provider)
         if decision.selected_method == ACCESS_DISABLED:
             return
+
+        if preferred_model:
+            decision.preferred_model = str(preferred_model)
+        if verified_models is not None:
+            decision.verified_models = [str(item) for item in verified_models if str(item).strip()]
+        if target_model:
+            decision.target_model = str(target_model)
 
         decision.runtime_confirmed = bool(confirmed)
         decision.target_form_reached = bool(

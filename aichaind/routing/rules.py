@@ -124,6 +124,22 @@ RESEARCH_PATTERNS = re.compile(
     r"(analyze|compare|evaluate|synthesize|review|assess|investigate|explain in depth)",
     re.IGNORECASE
 )
+CODING_INTENT_PATTERNS = re.compile(
+    r"(\bcode\b|\bcoding\b|\bcoder\b|\bprogram\w*\b|\bimplement\b|\bbuild\b|"
+    r"\bcreate\b|\bdevelop\b|\bfunction\b|\bclass\b|\bscript\b|\bmodule\b|"
+    r"\bendpoint\b|\bapi\b|\bdatabase\b|\bschema\b|\bmigration\b|\btest\b|"
+    r"\bdebug\b|\bbug\b|\bfix\b|\brefactor\b|\bpython\b|\bjavascript\b|"
+    r"\btypescript\b|\bjava\b|\brust\b|\bgolang\b|\bgo\b|\bc\+\+\b|\bc#\b|"
+    r"\bsql\b|\btetris\b|\bpygame\b|\bgodot\b|\bunity\b|\bgame\b|\bigric\w*\b|\bkod\w*\b)",
+    re.IGNORECASE
+)
+
+
+def detect_coding_intent(text: str) -> bool:
+    """Detect obvious code-generation/programming prompts early."""
+    if not text:
+        return False
+    return bool(CODING_INTENT_PATTERNS.search(text))
 
 
 def estimate_complexity(text: str) -> tuple[str, float]:
@@ -250,7 +266,17 @@ def layer1_route(
             reason=f"specialist_{pin['category']}",
         )
 
-    # 6. Complexity heuristics
+    # 6. Explicit coding intent
+    if detect_coding_intent(last_user_msg):
+        return RouteDecision(
+            target_model="",
+            confidence=0.91,
+            decision_layers=["L1:coding_intent"],
+            policy_checks=policy_checks,
+            reason="heuristic_code_generation",
+        )
+
+    # 7. Complexity heuristics
     category, confidence = estimate_complexity(last_user_msg)
     if confidence >= 0.85:
         return RouteDecision(

@@ -483,6 +483,43 @@ def test_local_profile_task_hint_can_promote_strong_coding_local_runtime():
     assert result.access_method == 'local'
 
 
+def test_large_effective_prompt_keeps_local_coding_runtime_out_of_route():
+    optimizer = CostOptimizer({'routing_hierarchy': []})
+    local_model = 'lmstudio/qwen/qwen3-4b-thinking-2507'
+    optimizer.configure_local_profiles({
+        'profiles': {
+            local_model: {
+                'runtime_confirmed': True,
+                'success_rate': 1.0,
+                'speed_score': 72.0,
+                'stability_score': 92.0,
+                'capacity_status': 'capacity_ok',
+                'prompt_type_suitability': {
+                    'coding': 100.0,
+                },
+                'task_profiles': {
+                    'coding': {'success': True},
+                },
+            }
+        }
+    })
+
+    result = optimizer.optimize(
+        model_preference='heavy',
+        balance_report=BalanceReport(),
+        available_models={
+            'local': local_model,
+            'free': 'openrouter/google/gemini-2.5-flash:free',
+            'heavy': 'openrouter/google/gemini-2.5-flash:free',
+        },
+        estimated_tokens=12000,
+        task_hint='heuristic_code_engineering',
+    )
+
+    assert result.provider == 'openrouter'
+    assert result.model == 'openrouter/google/gemini-2.5-flash:free'
+
+
 def test_runtime_confirmed_openai_codex_gpt54_beats_weak_local_coding_runtime():
     class _Decision:
         def __init__(self, provider, selected_method='disabled', runtime_confirmed=False):
@@ -879,3 +916,131 @@ def test_prepaid_premium_preference_can_be_inferred_from_billing_basis():
     assert result.provider == 'openai-codex'
     assert result.model == 'openai-codex/gpt-5.4'
     assert result.reason == 'prepaid_premium_preference:openai-codex'
+
+
+def test_prepaid_premium_route_can_use_best_verified_model_when_target_form_not_reached():
+    class _Decision:
+        def __init__(self, provider, selected_method='disabled', runtime_confirmed=False, target_form_reached=False, preferred_model=''):
+            self.provider = provider
+            self.selected_method = selected_method
+            self.status = 'target_form_not_reached' if runtime_confirmed and not target_form_reached else ('runtime_confirmed' if runtime_confirmed else 'disabled')
+            self.reason = ''
+            self.runtime_confirmed = runtime_confirmed
+            self.target_form_reached = target_form_reached
+            self.quota_visibility = 'provider_console'
+            self.billing_basis = 'subscription'
+            self.preferred_model = preferred_model
+            self.verified_models = [preferred_model] if preferred_model else []
+            self.target_model = 'openai-codex/gpt-5.4'
+
+    class _Layer:
+        def summary(self):
+            return {
+                'openai-codex': {
+                    'selected_method': 'oauth',
+                    'runtime_confirmed': True,
+                    'target_form_reached': False,
+                    'preferred_model': 'openai-codex/gpt-5.3-codex',
+                }
+            }
+
+        def resolve(self, provider):
+            if provider == 'openai-codex':
+                return _Decision(provider, selected_method='oauth', runtime_confirmed=True, target_form_reached=False, preferred_model='openai-codex/gpt-5.3-codex')
+            return _Decision(provider, selected_method='api_key', runtime_confirmed=True, target_form_reached=True)
+
+    optimizer = CostOptimizer({'routing_hierarchy': []})
+    optimizer.configure_provider_access_layer(_Layer())
+    optimizer.configure_provider_capabilities({
+        'openai-codex': {'openai-codex/gpt-5.3-codex'},
+        'deepseek': {'deepseek/deepseek-reasoner', 'deepseek/deepseek-chat'},
+    })
+    optimizer.configure_routing_preferences({
+        'prefer_prepaid_premium': True,
+        'prepaid_premium_providers': ['openai-codex'],
+    })
+    report = BalanceReport(
+        balances={
+            'deepseek': ProviderBalance(provider='deepseek', has_credits=True, balance_usd=3.0, source='api'),
+        },
+        providers_with_credits=['deepseek'],
+    )
+
+    result = optimizer.optimize(
+        model_preference='heavy',
+        balance_report=report,
+        available_models={
+            'free': 'deepseek/deepseek-chat',
+            'heavy': 'deepseek/deepseek-reasoner',
+        },
+        estimated_tokens=256,
+        task_hint='heuristic_code_engineering',
+    )
+
+    assert result.provider == 'openai-codex'
+    assert result.model == 'openai-codex/gpt-5.3-codex'
+    assert result.access_method == 'oauth'
+    assert result.reason == 'prepaid_premium_preference:openai-codex'
+
+
+def test_catalog_only_direct_model_is_rejected_until_runtime_capabilities_exist():
+    class _Decision:
+        def __init__(self, provider, selected_method='api_key', status='configured', runtime_confirmed=False):
+            self.provider = provider
+            self.selected_method = selected_method
+            self.status = status
+            self.reason = ''
+            self.runtime_confirmed = runtime_confirmed
+            self.target_form_reached = runtime_confirmed
+            self.quota_visibility = 'provider_console'
+            self.billing_basis = 'metered_api_billing'
+            self.preferred_model = ''
+            self.verified_models = []
+            self.target_model = ''
+
+    class _Layer:
+        def resolve(self, provider):
+            if provider == 'deepseek':
+                return _Decision(provider, selected_method='api_key', status='configured', runtime_confirmed=False)
+            if provider == 'openrouter':
+                return _Decision(provider, selected_method='api_key', status='runtime_confirmed', runtime_confirmed=True)
+            return _Decision(provider, selected_method='api_key', status='runtime_confirmed', runtime_confirmed=True)
+
+    optimizer = CostOptimizer({
+        'routing_hierarchy': [
+            {
+                'model': 'deepseek/deepseek-r1-distill-qwen-32b',
+                'tier': 'HEAVY_HITTER',
+                'provider': 'DeepSeek',
+                'metrics': {'cost': 0.000001, 'intelligence': 0.98},
+            },
+            {
+                'model': 'openrouter/google/gemini-2.5-pro',
+                'tier': 'HEAVY_HITTER',
+                'provider': 'OpenRouter',
+                'metrics': {'cost': 0.000002, 'intelligence': 0.82},
+            },
+        ]
+    })
+    optimizer.configure_provider_access_layer(_Layer())
+    report = BalanceReport(
+        balances={
+            'deepseek': ProviderBalance(provider='deepseek', has_credits=True, balance_usd=5.0, source='api'),
+            'openrouter': ProviderBalance(provider='openrouter', has_credits=True, balance_usd=5.0, source='api'),
+        },
+        providers_with_credits=['deepseek', 'openrouter'],
+    )
+
+    result = optimizer.optimize(
+        model_preference='heavy',
+        balance_report=report,
+        available_models={
+            'free': 'openrouter/google/gemini-2.5-flash:free',
+            'heavy': 'openrouter/google/gemini-2.5-pro',
+        },
+        estimated_tokens=512,
+        task_hint='heuristic_code_engineering',
+    )
+
+    assert result.model != 'deepseek/deepseek-r1-distill-qwen-32b'
+    assert result.model in {'deepseek/deepseek-reasoner', 'deepseek/deepseek-chat', 'openrouter/google/gemini-2.5-pro'}

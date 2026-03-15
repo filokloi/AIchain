@@ -21,6 +21,7 @@ import logging
 import re
 from datetime import datetime, timezone
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+from urllib.parse import parse_qs, urlparse
 
 from aichaind.security.auth import AuthTokenManager, validate_origin
 from aichaind.security.rate_limiter import TokenBucketRateLimiter
@@ -30,10 +31,13 @@ from aichaind.core.policy import PolicyEngine, PolicyResult
 from aichaind.core.state_machine import Controller
 from aichaind.core.session import SessionStore, ProviderRun, PrivacyContext
 from aichaind.routing.cascade import CascadeRouter
-from aichaind.routing.rules import RouteDecision, detect_visual_content
+from aichaind.routing.control_intent import parse_semantic_control
+from aichaind.routing.rules import RouteDecision, detect_visual_content, detect_coding_intent, estimate_complexity
 from aichaind.providers.registry import get_adapter, get_adapter_for_model
-from aichaind.providers.base import CompletionRequest
+from aichaind.providers.base import CompletionRequest, CompletionResponse
 from aichaind.telemetry.audit import AuditLogger
+from aichaind.ui.companion_panel import build_companion_panel_html
+from aichaind.ui.openclaw_bridge import build_openclaw_bridge_script
 
 log = logging.getLogger("aichaind.transport")
 
@@ -62,9 +66,27 @@ _CLOUD_PROVIDERS = {
     "mistral", "xai", "cohere", "moonshot", "zhipu",
 }
 _LOCAL_PROVIDERS = {"local", "vllm", "ollama", "lmstudio", "llamacpp"}
+DEFAULT_OPENCLAW_SESSION_ID = "openclaw-default"
+_OPENCLAW_UI_ORIGINS = frozenset({
+    "http://127.0.0.1:18789",
+    "http://localhost:18789",
+    "https://127.0.0.1:18789",
+    "https://localhost:18789",
+    "http://127.0.0.1:18791",
+    "http://localhost:18791",
+    "https://127.0.0.1:18791",
+    "https://localhost:18791",
+    "http://127.0.0.1:8080",
+    "http://localhost:8080",
+    "https://127.0.0.1:8080",
+    "https://localhost:8080",
+})
 _DANGEROUS_PATTERNS = re.compile(
-    r"(rm\s+-rf\s+/|DROP\s+TABLE|DELETE\s+FROM\s+\*|"
-    r"exec\s*\(|eval\s*\(|__import__|os\.system|subprocess\.)",
+    r"(rm\s+-rf\s+/|DROP\s+TABLE|DELETE\s+FROM\s+\*)",
+    re.IGNORECASE,
+)
+_CODE_SENSITIVE_PATTERNS = re.compile(
+    r"(exec\s*\(|eval\s*\(|__import__|os\.system|subprocess\.)",
     re.IGNORECASE,
 )
 _COMMAND_LINE_RE = re.compile(
@@ -84,6 +106,11 @@ _SENSITIVE_FILE_ACCESS_RE = re.compile(
     r"(id_rsa|id_ed25519|\.auth_token|openclaw\.json|\.env|/etc/passwd|/etc/shadow|\.ssh/|Get-Content\s+\$HOME\\\.openclaw|cat\s+~/.ssh)",
     re.IGNORECASE,
 )
+_STRUCTURED_PROMPT_RE = re.compile(r"\b(json|schema|minified json|structured|yaml|xml|csv|extract|return only)\b", re.IGNORECASE)
+_REASONING_PROMPT_RE = re.compile(r"\b(why|how|analy[sz]e|compare|trade-?off|algorithm|proof|theorem|research|security|reason(?:ing)?)\b", re.IGNORECASE)
+_CREATIVE_PROMPT_RE = re.compile(r"\b(story|poem|creative|essay|fiction|lyrics)\b", re.IGNORECASE)
+_LOCAL_RUNTIME_HEALTH_CACHE: dict[str, tuple[float, bool, str]] = {}
+_LOCAL_RUNTIME_HEALTH_TTL_SECONDS = 8.0
 
 
 class AichainDHandler(BaseHTTPRequestHandler):
@@ -93,10 +120,31 @@ class AichainDHandler(BaseHTTPRequestHandler):
         log.info(format % args)
 
     def do_GET(self):
-        if self.path == "/health":
+        parsed = urlparse(self.path)
+        if parsed.path == "/health":
             self._handle_health()
+        elif parsed.path == "/ui/control-state":
+            self._handle_ui_control_state(parsed)
+        elif parsed.path == "/ui/openclaw-bridge.js":
+            self._handle_ui_openclaw_bridge()
+        elif parsed.path == "/ui/panel":
+            self._handle_ui_panel()
         else:
             self.send_error(404, "Not Found")
+
+    def do_OPTIONS(self):
+        parsed = urlparse(self.path)
+        if not parsed.path.startswith("/ui/"):
+            self.send_error(404, "Not Found")
+            return
+        headers = _ui_cors_headers(self.headers.get("Origin", ""))
+        if not headers:
+            self.send_error(403, "Forbidden: Invalid UI origin")
+            return
+        self.send_response(204)
+        for key, value in headers.items():
+            self.send_header(key, value)
+        self.end_headers()
 
     def _handle_health(self):
         state = _controller.state if _controller else {}
@@ -116,10 +164,61 @@ class AichainDHandler(BaseHTTPRequestHandler):
         }
         self._send_json(200, health)
 
+    def _handle_ui_openclaw_bridge(self):
+        token = getattr(_auth_manager, "_current_token", "") if _auth_manager else ""
+        script = build_openclaw_bridge_script(
+            api_base="http://127.0.0.1:8080/ui",
+            token=token,
+            default_session_id=DEFAULT_OPENCLAW_SESSION_ID,
+            panel_base="http://127.0.0.1:8080/ui/panel",
+        )
+        self._send_text(200, script, "application/javascript; charset=utf-8", {
+            "Cache-Control": "no-store",
+            "Access-Control-Allow-Origin": "*",
+        })
+
+    def _handle_ui_panel(self):
+        token = getattr(_auth_manager, "_current_token", "") if _auth_manager else ""
+        html = build_companion_panel_html(
+            api_base="http://127.0.0.1:8080/ui",
+            token=token,
+            default_session_id=DEFAULT_OPENCLAW_SESSION_ID,
+        )
+        self._send_text(200, html, "text/html; charset=utf-8", {
+            "Cache-Control": "no-store",
+        })
+
+    def _validate_ui_request(self, origin: str) -> tuple[bool, dict]:
+        headers = _ui_cors_headers(origin)
+        if origin and not headers:
+            self.send_error(403, "Forbidden: Invalid UI origin")
+            return False, {}
+
+        if _is_trusted_ui_origin(origin) or _is_trusted_ui_referer(self.headers.get("Referer", "")):
+            return True, headers
+
+        auth_header = self.headers.get("X-AIchain-Token", "")
+        if _auth_manager and _auth_manager.is_active and not _auth_manager.validate(auth_header):
+            self.send_error(401, "Unauthorized: Invalid token")
+            return False, headers
+        return True, headers
+
+    def _handle_ui_control_state(self, parsed):
+        ok, headers = self._validate_ui_request(self.headers.get("Origin", ""))
+        if not ok:
+            return
+        query = parse_qs(parsed.query or "")
+        session_id = str((query.get("session_id", [DEFAULT_OPENCLAW_SESSION_ID])[0]) or "").strip()
+        session = _get_ui_session(session_id)
+        self._send_json(200, _build_ui_control_state(session), headers)
+
     def do_POST(self):
+        parsed = urlparse(self.path)
         try:
-            if self.path == "/v1/chat/completions":
+            if parsed.path == "/v1/chat/completions":
                 self._handle_chat()
+            elif parsed.path == "/ui/control":
+                self._handle_ui_control()
             else:
                 self.send_error(404, "Not Found")
         except Exception as exc:
@@ -128,6 +227,39 @@ class AichainDHandler(BaseHTTPRequestHandler):
                 self._send_json(500, {"error": f"Internal server error: {type(exc).__name__}"})
             except Exception:
                 self.close_connection = True
+
+    def _handle_ui_control(self):
+        ok, headers = self._validate_ui_request(self.headers.get("Origin", ""))
+        if not ok:
+            return
+
+        content_length = int(self.headers.get("Content-Length", 0))
+        body = self.rfile.read(content_length)
+        try:
+            payload = json.loads(body or b"{}")
+        except json.JSONDecodeError:
+            self.send_error(400, "Bad Request: Invalid JSON")
+            return
+
+        session = _get_ui_session(str(payload.get("session_id", "") or "").strip())
+        control_payload = {
+            "messages": [],
+            "_aichain_control": {
+                "mode": str(payload.get("mode", "") or "").strip(),
+                "model": str(payload.get("model", "") or "").strip(),
+                "provider": str(payload.get("provider", "") or "").strip(),
+                "routing_preference": str(payload.get("routing_preference", "balanced") or "balanced").strip(),
+                "persist_for_session": bool(payload.get("persist_for_session", True)),
+            },
+        }
+        control, error, changed = _resolve_routing_control(session, control_payload)
+        if error:
+            self._send_json(400, {"error": error}, headers)
+            return
+        if changed:
+            _save_session(session)
+        data = _build_ui_control_state(session, last_confirmation=control.get("control_confirmation", ""))
+        self._send_json(200, data, headers)
 
     def _handle_chat(self):
         origin = self.headers.get("Origin", "")
@@ -138,7 +270,13 @@ class AichainDHandler(BaseHTTPRequestHandler):
             return
 
         auth_header = self.headers.get("X-AIchain-Token", "")
-        if _auth_manager and _auth_manager.is_active and not _auth_manager.validate(auth_header):
+        trusted_openclaw_provider_bridge = _is_trusted_openclaw_provider_bridge(self)
+        if (
+            _auth_manager
+            and _auth_manager.is_active
+            and not trusted_openclaw_provider_bridge
+            and not _auth_manager.validate(auth_header)
+        ):
             self.send_error(401, "Unauthorized: Invalid token")
             if _audit_logger:
                 _audit_logger.record_auth_failure("invalid_token")
@@ -159,7 +297,6 @@ class AichainDHandler(BaseHTTPRequestHandler):
 
         messages = payload.get("messages", [])
         session = _load_or_create_session(payload)
-        _update_session_summary_state(session, messages)
         routing_control, routing_control_error, routing_control_persisted = _resolve_routing_control(session, payload)
         if routing_control_error:
             _save_session(session)
@@ -168,9 +305,16 @@ class AichainDHandler(BaseHTTPRequestHandler):
                 "session_id": session.session_id if session else "",
             })
             return
+
+        messages = routing_control.get("sanitized_messages", messages)
+        _update_session_summary_state(session, messages)
         if routing_control_persisted:
             _save_session(session)
         routing_control_meta = _routing_control_response_meta(routing_control)
+        if routing_control.get("control_only"):
+            _save_session(session)
+            self._send_json(200, _build_control_only_response(session, routing_control_meta))
+            return
 
         injection_result = _scan_for_prompt_injection(messages)
         if injection_result and injection_result.blocked:
@@ -257,6 +401,7 @@ class AichainDHandler(BaseHTTPRequestHandler):
                 privacy_context=privacy_ctx,
                 balance_report=balance_report,
                 budget_state=session.budget_state if session else None,
+                routing_preference=routing_control.get("routing_preference", "balanced"),
             )
 
             target_model = decision.target_model or _roles.get("fast_brain", "openrouter/google/gemini-2.5-flash:free")
@@ -386,6 +531,7 @@ class AichainDHandler(BaseHTTPRequestHandler):
             exec_latency=exec_latency,
             allow_failover=not routing_control.get("manual_override_active", False),
         )
+        access_decision = _refresh_access_decision_for_provider(target_provider, access_decision)
 
         if _controller:
             if response.status == "success":
@@ -400,7 +546,13 @@ class AichainDHandler(BaseHTTPRequestHandler):
             _update_session_summary_state(session, [{"role": "assistant", "content": response.content}])
 
         if response.status == "success" and response.content:
-            validation = _validate_output(response.content)
+            validation_hint = " | ".join(
+                part for part in (
+                    getattr(decision, "reason", ""),
+                    _payload_prompt_text(payload),
+                ) if part
+            )
+            validation = _validate_output(response.content, task_hint=validation_hint)
             if not validation["safe"]:
                 log.warning(f"Output validation failed: {validation['reason']}")
                 _record_route_eval(
@@ -452,37 +604,27 @@ class AichainDHandler(BaseHTTPRequestHandler):
                 return
 
         if response.status == "success":
-            result = response.raw_response or {
-                "choices": [{"message": {"content": response.content}}],
-                "usage": {
-                    "prompt_tokens": response.input_tokens,
-                    "completion_tokens": response.output_tokens,
-                },
-            }
-            result["_aichaind"] = {
-                "session_id": session.session_id if session else "",
-                "routed_model": target_model,
-                "routed_provider": target_provider or adapter.name,
-                "route_confidence": decision.confidence,
-                "route_layers": decision.decision_layers,
-                "route_latency_ms": round(decision.latency_ms, 2),
-                "exec_latency_ms": round(exec_latency, 2),
-                "pii_detected": contains_pii,
-                    "pii_redacted": pii_redacted,
-                "estimated_cost_usd": round(getattr(decision, "estimated_cost_usd", 0.0), 6),
-                "cost_tier": getattr(decision, "cost_tier", ""),
-                "model_preference": getattr(decision, "model_preference", ""),
-                "providers_with_credits": balance_report.providers_with_credits if balance_report else [],
-                "failover_used": failover_used,
-                "provider_access_failover_used": access_failover_used,
-                "provider_access_method": access_decision.selected_method if access_decision else "",
-                "provider_access_status": access_decision.status if access_decision else "",
-                "fallback_chain": getattr(decision, "fallback_chain", []),
-                "local_reroute_used": local_reroute_used,
-                "codex_oauth_bridge_used": codex_bridge_used,
-                "compression": compression_meta,
-                **routing_control_meta,
-            }
+            requested_model = str(payload.get("model", "") or "").strip()
+            result = _build_success_response_payload(
+                requested_model=requested_model,
+                target_model=target_model,
+                session=session,
+                response=response,
+                decision=decision,
+                target_provider=target_provider or adapter.name,
+                exec_latency=exec_latency,
+                contains_pii=contains_pii,
+                pii_redacted=pii_redacted,
+                balance_report=balance_report,
+                failover_used=failover_used,
+                access_failover_used=access_failover_used,
+                access_decision=access_decision,
+                local_reroute_used=local_reroute_used,
+                codex_bridge_used=codex_bridge_used,
+                compression_meta=compression_meta,
+                routing_control_meta=routing_control_meta,
+                compat_openclaw_bridge=trusted_openclaw_provider_bridge,
+            )
             _record_route_eval(
                 session=session,
                 messages=messages,
@@ -503,7 +645,10 @@ class AichainDHandler(BaseHTTPRequestHandler):
                 exec_latency=exec_latency,
                 estimated_cost_usd=getattr(decision, "estimated_cost_usd", 0.0),
             )
-            self._send_json(200, result)
+            if bool(payload.get("stream", False)):
+                self._send_openai_stream(200, result)
+            else:
+                self._send_json(200, result)
         else:
             log.error(f"Provider error: {response.error}")
             _record_route_eval(
@@ -537,11 +682,40 @@ class AichainDHandler(BaseHTTPRequestHandler):
                 },
             })
 
-    def _send_json(self, status_code: int, data: dict):
+    def _send_json(self, status_code: int, data: dict, extra_headers: dict | None = None):
+        payload = json.dumps(data, ensure_ascii=False).encode("utf-8")
         self.send_response(status_code)
         self.send_header("Content-Type", "application/json")
+        self.send_header("Content-Length", str(len(payload)))
+        for key, value in (extra_headers or {}).items():
+            self.send_header(key, value)
         self.end_headers()
-        self.wfile.write(json.dumps(data, ensure_ascii=False).encode("utf-8"))
+        self.wfile.write(payload)
+
+    def _send_text(self, status_code: int, data: str, content_type: str, extra_headers: dict | None = None):
+        payload = str(data or "").encode("utf-8")
+        self.send_response(status_code)
+        self.send_header("Content-Type", content_type)
+        self.send_header("Content-Length", str(len(payload)))
+        for key, value in (extra_headers or {}).items():
+            self.send_header(key, value)
+        self.end_headers()
+        self.wfile.write(payload)
+
+    def _send_openai_stream(self, status_code: int, payload: dict):
+        frames = _build_openai_stream_frames(payload)
+        self.send_response(status_code)
+        self.send_header("Content-Type", "text/event-stream; charset=utf-8")
+        self.send_header("Cache-Control", "no-cache")
+        self.send_header("Connection", "close")
+        self.end_headers()
+        for frame in frames:
+            try:
+                self.wfile.write(frame.encode("utf-8"))
+                self.wfile.flush()
+            except (BrokenPipeError, ConnectionResetError, ConnectionAbortedError):
+                break
+        self.close_connection = True
 
 
 def _load_or_create_session(payload: dict):
@@ -556,6 +730,13 @@ def _load_or_create_session(payload: dict):
     return session
 
 
+def _normalize_routing_preference(value: str) -> str:
+    normalized = str(value or "balanced").strip().lower()
+    if normalized in {"max_intelligence", "min_cost", "prefer_local", "balanced"}:
+        return normalized
+    return "balanced"
+
+
 def _parse_routing_control(payload: dict) -> tuple[dict, str]:
     raw = payload.get("_aichain_control")
     if raw is None:
@@ -567,6 +748,7 @@ def _parse_routing_control(payload: dict) -> tuple[dict, str]:
     model = str(raw.get("model", "") or raw.get("locked_model", "") or "").strip()
     provider = str(raw.get("provider", "") or raw.get("locked_provider", "") or "").strip().lower()
     persist_for_session = bool(raw.get("persist_for_session", False))
+    routing_preference = _normalize_routing_preference(raw.get("routing_preference", "balanced"))
 
     if mode and mode not in {"auto", "manual"}:
         return {}, "invalid_routing_mode"
@@ -578,53 +760,135 @@ def _parse_routing_control(payload: dict) -> tuple[dict, str]:
         "model": model,
         "provider": provider,
         "persist_for_session": persist_for_session,
+        "routing_preference": routing_preference,
+        "source": "explicit",
+        "control_only": False,
+        "stripped_prompt": "",
+        "confirmation": "",
     }, ""
+
+
+def _parse_semantic_routing_control(payload: dict) -> dict:
+    intent = parse_semantic_control(
+        payload.get("messages", []),
+        roles=_roles,
+        provider_access_summary=_provider_access_layer.summary() if _provider_access_layer else {},
+    )
+    if not intent:
+        return {}
+    return {
+        "mode": intent.mode,
+        "model": intent.model,
+        "provider": intent.provider,
+        "persist_for_session": intent.persist_for_session,
+        "routing_preference": _normalize_routing_preference(intent.routing_preference),
+        "source": intent.source,
+        "control_only": bool(intent.control_only),
+        "stripped_prompt": intent.stripped_prompt,
+        "confirmation": intent.confirmation,
+    }
+
+
+def _replace_last_user_message(messages: list[dict], stripped_prompt: str) -> list[dict]:
+    if not stripped_prompt:
+        return messages
+    updated = []
+    replaced = False
+    for index in range(len(messages) - 1, -1, -1):
+        msg = dict(messages[index])
+        if not replaced and msg.get("role") == "user":
+            msg["content"] = stripped_prompt
+            replaced = True
+        updated.append(msg)
+    updated.reverse()
+    return updated
 
 
 def _resolve_routing_control(session, payload: dict) -> tuple[dict, str, bool]:
     parsed, error = _parse_routing_control(payload)
     if error:
         return {}, error, False
+    if not parsed:
+        parsed = _parse_semantic_routing_control(payload)
 
     session_mode = str(getattr(session, "routing_mode", "auto") or "auto") if session else "auto"
     session_model = str(getattr(session, "locked_model", "") or "") if session else ""
     session_provider = str(getattr(session, "locked_provider", "") or "").strip().lower() if session else ""
+    session_preference = _normalize_routing_preference(getattr(session, "routing_preference", "balanced") if session else "balanced")
 
     effective_mode = session_mode if session_mode in {"auto", "manual"} else "auto"
     locked_model = session_model
     locked_provider = session_provider
+    routing_preference = session_preference
     changed = False
+    control_source = "session"
+    control_confirmation = ""
+    control_only = False
+    sanitized_messages = payload.get("messages", [])
+
+    if effective_mode == "manual" and locked_model and not _manual_lock_target_is_valid(locked_model, locked_provider):
+        effective_mode = "auto"
+        locked_model = ""
+        locked_provider = ""
+        if session:
+            changed = (
+                session.routing_mode != "auto"
+                or bool(session.locked_model)
+                or bool(session.locked_provider)
+            )
+            session.routing_mode = "auto"
+            session.locked_model = ""
+            session.locked_provider = ""
 
     if parsed:
+        control_source = parsed.get("source", "explicit") or "explicit"
+        control_confirmation = parsed.get("confirmation", "")
+        control_only = bool(parsed.get("control_only", False))
+        if parsed.get("stripped_prompt"):
+            sanitized_messages = _replace_last_user_message(payload.get("messages", []), parsed["stripped_prompt"])
+
         requested_mode = parsed.get("mode", "")
+        requested_preference = _normalize_routing_preference(parsed.get("routing_preference", session_preference))
+        persist = bool(parsed.get("persist_for_session", False))
+        routing_preference = requested_preference or session_preference
+
         if requested_mode == "auto":
             effective_mode = "auto"
             locked_model = ""
             locked_provider = ""
-            if parsed.get("persist_for_session") and session:
+            if persist and session:
                 changed = (
                     session.routing_mode != "auto"
                     or bool(session.locked_model)
                     or bool(session.locked_provider)
+                    or session.routing_preference != routing_preference
                 )
                 session.routing_mode = "auto"
                 session.locked_model = ""
                 session.locked_provider = ""
+                session.routing_preference = routing_preference
         elif requested_mode == "manual":
             effective_mode = "manual"
             locked_model = parsed.get("model", "") or session_model
             locked_provider = parsed.get("provider", "") or session_provider or _infer_provider(locked_model)
             if not locked_model:
                 return {}, "manual_mode_requires_model", changed
-            if parsed.get("persist_for_session") and session:
+            if not _manual_lock_target_is_valid(locked_model, locked_provider):
+                return {}, "invalid_manual_lock_target", changed
+            if persist and session:
                 changed = (
                     session.routing_mode != "manual"
                     or session.locked_model != locked_model
                     or session.locked_provider != locked_provider
+                    or session.routing_preference != routing_preference
                 )
                 session.routing_mode = "manual"
                 session.locked_model = locked_model
                 session.locked_provider = locked_provider
+                session.routing_preference = routing_preference
+        elif persist and session and session.routing_preference != routing_preference:
+            changed = True
+            session.routing_preference = routing_preference
 
     if effective_mode != "manual" or not locked_model:
         effective_mode = "auto"
@@ -636,6 +900,12 @@ def _resolve_routing_control(session, payload: dict) -> tuple[dict, str, bool]:
         "manual_override_active": effective_mode == "manual" and bool(locked_model),
         "locked_model": locked_model,
         "locked_provider": locked_provider,
+        "routing_preference": routing_preference,
+        "control_source": control_source,
+        "control_changed": changed,
+        "control_confirmation": control_confirmation,
+        "control_only": control_only,
+        "sanitized_messages": sanitized_messages,
     }, "", changed
 
 
@@ -655,14 +925,185 @@ def _build_manual_route_decision(control: dict):
     return decision, locked_model, locked_provider
 
 
+def _manual_lock_target_is_valid(model_id: str, provider: str = "") -> bool:
+    normalized_model = str(model_id or "").strip()
+    normalized_provider = str(provider or _infer_provider(normalized_model)).strip().lower()
+    if not normalized_model or "/" not in normalized_model:
+        return False
+    if "\\" in normalized_model:
+        return False
+    if normalized_provider in {"users", "windows", "program files", "program"}:
+        return False
+    provider_access = _provider_access_summary()
+    if normalized_provider in provider_access:
+        return True
+    if normalized_model in {
+        str(_roles.get("fast_brain", "") or "").strip(),
+        str(_roles.get("heavy_brain", "") or "").strip(),
+        str(_roles.get("visual_brain", "") or "").strip(),
+        str(_roles.get("local_brain", "") or "").strip(),
+    }:
+        return True
+    return normalized_provider in _CLOUD_PROVIDERS or normalized_provider in _LOCAL_PROVIDERS
+
+
 def _routing_control_response_meta(control: dict) -> dict:
     control = control or {}
     return {
         "routing_mode": control.get("mode", "auto"),
+        "routing_preference": _normalize_routing_preference(control.get("routing_preference", "balanced")),
         "manual_override_active": bool(control.get("manual_override_active", False)),
         "manual_locked_model": control.get("locked_model", "") if control.get("manual_override_active") else "",
         "manual_locked_provider": control.get("locked_provider", "") if control.get("manual_override_active") else "",
+        "control_source": control.get("control_source", "session"),
+        "control_changed": bool(control.get("control_changed", False)),
+        "control_confirmation": control.get("control_confirmation", ""),
     }
+
+
+def _build_control_only_response(session, routing_control_meta: dict) -> dict:
+    confirmation = routing_control_meta.get("control_confirmation", "AIchain control updated.")
+    return {
+        "choices": [{"message": {"role": "assistant", "content": confirmation}}],
+        "usage": {"prompt_tokens": 0, "completion_tokens": 0},
+        "session_id": session.session_id if session else "",
+        "_aichaind": {
+            "session_id": session.session_id if session else "",
+            "control_only": True,
+            **routing_control_meta,
+        },
+    }
+
+
+def _build_success_response_payload(
+    requested_model: str,
+    target_model: str,
+    session,
+    response: CompletionResponse,
+    decision: RouteDecision,
+    target_provider: str,
+    exec_latency: float,
+    contains_pii: bool,
+    pii_redacted: bool,
+    balance_report,
+    failover_used: bool,
+    access_failover_used: bool,
+    access_decision,
+    local_reroute_used: bool,
+    codex_bridge_used: bool,
+    compression_meta: dict,
+    routing_control_meta: dict,
+    compat_openclaw_bridge: bool = False,
+) -> dict:
+    model_label = str(requested_model or target_model or response.model or "").strip()
+    payload = {
+        "id": (
+            response.raw_response.get("id", "")
+            if isinstance(response.raw_response, dict)
+            else ""
+        ) or f"chatcmpl_{uuid.uuid4()}",
+        "object": "chat.completion",
+        "created": int(time.time()),
+        "model": model_label,
+        "choices": [{
+            "index": 0,
+            "message": {
+                "role": "assistant",
+                "content": response.content or "",
+            },
+            "finish_reason": response.finish_reason or "stop",
+        }],
+        "usage": {
+            "prompt_tokens": response.input_tokens,
+            "completion_tokens": response.output_tokens,
+            "total_tokens": response.input_tokens + response.output_tokens,
+        },
+    }
+    if compat_openclaw_bridge:
+        return payload
+
+    payload["_aichaind"] = {
+        "session_id": session.session_id if session else "",
+        "routed_model": target_model,
+        "routed_provider": target_provider,
+        "provider_model": response.model,
+        "route_confidence": decision.confidence,
+        "route_layers": decision.decision_layers,
+        "route_latency_ms": round(decision.latency_ms, 2),
+        "exec_latency_ms": round(exec_latency, 2),
+        "pii_detected": contains_pii,
+        "pii_redacted": pii_redacted,
+        "estimated_cost_usd": round(getattr(decision, "estimated_cost_usd", 0.0), 6),
+        "cost_tier": getattr(decision, "cost_tier", ""),
+        "model_preference": getattr(decision, "model_preference", ""),
+        "providers_with_credits": balance_report.providers_with_credits if balance_report else [],
+        "failover_used": failover_used,
+        "provider_access_failover_used": access_failover_used,
+        "provider_access_method": access_decision.selected_method if access_decision else "",
+        "provider_access_status": access_decision.status if access_decision else "",
+        "fallback_chain": getattr(decision, "fallback_chain", []),
+        "local_reroute_used": local_reroute_used,
+        "codex_oauth_bridge_used": codex_bridge_used,
+        "compression": compression_meta,
+        **routing_control_meta,
+    }
+    return payload
+
+
+def _chunk_text_for_stream(content: str, chunk_size: int = 512) -> list[str]:
+    text = str(content or "")
+    if not text:
+        return []
+    return [text[index:index + chunk_size] for index in range(0, len(text), chunk_size)]
+
+
+def _build_openai_stream_frames(payload: dict) -> list[str]:
+    model = str(payload.get("model", "") or "")
+    chunk_id = str(payload.get("id", "") or f"chatcmpl_{uuid.uuid4()}")
+    created = int(payload.get("created", int(time.time())))
+    choices = payload.get("choices", []) if isinstance(payload, dict) else []
+    choice = choices[0] if choices else {}
+    message = choice.get("message", {}) if isinstance(choice, dict) else {}
+    content = str(message.get("content", "") or "")
+    finish_reason = str(choice.get("finish_reason", "") or "stop")
+
+    frames = [
+        {
+            "id": chunk_id,
+            "object": "chat.completion.chunk",
+            "created": created,
+            "model": model,
+            "choices": [{
+                "index": 0,
+                "delta": {"role": "assistant"},
+                "finish_reason": None,
+            }],
+        }
+    ]
+    for text_chunk in _chunk_text_for_stream(content):
+        frames.append({
+            "id": chunk_id,
+            "object": "chat.completion.chunk",
+            "created": created,
+            "model": model,
+            "choices": [{
+                "index": 0,
+                "delta": {"content": text_chunk},
+                "finish_reason": None,
+            }],
+        })
+    frames.append({
+        "id": chunk_id,
+        "object": "chat.completion.chunk",
+        "created": created,
+        "model": model,
+        "choices": [{
+            "index": 0,
+            "delta": {},
+            "finish_reason": finish_reason,
+        }],
+    })
+    return [f"data: {json.dumps(frame, ensure_ascii=False)}\n\n" for frame in frames] + ["data: [DONE]\n\n"]
 
 
 def _provider_access_summary() -> dict:
@@ -670,20 +1111,26 @@ def _provider_access_summary() -> dict:
         return {}
     summary = {}
     for provider, decision in _provider_access_layer.summary().items():
+        fallback_methods = decision.get("fallback_methods", [])
         summary[provider] = {
             "method": decision.get("selected_method", "disabled"),
             "status": decision.get("status", "disabled"),
             "reason": decision.get("reason", ""),
             "runtime_confirmed": bool(decision.get("runtime_confirmed", False)),
             "target_form_reached": bool(decision.get("target_form_reached", False)),
+            "official_support": any(bool(option.get("official_support", False)) for option in decision.get("options", [])),
             "configured_methods": decision.get("configured_methods", []),
             "available_methods": decision.get("available_methods", []),
-            "fallback_methods": decision.get("fallback_methods", []),
+            "fallback_methods": fallback_methods,
+            "fallback_path": " -> ".join(fallback_methods) if fallback_methods else "",
             "billing_basis": decision.get("billing_basis", ""),
             "usage_tracking": decision.get("usage_tracking", ""),
             "quota_visibility": decision.get("quota_visibility", ""),
             "limitations": decision.get("limitations", []),
             "project_verification": decision.get("project_verification", ""),
+            "preferred_model": decision.get("preferred_model", ""),
+            "verified_models": decision.get("verified_models", []),
+            "target_model": decision.get("target_model", ""),
         }
     return summary
 
@@ -702,6 +1149,311 @@ def _routing_preferences_summary() -> dict:
     return {
         'prefer_prepaid_premium': bool((_routing_preferences or {}).get('prefer_prepaid_premium', False)),
         'prepaid_premium_providers': sorted(providers),
+    }
+
+
+def _normalize_ui_origin(origin: str) -> str:
+    value = str(origin or '').strip().rstrip('/')
+    if not value:
+        return ''
+    parsed = urlparse(value)
+    scheme = parsed.scheme or 'http'
+    host = (parsed.hostname or '').strip().lower()
+    port = parsed.port
+    if not host or not port:
+        return ''
+    return f"{scheme}://{host}:{port}"
+
+
+def _ui_cors_headers(origin: str) -> dict:
+    normalized = _normalize_ui_origin(origin)
+    if not normalized:
+        return {}
+    if normalized not in _OPENCLAW_UI_ORIGINS:
+        return {}
+    return {
+        'Access-Control-Allow-Origin': normalized,
+        'Access-Control-Allow-Headers': 'Content-Type, X-AIchain-Token',
+        'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+        'Vary': 'Origin',
+        'Cache-Control': 'no-store',
+    }
+
+
+def _is_trusted_ui_origin(origin: str) -> bool:
+    return bool(_ui_cors_headers(origin))
+
+
+def _is_trusted_ui_referer(referer: str) -> bool:
+    if not referer:
+        return False
+    try:
+        parsed = urlparse(referer)
+    except Exception:
+        return False
+    origin = f"{parsed.scheme}://{parsed.netloc}"
+    return _is_trusted_ui_origin(origin)
+
+
+def _is_loopback_client(client_ip: str) -> bool:
+    normalized = str(client_ip or "").strip()
+    return normalized in {"127.0.0.1", "::1", "::ffff:127.0.0.1", "localhost"}
+
+
+def _is_trusted_openclaw_provider_bridge(handler: BaseHTTPRequestHandler) -> bool:
+    """
+    Allow local OpenClaw provider calls to reach the OpenAI-compatible bridge
+    without the sidecar's private X-AIchain-Token.
+
+    OpenClaw's provider config for `aichain/dual-brain` uses a standard
+    OpenAI-compatible `Authorization: Bearer ignore` request against
+    http://127.0.0.1:8080/v1/chat/completions. That request originates from the
+    local gateway process, not from a browser, so there is no trusted Origin
+    header and there is no way for OpenClaw to inject the private sidecar token.
+    """
+    if not _is_loopback_client(getattr(handler, "client_address", ("",))[0]):
+        return False
+    authz = str(handler.headers.get("Authorization", "") or "").strip()
+    if not authz.lower().startswith("bearer "):
+        return False
+    token = authz.split(" ", 1)[1].strip()
+    return token.lower() == "ignore"
+
+
+def _get_ui_session(session_id: str = ''):
+    if not _session_store:
+        return None
+    resolved = str(session_id or '').strip() or DEFAULT_OPENCLAW_SESSION_ID
+    session = _session_store.load(resolved)
+    if session is None:
+        session = _session_store.create(session_id=resolved)
+    return session
+
+
+def _recommended_premium_ui_choice(provider_access: dict) -> tuple[str, str, bool]:
+    configured = set(_routing_preferences_summary().get('prepaid_premium_providers', []))
+    candidates = []
+    for provider, access in (provider_access or {}).items():
+        method = str(access.get('method', '') or '').strip().lower()
+        if method not in {'oauth', 'workspace_connector', 'enterprise_connector'}:
+            continue
+        if not access.get('runtime_confirmed'):
+            continue
+        billing_basis = str(access.get('billing_basis', '') or '').lower()
+        implicit = any(token in billing_basis for token in ('subscription', 'entitlement', 'workspace', 'enterprise'))
+        if provider not in configured and not implicit:
+            continue
+        model = str(access.get('preferred_model') or access.get('target_model') or '').strip()
+        if not model and provider == 'openai-codex' and access.get('target_form_reached'):
+            model = 'openai-codex/gpt-5.4'
+        if not model:
+            continue
+        candidates.append((0 if access.get('target_form_reached') else 1, provider, model, bool(access.get('target_form_reached'))))
+    if not candidates:
+        return '', '', False
+    candidates.sort()
+    _, provider, model, target_reached = candidates[0]
+    return provider, model, target_reached
+
+
+def _recommended_ui_route(session) -> dict:
+    provider_access = _provider_access_summary()
+    routing_preference = _normalize_routing_preference(getattr(session, 'routing_preference', 'balanced') if session else 'balanced')
+    reason_key = 'catalog_fallback'
+    reason_text = 'Using the current best runtime-confirmed route after global catalog ranking and local availability checks.'
+    if (
+        session
+        and getattr(session, 'routing_mode', 'auto') == 'manual'
+        and getattr(session, 'locked_model', '')
+        and _manual_lock_target_is_valid(getattr(session, 'locked_model', ''), getattr(session, 'locked_provider', ''))
+    ):
+        model = session.locked_model
+        provider = getattr(session, 'locked_provider', '') or _infer_provider(model)
+        reason_key = 'manual_lock'
+        reason_text = 'You manually locked this model for the current session.'
+    elif routing_preference == 'prefer_local' and _roles.get('local_brain'):
+        model = _roles.get('local_brain', '')
+        provider = _infer_provider(model)
+        reason_key = 'prefer_local'
+        reason_text = 'Local preference is active and a runtime-confirmed local model is available.'
+    else:
+        premium_provider, premium_model, target_reached = _recommended_premium_ui_choice(provider_access)
+        if premium_provider and premium_model:
+            model = premium_model
+            provider = premium_provider
+            reason_key = 'premium_entitlement'
+            if target_reached:
+                reason_text = 'A prepaid premium route is runtime-confirmed, so AIchain keeps maximum intelligence while marginal API cost stays near zero.'
+            else:
+                reason_text = 'Using the best currently verified premium model while the documented target model is not currently exposed.'
+        elif _roles.get('fast_brain'):
+            model = _roles.get('fast_brain', '')
+            provider = _infer_provider(model)
+            reason_key = 'fast_brain'
+            reason_text = 'Falling back to the catalog fast brain because no stronger prepaid route is currently confirmed.'
+        elif _roles.get('heavy_brain'):
+            model = _roles.get('heavy_brain', '')
+            provider = _infer_provider(model)
+            reason_key = 'heavy_brain'
+            reason_text = 'Using the catalog heavy brain because it is the best remaining runtime-confirmed route.'
+        else:
+            model = ''
+            provider = ''
+    access = provider_access.get(provider, {}) if provider else {}
+    return {
+        'label': model.split('/', 1)[-1] if model else '',
+        'model': model,
+        'provider': provider,
+        'access_method': access.get('method', ''),
+        'status': access.get('status', ''),
+        'effective_cost_label': _effective_cost_label(provider, access),
+        'why_key': reason_key,
+        'why': reason_text,
+        'fallback_path': access.get('fallback_path', ''),
+    }
+
+
+def _effective_cost_label(provider: str, access: dict) -> str:
+    method = str(access.get('method', '') or '').strip().lower()
+    billing = str(access.get('billing_basis', '') or '').strip().lower()
+    if provider in _LOCAL_PROVIDERS or method == 'local':
+        return 'zero API cost'
+    if method == 'oauth' and any(flag in billing for flag in {'subscription', 'entitlement', 'workspace', 'enterprise'}):
+        return 'marginal cost ~0'
+    if method == 'api_key':
+        return 'metered API'
+    if method in {'workspace_connector', 'enterprise_connector'}:
+        return 'connector-managed'
+    return ''
+
+
+def _ui_model_options(session) -> list[dict]:
+    provider_access = _provider_access_summary()
+    candidates = []
+    premium_provider, premium_model, target_reached = _recommended_premium_ui_choice(provider_access)
+    if premium_provider and premium_model:
+        premium_badges = ['Premium', 'Best intelligence']
+        if not target_reached:
+            premium_badges.append('Verified fallback')
+        candidates.append((premium_model, premium_provider, premium_badges))
+    role_badges = {
+        'fast_brain': ['Fast'],
+        'heavy_brain': ['Heavy'],
+        'visual_brain': ['Vision'],
+        'local_brain': ['Local'],
+    }
+    for role, badges in role_badges.items():
+        model = str(_roles.get(role, '') or '').strip()
+        if model:
+            candidates.append((model, _infer_provider(model), badges))
+    if (
+        session
+        and getattr(session, 'routing_mode', 'auto') == 'manual'
+        and getattr(session, 'locked_model', '')
+        and _manual_lock_target_is_valid(getattr(session, 'locked_model', ''), getattr(session, 'locked_provider', ''))
+    ):
+        candidates.append((session.locked_model, getattr(session, 'locked_provider', '') or _infer_provider(session.locked_model), ['Locked']))
+
+    seen = set()
+    items = []
+    for model, provider, badges in candidates:
+        if not model or model in seen:
+            continue
+        seen.add(model)
+        access = provider_access.get(provider, {}) if provider else {}
+        access_method = access.get('method', '')
+        if 'Locked' in badges:
+            group = 'manual'
+        elif provider in _LOCAL_PROVIDERS or access_method == 'local':
+            group = 'local'
+        elif access_method == 'oauth':
+            group = 'premium_access'
+        elif access_method in {'workspace_connector', 'enterprise_connector'}:
+            group = 'workspace'
+        else:
+            group = 'api_access'
+        items.append({
+            'label': model.split('/', 1)[-1],
+            'model': model,
+            'provider': provider,
+            'access_method': access_method,
+            'status': access.get('status', ''),
+            'effective_cost_label': _effective_cost_label(provider, access),
+            'badges': badges,
+            'group': group,
+        })
+    return items
+
+
+def _build_ui_why_this_route(session, recommended_current: dict) -> dict:
+    session_mode = getattr(session, 'routing_mode', 'auto') if session else 'auto'
+    session_preference = _normalize_routing_preference(getattr(session, 'routing_preference', 'balanced') if session else 'balanced')
+    bullets = []
+    if session_mode == 'manual':
+        bullets.append('Manual lock overrides automatic routing until you return to auto mode.')
+    else:
+        bullets.append('Global catalog remains first; local routing only narrows to routes you can actually use right now.')
+    if session_preference != 'balanced':
+        bullets.append(f'Active session preference: {session_preference}.')
+    if recommended_current.get('effective_cost_label'):
+        bullets.append(f'Current effective cost mode: {recommended_current.get("effective_cost_label")}.')
+    if recommended_current.get('fallback_path'):
+        bullets.append(f'Fallback path: {recommended_current.get("fallback_path")}.')
+    return {
+        'title': 'Why this model?',
+        'summary': recommended_current.get('why', 'Current route selected from global ranking plus your runtime access state.'),
+        'bullets': bullets,
+    }
+
+
+def _build_ui_savings_summary(recommended_current: dict, provider_access: dict) -> dict:
+    provider = recommended_current.get('provider', '')
+    access = provider_access.get(provider, {}) if provider else {}
+    label = recommended_current.get('effective_cost_label', '')
+    if label == 'marginal cost ~0':
+        headline = 'Premium entitlement is currently saving API spend.'
+        detail = 'AIchain is using a prepaid premium route instead of metered API billing while the entitlement remains runtime-confirmed.'
+        kind = 'savings'
+    elif label == 'zero API cost':
+        headline = 'Local runtime avoids API billing.'
+        detail = 'This route is using your local runtime instead of a metered provider.'
+        kind = 'local'
+    elif label == 'metered API':
+        headline = 'Metered route selected for better overall value.'
+        detail = 'AIchain chose a metered provider because it currently gives the best balance of intelligence, speed, stability and real availability.'
+        kind = 'metered'
+    else:
+        headline = 'Effective cost is not fully classified yet.'
+        detail = 'The route is valid, but cost mode is not fully described by the current runtime metadata.'
+        kind = 'unknown'
+    return {
+        'kind': kind,
+        'headline': headline,
+        'detail': detail,
+        'cost_mode': label,
+        'quota_visibility': access.get('quota_visibility', ''),
+    }
+
+
+def _build_ui_control_state(session, last_confirmation: str = '') -> dict:
+    provider_access = _provider_access_summary()
+    recommended_current = _recommended_ui_route(session)
+    return {
+        'session': {
+            'session_id': session.session_id if session else DEFAULT_OPENCLAW_SESSION_ID,
+            'routing_mode': getattr(session, 'routing_mode', 'auto') if session else 'auto',
+            'routing_preference': _normalize_routing_preference(getattr(session, 'routing_preference', 'balanced') if session else 'balanced'),
+            'locked_model': getattr(session, 'locked_model', '') if session else '',
+            'locked_provider': getattr(session, 'locked_provider', '') if session else '',
+        },
+        'recommended_current': recommended_current,
+        'why_this_route': _build_ui_why_this_route(session, recommended_current),
+        'savings_summary': _build_ui_savings_summary(recommended_current, provider_access),
+        'provider_access': provider_access,
+        'local_profiles': _local_profile_summary(),
+        'routing_preferences': _routing_preferences_summary(),
+        'model_options': _ui_model_options(session),
+        'last_confirmation': last_confirmation,
     }
 
 
@@ -984,9 +1736,21 @@ def _maybe_route_openai_codex_oauth(decision, target_model: str, target_provider
         return decision, target_model, target_provider, False
 
     try:
-        discovery = codex_adapter.discover()
-        available_models = list(getattr(discovery, "available_models", []) or [])
-        resolved_model = codex_adapter.resolve_preferred_model(target_model, available_models)
+        available_models = []
+        if getattr(codex_access, "verified_models", None):
+            available_models.extend(list(codex_access.verified_models or []))
+        preferred_model = str(getattr(codex_access, "preferred_model", "") or "").strip()
+        if preferred_model:
+            available_models.append(preferred_model)
+        target_model_hint = str(getattr(codex_access, "target_model", "") or "").strip()
+        if target_model_hint:
+            available_models.append(target_model_hint)
+        available_models = list(dict.fromkeys(model for model in available_models if model))
+        resolved_model = (
+            codex_adapter.resolve_preferred_model(target_model, available_models)
+            if available_models else
+            codex_adapter.resolve_preferred_model(target_model)
+        )
     except Exception:
         return decision, target_model, target_provider, False
 
@@ -1014,12 +1778,20 @@ def _ensure_provider_access(decision, payload: dict, target_model: str, target_p
         return decision, target_model, provider, None, False, ""
 
     access_decision = _provider_access_layer.resolve(provider)
+    runtime_ready = True
+    runtime_reason = ""
+    if provider in _LOCAL_PROVIDERS:
+        adapter = get_adapter(provider) or get_adapter_for_model(target_model)
+        runtime_ready, runtime_reason = _local_runtime_ready(provider, adapter)
+        if not runtime_ready:
+            access_decision = _provider_access_layer.resolve(provider)
     if (
         access_decision.selected_method != "disabled"
         and (
             access_decision.status != "target_form_not_reached"
             or access_decision.runtime_confirmed
         )
+        and runtime_ready
     ):
         return decision, target_model, provider, access_decision, False, ""
 
@@ -1031,7 +1803,7 @@ def _ensure_provider_access(decision, payload: dict, target_model: str, target_p
             provider,
             access_decision,
             False,
-            f"provider_access_unavailable:{provider}:{access_decision.reason}",
+            f"provider_access_unavailable:{provider}:{runtime_reason or access_decision.reason}",
         )
 
     available_models = {
@@ -1072,8 +1844,8 @@ def _ensure_provider_access(decision, payload: dict, target_model: str, target_p
         decision.cost_tier = alt.tier
         decision.fallback_chain = getattr(decision, "fallback_chain", []) + [prior_model]
         decision.reason = (
-            f"{decision.reason}|access_failover:{provider}:{access_decision.reason}->{alt.reason}"
-            if decision.reason else f"access_failover:{provider}:{access_decision.reason}->{alt.reason}"
+            f"{decision.reason}|access_failover:{provider}:{runtime_reason or access_decision.reason}->{alt.reason}"
+            if decision.reason else f"access_failover:{provider}:{runtime_reason or access_decision.reason}->{alt.reason}"
         )
         return decision, alt.model, alt_provider, alt_access, True, ""
 
@@ -1083,7 +1855,7 @@ def _ensure_provider_access(decision, payload: dict, target_model: str, target_p
         provider,
         access_decision,
         False,
-        f"provider_access_unavailable:{provider}:{access_decision.reason}",
+        f"provider_access_unavailable:{provider}:{runtime_reason or access_decision.reason}",
     )
 
 
@@ -1222,9 +1994,168 @@ def _record_route_eval(
             session.cache_refs.append(cache_ref)
 
 
+def _provider_timeout_ms(provider_name: str, payload: dict, messages: list[dict] | None = None) -> int:
+    normalized = str(provider_name or "").strip().lower()
+    max_tokens = _effective_max_tokens(payload, messages)
+    if normalized == "openai-codex":
+        prompt_text = _last_user_prompt_text(messages or []) or _payload_prompt_text(payload)
+        hint = prompt_text.lower()
+        if any(token in hint for token in ("code", "coding", "refactor", "debug", "unit test", "unit_test", "function", "script", "endpoint", "api", "sql", "patch", "repository", "repo")):
+            return max(90000, min(140000, 70000 + (max_tokens * 350)))
+        if any(token in hint for token in ("reason", "reasoning", "analysis", "security", "proof", "theorem", "research", "math", "password", "credential", "login", "secret", "token", "auth")):
+            return max(80000, min(130000, 65000 + (max_tokens * 325)))
+        if any(token in hint for token in ("json", "schema", "structured", "extract", "yaml", "xml", "csv")):
+            return max(55000, min(90000, 45000 + (max_tokens * 250)))
+        return max(45000, min(75000, 35000 + (max_tokens * 200)))
+    return 0
+
+
+def _payload_prompt_text(payload: dict) -> str:
+    messages = payload.get("messages") or []
+    parts: list[str] = []
+    for message in messages:
+        content = message.get("content", "")
+        if isinstance(content, str):
+            parts.append(content)
+        elif isinstance(content, list):
+            for part in content:
+                if isinstance(part, dict):
+                    text = part.get("text") or part.get("content") or ""
+                    if isinstance(text, str):
+                        parts.append(text)
+    return " ".join(part for part in parts if part)
+
+
+def _last_user_prompt_text(messages: list[dict]) -> str:
+    for message in reversed(messages or []):
+        if message.get("role") != "user":
+            continue
+        content = message.get("content", "")
+        if isinstance(content, str):
+            return content.strip()
+        if isinstance(content, list):
+            parts = []
+            for part in content:
+                if isinstance(part, dict):
+                    text = part.get("text") or part.get("content") or ""
+                    if isinstance(text, str) and text.strip():
+                        parts.append(text.strip())
+            return " ".join(parts).strip()
+    return ""
+
+
+def _request_shape(messages: list[dict], payload: dict | None = None) -> str:
+    if detect_visual_content(messages or []):
+        return "visual"
+
+    prompt_text = _last_user_prompt_text(messages or []) or _payload_prompt_text(payload or {})
+    normalized = prompt_text.lower()
+    word_count = len(prompt_text.split())
+
+    if _STRUCTURED_PROMPT_RE.search(normalized):
+        return "structured"
+    if detect_coding_intent(prompt_text):
+        return "coding"
+    if _CREATIVE_PROMPT_RE.search(normalized):
+        return "creative"
+    if _REASONING_PROMPT_RE.search(normalized):
+        return "reasoning"
+
+    complexity, confidence = estimate_complexity(prompt_text)
+    if complexity == "analyst" and confidence >= 0.7:
+        return "reasoning"
+    if word_count <= 18 and confidence >= 0.6:
+        return "simple"
+    return "general"
+
+
+def _default_max_tokens_for_shape(shape: str) -> int:
+    return {
+        "simple": 64,
+        "structured": 160,
+        "general": 256,
+        "visual": 320,
+        "reasoning": 480,
+        "creative": 640,
+        "coding": 900,
+    }.get(shape, 256)
+
+
+def _effective_max_tokens(payload: dict, messages: list[dict] | None = None) -> int:
+    raw = payload.get("max_tokens")
+    if raw is None:
+        return _default_max_tokens_for_shape(_request_shape(messages or payload.get("messages") or [], payload))
+    try:
+        value = int(raw)
+    except Exception:
+        value = 0
+    if value > 0:
+        return value
+    return _default_max_tokens_for_shape(_request_shape(messages or payload.get("messages") or [], payload))
+
+
+def _apply_response_style_overrides(messages: list[dict], payload: dict) -> list[dict]:
+    shape = _request_shape(messages or [], payload)
+    if shape != "simple":
+        return messages
+    brevity_prompt = {
+        "role": "system",
+        "content": "Respond briefly in 1-2 sentences unless the user explicitly asks for more detail.",
+    }
+    updated = list(messages or [])
+    insert_at = 1 if updated and updated[0].get("role") == "system" else 0
+    updated.insert(insert_at, brevity_prompt)
+    return updated
+
+
+def _local_runtime_ready(provider_name: str, adapter) -> tuple[bool, str]:
+    normalized = str(provider_name or "").strip().lower()
+    if normalized not in _LOCAL_PROVIDERS:
+        return True, ""
+    cache_key = f"{normalized}:{getattr(adapter, 'base_url', '')}"
+    now = time.time()
+    cached = _LOCAL_RUNTIME_HEALTH_CACHE.get(cache_key)
+    if cached and (now - cached[0]) < _LOCAL_RUNTIME_HEALTH_TTL_SECONDS:
+        return cached[1], cached[2]
+
+    healthy = False
+    reason = "runtime_health_check_failed"
+    try:
+        healthy = bool(adapter and adapter.health_check())
+        if healthy:
+            reason = ""
+    except Exception as exc:
+        reason = f"runtime_health_check_failed:{type(exc).__name__}"
+
+    _LOCAL_RUNTIME_HEALTH_CACHE[cache_key] = (now, healthy, reason)
+    if _provider_access_layer:
+        try:
+            _provider_access_layer.mark_runtime_result(
+                normalized,
+                healthy,
+                reason or "health_check:ok",
+                target_form_reached=healthy,
+            )
+        except Exception:
+            pass
+    return healthy, reason
+
+
+def _refresh_access_decision_for_provider(provider_name: str, access_decision):
+    if not _provider_access_layer or not provider_name:
+        return access_decision
+    try:
+        return _provider_access_layer.resolve(provider_name)
+    except Exception:
+        return access_decision
+
+
 def _build_request(payload: dict, messages: list[dict], target_model: str, adapter) -> CompletionRequest:
     extra = {}
     provider_name = str(getattr(adapter, "name", "") or "").lower()
+    provider_timeout_ms = _provider_timeout_ms(provider_name, payload, messages)
+    if provider_timeout_ms:
+        extra["timeout_ms"] = provider_timeout_ms
     if provider_name in _LOCAL_PROVIDERS and _local_profile_store:
         try:
             profile = _local_profile_store.get(target_model)
@@ -1240,8 +2171,8 @@ def _build_request(payload: dict, messages: list[dict], target_model: str, adapt
 
     return CompletionRequest(
         model=adapter.format_model_id(target_model),
-        messages=messages,
-        max_tokens=payload.get("max_tokens", 4096),
+        messages=_apply_response_style_overrides(messages, payload),
+        max_tokens=_effective_max_tokens(payload, messages),
         temperature=payload.get("temperature", 0.7),
         stream=payload.get("stream", False),
         extra=extra,
@@ -1346,8 +2277,24 @@ class AichainThreadingHTTPServer(ThreadingHTTPServer):
 # ─────────────────────────────────────────
 
 
-def _validate_output(content: str) -> dict:
+def _looks_like_code_generation_request(task_hint: str) -> bool:
+    hint = str(task_hint or "").lower()
+    if not hint:
+        return False
+    tokens = (
+        "code", "coding", "program", "implement", "build", "create", "develop",
+        "function", "class", "script", "module", "endpoint", "api", "database",
+        "schema", "migration", "python", "javascript", "typescript", "java",
+        "rust", "sql", "game", "tetris", "pygame", "godot", "unity", "unit test",
+        "integration test", "refactor", "debug", "bug", "fix", "patch",
+    )
+    return any(token in hint for token in tokens)
+
+
+def _validate_output(content: str, task_hint: str = "") -> dict:
     if _DANGEROUS_PATTERNS.search(content):
+        return {"safe": False, "reason": "dangerous_pattern_detected"}
+    if _CODE_SENSITIVE_PATTERNS.search(content) and not _looks_like_code_generation_request(task_hint):
         return {"safe": False, "reason": "dangerous_pattern_detected"}
     if _SECRET_TOKEN_RE.search(content):
         return {"safe": False, "reason": "secret_like_token_detected"}

@@ -25,6 +25,7 @@ except ImportError:
 
 
 DEFAULT_SIDECAR_URL = "http://127.0.0.1:8080"
+DEFAULT_OPENCLAW_SESSION_ID = "openclaw-default"
 TOKEN_PATH = Path.home() / ".openclaw" / "aichain" / ".auth_token"
 
 
@@ -77,9 +78,8 @@ def build_chat_payload(args) -> dict:
         "max_tokens": args.max_tokens,
         "temperature": args.temperature,
     }
-    session_id = str(getattr(args, "session_id", "") or "").strip()
-    if session_id:
-        payload["session_id"] = session_id
+    session_id = str(getattr(args, "session_id", "") or "").strip() or DEFAULT_OPENCLAW_SESSION_ID
+    payload["session_id"] = session_id
 
     manual_model = str(getattr(args, "manual_model", "") or "").strip()
     manual_provider = str(getattr(args, "manual_provider", "") or "").strip()
@@ -185,3 +185,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+

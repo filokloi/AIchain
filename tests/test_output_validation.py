@@ -45,6 +45,13 @@ class TestOutputValidation:
         result = _validate_output("def fibonacci(n):\n    if n <= 1:\n        return n\n    return fibonacci(n-1) + fibonacci(n-2)")
         assert result["safe"] is True
 
+    def test_code_sensitive_patterns_pass_for_code_generation_requests(self):
+        result = _validate_output(
+            "import os\nos.system('cls')\nprint('ready')",
+            task_hint="Write Python code for a terminal game.",
+        )
+        assert result["safe"] is True
+
     def test_empty_passes(self):
         result = _validate_output("")
         assert result["safe"] is True
