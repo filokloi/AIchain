@@ -36,6 +36,7 @@ from aichaind.routing.rules import RouteDecision, detect_visual_content, detect_
 from aichaind.providers.registry import get_adapter, get_adapter_for_model
 from aichaind.providers.base import CompletionRequest, CompletionResponse
 from aichaind.telemetry.audit import AuditLogger
+from aichaind.telemetry.metrics import OperatorMetrics
 from aichaind.ui.companion_panel import build_companion_panel_html
 from aichaind.ui.openclaw_bridge import build_openclaw_bridge_script
 
@@ -60,6 +61,7 @@ _provider_access_layer = None
 _local_profile_store = None
 _input_redaction_enabled = True
 _routing_preferences = {}
+_operator_metrics: OperatorMetrics = None
 
 _CLOUD_PROVIDERS = {
     "openrouter", "openai", "openai-codex", "google", "anthropic", "deepseek", "groq",
@@ -198,6 +200,7 @@ class AichainDHandler(BaseHTTPRequestHandler):
             "roles": _roles.copy(),
             "auth_active": _auth_manager.is_active if _auth_manager else False,
             "provider_access": _provider_access_summary(),
+            "operator_metrics": _operator_metrics.snapshot() if _operator_metrics else {},
         }
         self._send_json(200, status_data)
 
@@ -574,6 +577,8 @@ class AichainDHandler(BaseHTTPRequestHandler):
             if response.status == "success":
                 _controller.record_success()
             elif response.status in ("error", "timeout"):
+                if _operator_metrics:
+                    _operator_metrics.record_timeout()
                 action = _controller.record_error((response.error or "")[:100])
                 if action == "ESCALATE":
                     log.warning("Controller requesting escalation")
@@ -641,6 +646,13 @@ class AichainDHandler(BaseHTTPRequestHandler):
                 return
 
         if response.status == "success":
+            if _operator_metrics:
+                _operator_metrics.record_request(
+                    model_id=target_model,
+                    is_manual=bool(routing_control.get("manual_override_active")),
+                    is_fallback=bool(failover_used or getattr(access_decision, "failover_used", False)),
+                    latency_ms=exec_latency,
+                )
             requested_model = str(payload.get("model", "") or "").strip()
             result = _build_success_response_payload(
                 requested_model=requested_model,
@@ -2365,11 +2377,12 @@ def start_server(
     local_profile_store=None,
     input_redaction_enabled: bool = True,
     routing_preferences: dict | None = None,
+    operator_metrics: OperatorMetrics = None,
 ):
     global _auth_manager, _rate_limiter, _cascade_router, _audit_logger
     global _policy_engine, _controller, _session_store, _pii_redactor
     global _roles, _version, _balance_checker, _discovery_report
-    global _route_eval_collector, _summarizer, _injection_guard, _provider_access_layer, _local_profile_store, _input_redaction_enabled, _routing_preferences
+    global _route_eval_collector, _summarizer, _injection_guard, _provider_access_layer, _local_profile_store, _input_redaction_enabled, _routing_preferences, _operator_metrics
 
     _auth_manager = auth_manager
     _rate_limiter = rate_limiter or TokenBucketRateLimiter()
@@ -2390,6 +2403,7 @@ def start_server(
     _local_profile_store = local_profile_store
     _input_redaction_enabled = bool(input_redaction_enabled)
     _routing_preferences = dict(routing_preferences or {})
+    _operator_metrics = operator_metrics
 
     server_address = ("127.0.0.1", port)
     httpd = AichainThreadingHTTPServer(server_address, AichainDHandler)

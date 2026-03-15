@@ -26,6 +26,7 @@ from aichaind.providers.access import build_provider_access_layer
 from aichaind.providers.local_runtime import resolve_local_execution
 from aichaind.providers.local_profile import LocalProfileStore
 from aichaind.telemetry.audit import AuditLogger
+from aichaind.telemetry.metrics import OperatorMetrics
 from aichaind.transport.http_server import start_server
 
 
@@ -354,6 +355,8 @@ def main():
     audit_logger = AuditLogger(paths["audit_file"])
     audit_logger.record("daemon_start", {"version": VERSION})
 
+    operator_metrics = OperatorMetrics(paths["data_dir"])
+
     from aichaind.providers.discovery import discover_providers, inject_keys_into_env
     discovery_report = discover_providers()
     inject_keys_into_env(discovery_report)
@@ -423,6 +426,7 @@ def main():
         local_profile_store=local_profile_store,
         input_redaction_enabled=cfg.get("security", {}).get("redact_inputs_before_cloud", False),
         routing_preferences=cost_optimizer._routing_preferences,
+        operator_metrics=operator_metrics,
     )
 
     bootstrap_thread = threading.Thread(
@@ -445,6 +449,7 @@ def main():
 
     def shutdown(signum, frame):
         log.info("Shutdown signal received...")
+        operator_metrics.flush_snapshot()
         audit_logger.record("daemon_stop", {"signal": signum})
         auth_manager.revoke()
         release_single_instance(paths["pid_file"])

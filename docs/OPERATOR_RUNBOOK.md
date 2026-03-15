@@ -48,9 +48,22 @@ This performs a safe local health lookup (`/health`), fetches operational teleme
 
 ---
 
-## Operational Observability
+## Operational Observability & Metrics
+
+AIchain collects lightweight decision-grade telemetry to help you monitor performance without dragging down your system with a heavy database footprint. This telemetry is attached securely to the `/status` endpoint payload.
+
 - `/health`: Liveness probe. Returns JSON like `{"status": "ok", "system_state": "NORMAL"}`.
-- `/status`: Detailed telemetry. Exposes active router rules, fast_brain/heavy_brain mappings, and circuit breaker health statistics.
+- `/status`: Extended operational telemetry payload. Contains:
+  - **Provider Health Limits**: Global circuit-breaker thresholds per backend.
+  - **Operator Metrics**: Cumulative operational counters.
+
+### Interpreting Operator Metrics
+When invoking `/status`, the `operator_metrics` sub-dictionary will reveal exactly how AIchain is handling your traffic behind the gateway.
+
+- **`total_requests`**: Absolute number of requests sent to the proxy bridge. If it’s stuck at zero, OpenClaw itself is failing to connect to the daemon HTTP port (8080).
+- **`average_latency_ms`**: An Exponentially Weighted Moving Average (~10-request window) of provider execution time. If this spikes significantly, a provider is bogging down, consider using God Mode to shift primary models.
+- **`fallback_events`**: Number of times the primary model failed/timed out, and the Cascade Router successfully rescued the request by silently trying the next model in the pricing tier hierarchy. Over 2% fallback rate implies backend provider hostility or exhausted quotas.
+- **`routes_selected`**: Distribution of exact backend target models responding to your system. Useful for validating that the fast-brain is correctly routing the bulk of requests instead of invoking expensive models unnecessarily.
 
 ## Troubleshooting
 
