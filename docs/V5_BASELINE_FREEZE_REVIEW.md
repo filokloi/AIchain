@@ -37,7 +37,7 @@ The v5 baseline formally encapsulates:
 ## 7. Accepted Risks
 - **Only real accepted risks that remain**:
   - `docs/V5_BASELINE.md` defines Single Operator setups natively. Launching AIchain as a multi-tenant hub introduces implicit authorization hazards.
-  - Previous Gemini API Key exposure in `catalog_manifest.json` history is mitigated natively via CI rotations and `.gitignore` updates, but legacy repo clones theoretically possess rotated strings.
+  - Previous Gemini API Key exposure in `catalog_manifest.json` history: The live manifest is now scrubbed, and future public leaks through the manifest pipeline are prevented by the current scrubbing logic. Prior exposure remains an accepted historical/operator risk unless separately rotated. No current live public artifact exposes the key.
 - **Why they do not block baseline freeze**: The v5 perimeter is heavily delineated as a local companion to OpenClaw. It perfectly fulfills its architectural brief.
 
 ## 8. Final Baseline Verdict
