@@ -13,7 +13,8 @@ Goal: catalog first, access second, user-effective routing third.
 """
 
 import logging
-from dataclasses import dataclass
+import time
+from dataclasses import dataclass, field
 
 log = logging.getLogger("aichaind.routing.cost_optimizer")
 
@@ -77,6 +78,15 @@ _VERIFIED_DIRECT_MODELS = {
 
 
 @dataclass
+class _QuotaExhaustionState:
+    """Tracks consecutive failures for a single provider."""
+    failures: int = 0
+    first_failure_at: float = 0.0
+    last_failure_at: float = 0.0
+    demoted_until: float = 0.0
+
+
+@dataclass
 class CostRoute:
     """A cost-optimized routing decision."""
     model: str
@@ -120,6 +130,11 @@ class _AccessSnapshot:
 class CostOptimizer:
     """Optimizes model selection using local effective score semantics."""
 
+    # Default quota exhaustion thresholds
+    QUOTA_FAILURE_THRESHOLD = 3          # consecutive failures before demotion
+    QUOTA_FAILURE_WINDOW_SECONDS = 300   # failures must occur within this window
+    QUOTA_DEMOTION_SECONDS = 600         # how long the provider stays demoted
+
     def __init__(self, pricing_table: dict = None):
         self._pricing: dict[str, ModelPricing] = {}
         self._budget_alerts: list[dict] = []
@@ -130,6 +145,10 @@ class CostOptimizer:
             "prefer_prepaid_premium": False,
             "prepaid_premium_providers": set(),
         }
+        self._quota_tracker: dict[str, _QuotaExhaustionState] = {}
+        self._quota_failure_threshold = self.QUOTA_FAILURE_THRESHOLD
+        self._quota_failure_window = self.QUOTA_FAILURE_WINDOW_SECONDS
+        self._quota_demotion_duration = self.QUOTA_DEMOTION_SECONDS
         if pricing_table:
             self._load_pricing(pricing_table)
 
@@ -161,6 +180,89 @@ class CostOptimizer:
             "prefer_prepaid_premium": bool(cfg.get("prefer_prepaid_premium", False)),
             "prepaid_premium_providers": providers,
         }
+        # Configurable quota exhaustion thresholds
+        quota_cfg = cfg.get("quota_exhaustion") or {}
+        if isinstance(quota_cfg, dict):
+            self._quota_failure_threshold = int(quota_cfg.get("failure_threshold", self.QUOTA_FAILURE_THRESHOLD))
+            self._quota_failure_window = int(quota_cfg.get("failure_window_seconds", self.QUOTA_FAILURE_WINDOW_SECONDS))
+            self._quota_demotion_duration = int(quota_cfg.get("demotion_seconds", self.QUOTA_DEMOTION_SECONDS))
+
+    def record_provider_failure(self, provider: str, is_quota_error: bool = False) -> bool:
+        """Record a provider failure. Returns True if the provider is now demoted.
+
+        When *is_quota_error* is True (e.g. 429 / quota-exceeded), a single
+        failure counts as much as the entire threshold so the demotion
+        takes effect immediately.
+        """
+        normalized = self._normalize_provider(provider)
+        now = time.monotonic()
+        state = self._quota_tracker.get(normalized)
+        if state is None:
+            state = _QuotaExhaustionState()
+            self._quota_tracker[normalized] = state
+
+        # Reset if the failure window has elapsed since the first failure
+        if state.failures > 0 and (now - state.first_failure_at) > self._quota_failure_window:
+            state.failures = 0
+            state.first_failure_at = 0.0
+
+        if state.failures == 0:
+            state.first_failure_at = now
+
+        if is_quota_error:
+            state.failures = self._quota_failure_threshold
+        else:
+            state.failures += 1
+        state.last_failure_at = now
+
+        if state.failures >= self._quota_failure_threshold:
+            state.demoted_until = now + self._quota_demotion_duration
+            log.warning(
+                f"Quota exhaustion: provider={normalized} demoted for "
+                f"{self._quota_demotion_duration}s after {state.failures} failures"
+            )
+            return True
+        return False
+
+    def record_provider_success(self, provider: str) -> None:
+        """Record a provider success, clearing its failure state."""
+        normalized = self._normalize_provider(provider)
+        state = self._quota_tracker.get(normalized)
+        if state:
+            state.failures = 0
+            state.first_failure_at = 0.0
+            state.demoted_until = 0.0
+
+    def _provider_quota_suppressed(self, provider: str) -> bool:
+        """Check if a provider is temporarily suppressed due to quota exhaustion."""
+        normalized = self._normalize_provider(provider)
+        state = self._quota_tracker.get(normalized)
+        if not state:
+            return False
+        if state.demoted_until <= 0.0:
+            return False
+        now = time.monotonic()
+        if now >= state.demoted_until:
+            # Demotion expired, reset
+            state.failures = 0
+            state.first_failure_at = 0.0
+            state.demoted_until = 0.0
+            log.info(f"Quota demotion expired for provider={normalized}, restored.")
+            return False
+        return True
+
+    def quota_status(self) -> dict[str, dict]:
+        """Return quota exhaustion status for all tracked providers."""
+        now = time.monotonic()
+        result = {}
+        for provider, state in self._quota_tracker.items():
+            suppressed = state.demoted_until > 0.0 and now < state.demoted_until
+            result[provider] = {
+                "failures": state.failures,
+                "suppressed": suppressed,
+                "demoted_remaining_seconds": max(0.0, state.demoted_until - now) if suppressed else 0.0,
+            }
+        return result
 
     def _load_pricing(self, table: dict):
         self._pricing.clear()
@@ -229,6 +331,9 @@ class CostOptimizer:
             available_models = {}
         routing_preference = self._normalize_user_routing_preference(routing_preference)
         exclude_providers = {self._normalize_provider(p) for p in (exclude_providers or set())}
+        for provider, state in self._quota_tracker.items():
+            if self._provider_quota_suppressed(provider):
+                exclude_providers.add(provider)
         exclude_models = set(exclude_models or set())
         providers_with_money = [
             self._normalize_provider(provider)

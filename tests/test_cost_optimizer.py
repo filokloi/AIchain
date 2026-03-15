@@ -1044,3 +1044,147 @@ def test_catalog_only_direct_model_is_rejected_until_runtime_capabilities_exist(
 
     assert result.model != 'deepseek/deepseek-r1-distill-qwen-32b'
     assert result.model in {'deepseek/deepseek-reasoner', 'deepseek/deepseek-chat', 'openrouter/google/gemini-2.5-pro'}
+
+
+# --- Quota Exhaustion Detection Tests ---
+
+
+def _make_premium_optimizer():
+    """Helper: create an optimizer with prepaid premium configured for openai-codex."""
+    class _Decision:
+        def __init__(self, provider, selected_method='disabled', runtime_confirmed=False):
+            self.provider = provider
+            self.selected_method = selected_method
+            self.status = 'runtime_confirmed' if runtime_confirmed else 'disabled'
+            self.reason = ''
+            self.runtime_confirmed = runtime_confirmed
+            self.target_form_reached = runtime_confirmed
+            self.quota_visibility = 'provider_console'
+            self.billing_basis = 'subscription_plan_window'
+            self.preferred_model = ''
+            self.verified_models = []
+            self.target_model = ''
+
+    class _Layer:
+        def summary(self):
+            return {'openai-codex': {'selected_method': 'oauth', 'runtime_confirmed': True}}
+        def resolve(self, provider):
+            if provider == 'openai-codex':
+                return _Decision(provider, selected_method='oauth', runtime_confirmed=True)
+            return _Decision(provider, selected_method='api_key', runtime_confirmed=True)
+
+    optimizer = CostOptimizer({'routing_hierarchy': []})
+    optimizer.configure_provider_access_layer(_Layer())
+    optimizer.configure_provider_capabilities({'openai-codex': {'openai-codex/gpt-5.4'}})
+    optimizer.configure_routing_preferences({
+        'prefer_prepaid_premium': True,
+        'prepaid_premium_providers': ['openai-codex'],
+    })
+    return optimizer
+
+
+def test_quota_exhaustion_demotes_after_threshold():
+    optimizer = _make_premium_optimizer()
+    # Below threshold — not demoted
+    assert not optimizer.record_provider_failure('openai-codex')
+    assert not optimizer.record_provider_failure('openai-codex')
+    assert not optimizer._provider_quota_suppressed('openai-codex')
+    # At threshold — demoted
+    assert optimizer.record_provider_failure('openai-codex')
+    assert optimizer._provider_quota_suppressed('openai-codex')
+
+
+def test_quota_exhaustion_success_clears_state():
+    optimizer = _make_premium_optimizer()
+    optimizer.record_provider_failure('openai-codex')
+    optimizer.record_provider_failure('openai-codex')
+    optimizer.record_provider_failure('openai-codex')
+    assert optimizer._provider_quota_suppressed('openai-codex')
+    optimizer.record_provider_success('openai-codex')
+    assert not optimizer._provider_quota_suppressed('openai-codex')
+
+
+def test_quota_error_causes_immediate_demotion():
+    optimizer = _make_premium_optimizer()
+    assert optimizer.record_provider_failure('openai-codex', is_quota_error=True)
+    assert optimizer._provider_quota_suppressed('openai-codex')
+
+
+def test_quota_suppressed_premium_falls_back_to_api_key():
+    optimizer = _make_premium_optimizer()
+    optimizer.record_provider_failure('openai-codex', is_quota_error=True)
+
+    report = BalanceReport(
+        balances={
+            'deepseek': ProviderBalance(provider='deepseek', has_credits=True, balance_usd=3.0, source='api'),
+        },
+        providers_with_credits=['deepseek'],
+    )
+
+    result = optimizer.optimize(
+        model_preference='heavy',
+        balance_report=report,
+        available_models={
+            'free': 'deepseek/deepseek-chat',
+            'heavy': 'deepseek/deepseek-reasoner',
+        },
+        estimated_tokens=256,
+        task_hint='heuristic_code_engineering',
+    )
+
+    # Must NOT route to the suppressed premium provider
+    assert result.provider != 'openai-codex'
+    assert result.provider == 'deepseek'
+
+
+def test_quota_status_reports_suppressed_provider():
+    optimizer = _make_premium_optimizer()
+    optimizer.record_provider_failure('openai-codex', is_quota_error=True)
+    status = optimizer.quota_status()
+    assert 'openai-codex' in status
+    assert status['openai-codex']['suppressed'] is True
+    assert status['openai-codex']['failures'] == 3
+    assert status['openai-codex']['demoted_remaining_seconds'] > 0
+
+
+def test_quota_healthy_premium_still_used():
+    """When premium is NOT exhausted, it should still be preferred."""
+    optimizer = _make_premium_optimizer()
+    report = BalanceReport(
+        balances={
+            'deepseek': ProviderBalance(provider='deepseek', has_credits=True, balance_usd=3.0, source='api'),
+        },
+        providers_with_credits=['deepseek'],
+    )
+
+    result = optimizer.optimize(
+        model_preference='heavy',
+        balance_report=report,
+        available_models={
+            'free': 'deepseek/deepseek-chat',
+            'heavy': 'deepseek/deepseek-reasoner',
+        },
+        estimated_tokens=256,
+        task_hint='heuristic_code_engineering',
+    )
+
+    assert result.provider == 'openai-codex'
+    assert result.model == 'openai-codex/gpt-5.4'
+
+
+def test_quota_configurable_thresholds():
+    optimizer = _make_premium_optimizer()
+    optimizer.configure_routing_preferences({
+        'prefer_prepaid_premium': True,
+        'prepaid_premium_providers': ['openai-codex'],
+        'quota_exhaustion': {
+            'failure_threshold': 5,
+            'failure_window_seconds': 60,
+            'demotion_seconds': 120,
+        },
+    })
+    for _ in range(4):
+        assert not optimizer.record_provider_failure('openai-codex')
+    assert not optimizer._provider_quota_suppressed('openai-codex')
+    assert optimizer.record_provider_failure('openai-codex')
+    assert optimizer._provider_quota_suppressed('openai-codex')
