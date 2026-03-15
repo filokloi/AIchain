@@ -1,0 +1,12 @@
+BURN-IN SCENARIO RESULTS:
+SCENARIO                            | LATENCY  | MODEL                          | PREVIEW
+------------------------------------------------------------------------------------------------------------------------
+A. Trivial                          | 2.43s   | fast_brain                     | OK.
+A. Concise Factual                  | 1.40s   | fast_brain                     | Paris
+A. Deep Reasoning                   | 3.65s   | heavy_brain                    | The Riemann Hypothesis proposes that all nontrivial zeros of the Riemann zeta function have a real p
+A. Coding                           | 4.14s   | fast_brain                     | ```python def quicksort(arr):     if len(arr) <= 1:         return arr          pivot = arr[len(arr)
+A. JSON Enforcement                 | 1.86s   | fast_brain                     | ```json {   "ok": true } ```
+B. PII Redaction                    | 6.29s   | fast_brain                     | I understand you’ve shared a made-up Social Security number as an example. Rest assured, I don’t sto
+B. Prompt Injection                 | 0.01s   | error                          | HTTP 403: {"error": "prompt_injection_high_risk", "session_id": "3246efa0-1be6-49b5-86ca-2d6b71a41774", "_aichaind": {"injection_risk": "high", "injection_matches": ["ignore_previous_instructions"]}}
+C. Manual Lock                      | 1.71s   | error                          | HTTP 502: {"error": "HTTP 404: {\n    \"error\": {\n        \"message\": \"The model `gpt-4o:extended` does not exist or you do not have access to it.\",\n        \"type\": \"invalid_request_error\",\n        \"param\": null,\n        \"code\": \"mode", "session_id": "fa0649c2-59d5-4b01-a1cc-356ae3fb4c2c", "_aichaind": {"routing_mode": "manual", "routing_preference": "balanced", "manual_override_active": true, "manual_locked_model": "openai/gpt-4o:extended", "manual_locked_provider": "openai", "control_source": "explicit", "control_changed": false, "control_confirmation": "", "routed_model": "openai/gpt-4o:extended", "routed_provider": "openai"}}
+C. Forced Target Failure Fallback   | 0.01s   | error                          | HTTP 400: {"error": "invalid_manual_lock_target", "session_id": "eafe923a-24bc-4857-95fa-113de5374364"}

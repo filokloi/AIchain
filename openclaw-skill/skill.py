@@ -109,7 +109,13 @@ def cmd_chat(args):
         content = result["body"].get("choices", [{}])[0].get("message", {}).get("content", "")
         print(content)
     else:
-        print(f"Error ({result['status']}): {json.dumps(result['body'], indent=2)}", file=sys.stderr)
+        # Prevent raw JSON dumps to OpenClaw's stderr
+        body = result["body"]
+        error_msg = body.get("error", "") if isinstance(body, dict) else str(body)
+        if result["status"] == 503 or result["status"] == 504:
+            print(f"[AIchain] Daemon offline or unreachable ({result['status']}): {error_msg}", file=sys.stderr)
+        else:
+            print(f"[AIchain] Request failed ({result['status']}): {error_msg}", file=sys.stderr)
         sys.exit(1)
 
 

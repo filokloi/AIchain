@@ -1,0 +1,532 @@
+{
+  "status": "ok",
+  "version": "5.0.0-alpha",
+  "uptime_seconds": 0.0,
+  "system_state": "SystemState.NORMAL",
+  "routing_mode": "cascade",
+  "catalog_age_seconds": 0.0,
+  "provider_health": {
+    "openrouter": {
+      "state": "CLOSED",
+      "is_available": true,
+      "failures": 0
+    },
+    "google": {
+      "state": "CLOSED",
+      "is_available": true,
+      "failures": 0
+    },
+    "groq": {
+      "state": "CLOSED",
+      "is_available": true,
+      "failures": 0
+    },
+    "deepseek": {
+      "state": "CLOSED",
+      "is_available": true,
+      "failures": 0
+    },
+    "openai": {
+      "state": "CLOSED",
+      "is_available": true,
+      "failures": 0
+    },
+    "openai-codex": {
+      "state": "CLOSED",
+      "is_available": true,
+      "failures": 0
+    },
+    "local": {
+      "state": "CLOSED",
+      "is_available": true,
+      "failures": 0
+    },
+    "vllm": {
+      "state": "CLOSED",
+      "is_available": true,
+      "failures": 0
+    },
+    "ollama": {
+      "state": "CLOSED",
+      "is_available": true,
+      "failures": 0
+    },
+    "lmstudio": {
+      "state": "CLOSED",
+      "is_available": true,
+      "failures": 0
+    },
+    "llamacpp": {
+      "state": "CLOSED",
+      "is_available": true,
+      "failures": 0
+    },
+    "mistral": {
+      "state": "CLOSED",
+      "is_available": true,
+      "failures": 0
+    },
+    "xai": {
+      "state": "CLOSED",
+      "is_available": true,
+      "failures": 0
+    },
+    "cohere": {
+      "state": "CLOSED",
+      "is_available": true,
+      "failures": 0
+    },
+    "moonshot": {
+      "state": "CLOSED",
+      "is_available": true,
+      "failures": 0
+    },
+    "zhipu": {
+      "state": "CLOSED",
+      "is_available": true,
+      "failures": 0
+    }
+  },
+  "roles": {
+    "fast_brain": "minimax/minimax-01",
+    "heavy_brain": "openrouter/google/gemini-2.5-pro",
+    "visual_brain": "openai/gpt-4o:extended",
+    "local_brain": ""
+  },
+  "auth_active": true,
+  "provider_access": {
+    "anthropic": {
+      "method": "api_key",
+      "status": "target_form_not_reached",
+      "reason": "adapter_missing",
+      "runtime_confirmed": false,
+      "target_form_reached": false,
+      "official_support": true,
+      "configured_methods": [
+        "api_key"
+      ],
+      "available_methods": [
+        "api_key"
+      ],
+      "fallback_methods": [],
+      "fallback_path": "",
+      "billing_basis": "metered_api_billing",
+      "usage_tracking": "provider_console",
+      "quota_visibility": "provider_console",
+      "limitations": [
+        "Anthropic model execution currently relies on API-key billing."
+      ],
+      "project_verification": "API key path is the supported execution mode in AIchain.",
+      "preferred_model": "",
+      "verified_models": [],
+      "target_model": ""
+    },
+    "cohere": {
+      "method": "api_key",
+      "status": "target_form_not_reached",
+      "reason": "discover:authenticated:models=0",
+      "runtime_confirmed": false,
+      "target_form_reached": false,
+      "official_support": true,
+      "configured_methods": [
+        "api_key"
+      ],
+      "available_methods": [
+        "api_key"
+      ],
+      "fallback_methods": [],
+      "fallback_path": "",
+      "billing_basis": "",
+      "usage_tracking": "",
+      "quota_visibility": "",
+      "limitations": [],
+      "project_verification": "",
+      "preferred_model": "",
+      "verified_models": [],
+      "target_model": ""
+    },
+    "deepseek": {
+      "method": "api_key",
+      "status": "runtime_confirmed",
+      "reason": "discover:authenticated:models=2",
+      "runtime_confirmed": true,
+      "target_form_reached": true,
+      "official_support": true,
+      "configured_methods": [
+        "api_key"
+      ],
+      "available_methods": [
+        "api_key"
+      ],
+      "fallback_methods": [],
+      "fallback_path": "",
+      "billing_basis": "metered_api_billing",
+      "usage_tracking": "balance_api_plus_provider_console",
+      "quota_visibility": "machine_readable_balance_and_provider_console",
+      "limitations": [
+        "DeepSeek balance is queried directly when available and cached for routing decisions."
+      ],
+      "project_verification": "Runtime confirmed in aichaind and used as a current stable execution path.",
+      "preferred_model": "",
+      "verified_models": [],
+      "target_model": ""
+    },
+    "google": {
+      "method": "api_key",
+      "status": "target_form_not_reached",
+      "reason": "discover:auth_failed:models=0",
+      "runtime_confirmed": false,
+      "target_form_reached": false,
+      "official_support": true,
+      "configured_methods": [
+        "api_key"
+      ],
+      "available_methods": [
+        "api_key"
+      ],
+      "fallback_methods": [],
+      "fallback_path": "",
+      "billing_basis": "metered_api_billing_or_free_tier",
+      "usage_tracking": "provider_console",
+      "quota_visibility": "provider_console",
+      "limitations": [
+        "API quotas and free-tier limits are controlled by Google AI Studio or Google Cloud."
+      ],
+      "project_verification": "API key execution path is implemented; runtime health depends on current provider auth state.",
+      "preferred_model": "",
+      "verified_models": [],
+      "target_model": ""
+    },
+    "groq": {
+      "method": "api_key",
+      "status": "runtime_confirmed",
+      "reason": "discover:authenticated:models=18",
+      "runtime_confirmed": true,
+      "target_form_reached": true,
+      "official_support": true,
+      "configured_methods": [
+        "api_key"
+      ],
+      "available_methods": [
+        "api_key"
+      ],
+      "fallback_methods": [],
+      "fallback_path": "",
+      "billing_basis": "",
+      "usage_tracking": "",
+      "quota_visibility": "",
+      "limitations": [],
+      "project_verification": "",
+      "preferred_model": "",
+      "verified_models": [],
+      "target_model": ""
+    },
+    "llamacpp": {
+      "method": "local",
+      "status": "target_form_not_reached",
+      "reason": "discover:error:models=0",
+      "runtime_confirmed": false,
+      "target_form_reached": false,
+      "official_support": true,
+      "configured_methods": [
+        "local"
+      ],
+      "available_methods": [
+        "local"
+      ],
+      "fallback_methods": [],
+      "fallback_path": "",
+      "billing_basis": "local_inference_hardware",
+      "usage_tracking": "local_runtime_health_and_operator_observation",
+      "quota_visibility": "local_only",
+      "limitations": [
+        "Requires a healthy local model server and a generative model that passes completion probing."
+      ],
+      "project_verification": "Implemented and tested; runtime confirmation depends on the local machine.",
+      "preferred_model": "",
+      "verified_models": [],
+      "target_model": ""
+    },
+    "lmstudio": {
+      "method": "local",
+      "status": "target_form_not_reached",
+      "reason": "discover:error:models=0",
+      "runtime_confirmed": false,
+      "target_form_reached": false,
+      "official_support": true,
+      "configured_methods": [
+        "local"
+      ],
+      "available_methods": [
+        "local"
+      ],
+      "fallback_methods": [],
+      "fallback_path": "",
+      "billing_basis": "local_inference_hardware",
+      "usage_tracking": "local_runtime_health_and_operator_observation",
+      "quota_visibility": "local_only",
+      "limitations": [
+        "Requires a healthy local model server and a generative model that passes completion probing."
+      ],
+      "project_verification": "Implemented and tested; runtime confirmation depends on the local machine.",
+      "preferred_model": "",
+      "verified_models": [],
+      "target_model": ""
+    },
+    "local": {
+      "method": "local",
+      "status": "target_form_not_reached",
+      "reason": "discover:error:models=0",
+      "runtime_confirmed": false,
+      "target_form_reached": false,
+      "official_support": true,
+      "configured_methods": [
+        "local"
+      ],
+      "available_methods": [
+        "local"
+      ],
+      "fallback_methods": [],
+      "fallback_path": "",
+      "billing_basis": "local_inference_hardware",
+      "usage_tracking": "local_runtime_health_and_operator_observation",
+      "quota_visibility": "local_only",
+      "limitations": [
+        "Requires a healthy local model server and a generative model that passes completion probing."
+      ],
+      "project_verification": "Implemented and tested; runtime confirmation depends on the local machine.",
+      "preferred_model": "",
+      "verified_models": [],
+      "target_model": ""
+    },
+    "mistral": {
+      "method": "api_key",
+      "status": "runtime_confirmed",
+      "reason": "discover:authenticated:models=58",
+      "runtime_confirmed": true,
+      "target_form_reached": true,
+      "official_support": true,
+      "configured_methods": [
+        "api_key"
+      ],
+      "available_methods": [
+        "api_key"
+      ],
+      "fallback_methods": [],
+      "fallback_path": "",
+      "billing_basis": "",
+      "usage_tracking": "",
+      "quota_visibility": "",
+      "limitations": [],
+      "project_verification": "",
+      "preferred_model": "",
+      "verified_models": [],
+      "target_model": ""
+    },
+    "moonshot": {
+      "method": "api_key",
+      "status": "target_form_not_reached",
+      "reason": "discover:auth_failed:models=0",
+      "runtime_confirmed": false,
+      "target_form_reached": false,
+      "official_support": true,
+      "configured_methods": [
+        "api_key"
+      ],
+      "available_methods": [
+        "api_key"
+      ],
+      "fallback_methods": [],
+      "fallback_path": "",
+      "billing_basis": "",
+      "usage_tracking": "",
+      "quota_visibility": "",
+      "limitations": [],
+      "project_verification": "",
+      "preferred_model": "",
+      "verified_models": [],
+      "target_model": ""
+    },
+    "ollama": {
+      "method": "local",
+      "status": "target_form_not_reached",
+      "reason": "discover:error:models=0",
+      "runtime_confirmed": false,
+      "target_form_reached": false,
+      "official_support": true,
+      "configured_methods": [
+        "local"
+      ],
+      "available_methods": [
+        "local"
+      ],
+      "fallback_methods": [],
+      "fallback_path": "",
+      "billing_basis": "local_inference_hardware",
+      "usage_tracking": "local_runtime_health_and_operator_observation",
+      "quota_visibility": "local_only",
+      "limitations": [
+        "Requires a healthy local model server and a generative model that passes completion probing."
+      ],
+      "project_verification": "Implemented and tested; runtime confirmation depends on the local machine.",
+      "preferred_model": "",
+      "verified_models": [],
+      "target_model": ""
+    },
+    "openai": {
+      "method": "api_key",
+      "status": "runtime_confirmed",
+      "reason": "discover:authenticated:models=105",
+      "runtime_confirmed": true,
+      "target_form_reached": true,
+      "official_support": true,
+      "configured_methods": [
+        "api_key"
+      ],
+      "available_methods": [
+        "api_key"
+      ],
+      "fallback_methods": [],
+      "fallback_path": "",
+      "billing_basis": "metered_api_billing",
+      "usage_tracking": "provider_console_and_api_spend",
+      "quota_visibility": "api_balance_and_provider_console",
+      "limitations": [
+        "Requires separate OpenAI Platform billing; ChatGPT subscription does not automatically cover API usage.",
+        "Spend and quota status are governed by the API account, not by the consumer ChatGPT plan."
+      ],
+      "project_verification": "Runtime confirmed in aichaind through the OpenAI API key path.",
+      "preferred_model": "",
+      "verified_models": [],
+      "target_model": ""
+    },
+    "openai-codex": {
+      "method": "oauth",
+      "status": "configured",
+      "reason": "openai-codex:default",
+      "runtime_confirmed": false,
+      "target_form_reached": true,
+      "official_support": true,
+      "configured_methods": [
+        "oauth"
+      ],
+      "available_methods": [
+        "oauth"
+      ],
+      "fallback_methods": [],
+      "fallback_path": "",
+      "billing_basis": "subscription_plan_window",
+      "usage_tracking": "openclaw_auth_usage_stats_plus_provider_ui",
+      "quota_visibility": "provider_ui_or_openclaw_sign_in_window_not_fully_machine_readable",
+      "limitations": [
+        "Daily and weekly sign-in plan windows may apply and can change by provider policy or subscription tier.",
+        "Remaining OAuth entitlement is not yet fully machine-readable inside AIchain and must be checked in the provider or OpenClaw UI.",
+        "AIchain must always keep API key and ranked-model fallback paths available if this route is unavailable or exhausted."
+      ],
+      "project_verification": "OpenClaw OAuth execution is verified when the local gateway auth and runtime model probe succeed; AIchain prefers openai-codex/gpt-5.4 when that target model is runtime-confirmed and otherwise falls back safely.",
+      "preferred_model": "",
+      "verified_models": [],
+      "target_model": ""
+    },
+    "openrouter": {
+      "method": "api_key",
+      "status": "configured",
+      "reason": "openclaw_config",
+      "runtime_confirmed": false,
+      "target_form_reached": true,
+      "official_support": true,
+      "configured_methods": [
+        "api_key"
+      ],
+      "available_methods": [
+        "api_key"
+      ],
+      "fallback_methods": [],
+      "fallback_path": "",
+      "billing_basis": "metered_api_billing",
+      "usage_tracking": "balance_api_plus_provider_console",
+      "quota_visibility": "machine_readable_balance_and_provider_console",
+      "limitations": [
+        "Acts as a catalog-rich fallback but should not be treated as the only execution path."
+      ],
+      "project_verification": "Runtime confirmed for catalog ingestion and execution fallback.",
+      "preferred_model": "",
+      "verified_models": [],
+      "target_model": ""
+    },
+    "vllm": {
+      "method": "local",
+      "status": "configured",
+      "reason": "http://127.0.0.1:1234/v1",
+      "runtime_confirmed": false,
+      "target_form_reached": true,
+      "official_support": true,
+      "configured_methods": [
+        "local"
+      ],
+      "available_methods": [
+        "local"
+      ],
+      "fallback_methods": [],
+      "fallback_path": "",
+      "billing_basis": "local_inference_hardware",
+      "usage_tracking": "local_runtime_health_and_operator_observation",
+      "quota_visibility": "local_only",
+      "limitations": [
+        "Requires a healthy local model server and a generative model that passes completion probing."
+      ],
+      "project_verification": "Implemented and tested; runtime confirmation depends on the local machine.",
+      "preferred_model": "",
+      "verified_models": [],
+      "target_model": ""
+    },
+    "xai": {
+      "method": "api_key",
+      "status": "configured",
+      "reason": "openclaw_config",
+      "runtime_confirmed": false,
+      "target_form_reached": true,
+      "official_support": true,
+      "configured_methods": [
+        "api_key"
+      ],
+      "available_methods": [
+        "api_key"
+      ],
+      "fallback_methods": [],
+      "fallback_path": "",
+      "billing_basis": "",
+      "usage_tracking": "",
+      "quota_visibility": "",
+      "limitations": [],
+      "project_verification": "",
+      "preferred_model": "",
+      "verified_models": [],
+      "target_model": ""
+    },
+    "zhipu": {
+      "method": "api_key",
+      "status": "configured",
+      "reason": "openclaw_config",
+      "runtime_confirmed": false,
+      "target_form_reached": true,
+      "official_support": true,
+      "configured_methods": [
+        "api_key"
+      ],
+      "available_methods": [
+        "api_key"
+      ],
+      "fallback_methods": [],
+      "fallback_path": "",
+      "billing_basis": "",
+      "usage_tracking": "",
+      "quota_visibility": "",
+      "limitations": [],
+      "project_verification": "",
+      "preferred_model": "",
+      "verified_models": [],
+      "target_model": ""
+    }
+  }
+}
