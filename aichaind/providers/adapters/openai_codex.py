@@ -302,14 +302,7 @@ class OpenAICodexOAuthAdapter(ProviderAdapter):
         )
 
     def _resolve_timeout_seconds(self, request: CompletionRequest) -> float:
-        raw_timeout_ms = 0
-        try:
-            raw_timeout_ms = int((request.extra or {}).get("timeout_ms") or 0)
-        except Exception:
-            raw_timeout_ms = 0
-        if raw_timeout_ms > 0:
-            return max(5.0, min(float(self._timeout), raw_timeout_ms / 1000.0))
-        return float(self._timeout)
+        return self.resolve_timeout(request, default=45.0, max_timeout=150.0)
 
     def health_check(self) -> bool:
         result = self.discover()

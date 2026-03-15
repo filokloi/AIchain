@@ -79,7 +79,7 @@ class GroqAdapter(ProviderAdapter):
 
         start_t = time.time()
         try:
-            resp = requests.post(ENDPOINT, json=payload, headers=self._headers(), timeout=30)
+            resp = requests.post(ENDPOINT, json=payload, headers=self._headers(), timeout=self.resolve_timeout(request, default=30.0, max_timeout=60.0))
             latency = (time.time() - start_t) * 1000
 
             if resp.status_code != 200:

@@ -105,6 +105,42 @@ class TestA2AStub:
         assert a2a.health_check() is False
 
 
+class TestProviderAdapterTimeout:
+    def test_default_timeout(self):
+        a2a = A2AAdapter()
+        req = CompletionRequest(model="test", messages=[])
+        assert a2a.resolve_timeout(req) == 30.0
+
+    def test_custom_default_timeout(self):
+        a2a = A2AAdapter()
+        req = CompletionRequest(model="test", messages=[])
+        assert a2a.resolve_timeout(req, default=45.0) == 45.0
+
+    def test_extended_timeout_via_extra(self):
+        a2a = A2AAdapter()
+        # 60s
+        req = CompletionRequest(model="test", messages=[], extra={"timeout_ms": 60000})
+        assert a2a.resolve_timeout(req, max_timeout=120.0) == 60.0
+
+    def test_timeout_capped_at_max(self):
+        a2a = A2AAdapter()
+        # 300s requested, 150s max
+        req = CompletionRequest(model="test", messages=[], extra={"timeout_ms": 300000})
+        assert a2a.resolve_timeout(req, max_timeout=150.0) == 150.0
+
+    def test_timeout_floored_at_min(self):
+        a2a = A2AAdapter()
+        # 10ms requested, 5s min floor
+        req = CompletionRequest(model="test", messages=[], extra={"timeout_ms": 10})
+        assert a2a.resolve_timeout(req) == 5.0
+
+    def test_invalid_timeout_ignored(self):
+        a2a = A2AAdapter()
+        # Invalid string, falls back to default
+        req = CompletionRequest(model="test", messages=[], extra={"timeout_ms": "not_a_number"})
+        assert a2a.resolve_timeout(req, default=30.0) == 30.0
+
+
 class TestCompletionContracts:
     def test_completion_request_defaults(self):
         req = CompletionRequest(model="test", messages=[])

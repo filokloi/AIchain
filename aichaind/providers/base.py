@@ -172,3 +172,18 @@ class ProviderAdapter(ABC):
 
         return normalized
 
+    def resolve_timeout(self, request: CompletionRequest, default: float = 30.0, max_timeout: float = 120.0) -> float:
+        """
+        Resolve the final timeout for this request.
+        Allows request.extra["timeout_ms"] to extend the timeout up to max_timeout,
+        while maintaining a fast default.
+        """
+        raw_timeout_ms = 0
+        try:
+            raw_timeout_ms = int((request.extra or {}).get("timeout_ms") or 0)
+        except Exception:
+            pass
+        if raw_timeout_ms > 0:
+            return max(5.0, min(max_timeout, raw_timeout_ms / 1000.0))
+        return float(default)
+

@@ -143,7 +143,7 @@ class GenericOpenAIAdapter(ProviderAdapter):
                 f"{self.base_url}/chat/completions",
                 headers=self._headers(),
                 json=payload,
-                timeout=self._timeout,
+                timeout=self.resolve_timeout(request, default=30.0, max_timeout=120.0),
             )
             latency = (time.time() - start) * 1000
 

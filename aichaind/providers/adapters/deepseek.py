@@ -79,7 +79,7 @@ class DeepSeekAdapter(ProviderAdapter):
 
         start_t = time.time()
         try:
-            resp = requests.post(ENDPOINT, json=payload, headers=self._headers(), timeout=60)
+            resp = requests.post(ENDPOINT, json=payload, headers=self._headers(), timeout=self.resolve_timeout(request, default=45.0, max_timeout=180.0))
             latency = (time.time() - start_t) * 1000
 
             if resp.status_code != 200:

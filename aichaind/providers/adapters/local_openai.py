@@ -80,16 +80,7 @@ class LocalOpenAIAdapter(ProviderAdapter):
         return headers
 
     def _resolve_timeout(self, request: CompletionRequest) -> float:
-        timeout_ms = None
-        if isinstance(getattr(request, "extra", None), dict):
-            timeout_ms = request.extra.get("timeout_ms")
-        try:
-            timeout_ms = float(timeout_ms)
-        except (TypeError, ValueError):
-            timeout_ms = None
-        if timeout_ms is None:
-            return float(self._timeout)
-        return max(20.0, min(timeout_ms / 1000.0, 180.0))
+        return self.resolve_timeout(request, default=45.0, max_timeout=180.0)
 
     def format_model_id(self, model_id: str) -> str:
         if "/" not in model_id:
