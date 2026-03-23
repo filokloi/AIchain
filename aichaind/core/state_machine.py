@@ -129,10 +129,21 @@ def atomic_write(path: Path, data: dict):
             f.write("\n")
             f.flush()
             os.fsync(f.fileno())
-        os.replace(tmp, str(path))
+        last_error = None
+        for attempt in range(6):
+            try:
+                os.replace(tmp, str(path))
+                tmp = ""
+                return
+            except PermissionError as exc:
+                last_error = exc
+                time.sleep(0.02 * (attempt + 1))
+        if last_error is not None:
+            raise last_error
     except Exception:
         try:
-            os.unlink(tmp)
+            if tmp:
+                os.unlink(tmp)
         except OSError:
             pass
         raise

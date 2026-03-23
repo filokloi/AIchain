@@ -144,6 +144,52 @@ def test_refresh_access_decision_for_provider_uses_final_provider():
     assert refreshed.selected_method == "api_key"
 
 
+class _MarkingAccessLayer:
+    def __init__(self):
+        self.calls = []
+
+    def mark_runtime_result(self, provider, confirmed, reason="", target_form_reached=None, preferred_model="", verified_models=None, target_model=""):
+        self.calls.append({
+            "provider": provider,
+            "confirmed": confirmed,
+            "reason": reason,
+            "target_form_reached": target_form_reached,
+        })
+
+
+def test_mark_provider_runtime_failure_marks_leaked_key_as_auth_failed():
+    http_server._provider_access_layer = _MarkingAccessLayer()
+    response = CompletionResponse(
+        model="google/gemini-2.5-flash",
+        content="",
+        status="error",
+        error='HTTP 403: {"error":{"message":"Your API key was reported as leaked.","status":"PERMISSION_DENIED"}}',
+    )
+
+    http_server._mark_provider_runtime_failure("google", response)
+
+    assert http_server._provider_access_layer.calls == [{
+        "provider": "google",
+        "confirmed": False,
+        "reason": "runtime_auth_failed:leaked_api_key",
+        "target_form_reached": False,
+    }]
+
+
+def test_mark_provider_runtime_failure_ignores_non_auth_errors():
+    http_server._provider_access_layer = _MarkingAccessLayer()
+    response = CompletionResponse(
+        model="deepseek/deepseek-chat",
+        content="",
+        status="error",
+        error="HTTP 429: rate limit",
+    )
+
+    http_server._mark_provider_runtime_failure("deepseek", response)
+
+    assert http_server._provider_access_layer.calls == []
+
+
 def test_build_success_response_payload_normalizes_openclaw_compat_shape():
     session = CanonicalSession(session_id="compat-session")
     response = CompletionResponse(
@@ -258,6 +304,33 @@ def test_build_openai_stream_frames_emits_assistant_delta_content_and_done():
     assert any('"content": "STREAM_OK"' in frame for frame in frames)
     assert '"finish_reason": "stop"' in frames[-2]
     assert frames[-1] == "data: [DONE]\n\n"
+
+
+def test_parse_routing_control_canonicalizes_gpt_5_4_manual_alias():
+    parsed, error = http_server._parse_routing_control({
+        "_aichain_control": {
+            "mode": "manual",
+            "model": "GPT-5.4",
+        }
+    })
+
+    assert error == ""
+    assert parsed["mode"] == "manual"
+    assert parsed["model"] == "openai-codex/gpt-5.4"
+    assert parsed["provider"] == "openai-codex"
+
+
+def test_parse_routing_control_canonicalizes_openai_gpt_5_4_manual_alias():
+    parsed, error = http_server._parse_routing_control({
+        "_aichain_control": {
+            "mode": "manual",
+            "model": "openai/gpt-5.4",
+        }
+    })
+
+    assert error == ""
+    assert parsed["model"] == "openai-codex/gpt-5.4"
+    assert parsed["provider"] == "openai-codex"
 
 
 def test_maybe_route_openai_codex_oauth_uses_access_metadata_without_full_discovery(monkeypatch):
@@ -632,6 +705,17 @@ def test_build_request_respects_explicit_max_tokens():
     assert request.max_tokens == 640
 
 
+def test_route_progress_label_is_specific_for_manual_codex():
+    label = http_server._route_progress_label(
+        messages=[{"role": "user", "content": "Reply exactly with PREMIUM_OK"}],
+        payload={"max_tokens": 12},
+        provider_name="openai-codex",
+        routing_control={"manual_override_active": True},
+    )
+
+    assert label == "Connecting to premium GPT-5.4…"
+
+
 def test_ensure_provider_access_fails_over_when_local_runtime_is_unhealthy(monkeypatch):
     class _AccessLayer:
         def __init__(self):
@@ -709,6 +793,94 @@ def test_ensure_provider_access_fails_over_when_local_runtime_is_unhealthy(monke
     assert access_decision.selected_method == "api_key"
 
 
+def test_ensure_provider_access_allows_manual_codex_when_gateway_is_ready(monkeypatch):
+    class _AccessLayer:
+        def resolve(self, provider_name):
+            assert provider_name == "openai-codex"
+            return ProviderAccessDecision(
+                provider="openai-codex",
+                selected_method="oauth",
+                status="target_form_not_reached",
+                reason="runtime_probe:runtime_probe_timeout:models=8",
+                runtime_confirmed=False,
+                target_form_reached=False,
+            )
+
+    http_server._provider_access_layer = _AccessLayer()
+    monkeypatch.setattr(
+        http_server,
+        "get_adapter",
+        lambda provider_name: SimpleNamespace(gateway_ready=True) if provider_name == "openai-codex" else None,
+    )
+
+    decision = RouteDecision(
+        target_model="openai-codex/gpt-5.4",
+        target_provider="openai-codex",
+        confidence=1.0,
+        decision_layers=["manual_override"],
+        reason="manual_override",
+    )
+    decision.model_preference = "manual"
+
+    decision, target_model, target_provider, access_decision, failover_used, block_reason = http_server._ensure_provider_access(
+        decision=decision,
+        payload={"messages": [{"role": "user", "content": "Use GPT-5.4 now."}]},
+        target_model="openai-codex/gpt-5.4",
+        target_provider="openai-codex",
+        balance_report=None,
+        allow_failover=False,
+    )
+
+    assert failover_used is False
+    assert block_reason == ""
+    assert target_provider == "openai-codex"
+    assert target_model == "openai-codex/gpt-5.4"
+    assert access_decision.selected_method == "oauth"
+
+
+def test_ensure_provider_access_still_blocks_auto_codex_when_probe_not_confirmed(monkeypatch):
+    class _AccessLayer:
+        def resolve(self, provider_name):
+            assert provider_name == "openai-codex"
+            return ProviderAccessDecision(
+                provider="openai-codex",
+                selected_method="oauth",
+                status="target_form_not_reached",
+                reason="runtime_probe:runtime_probe_timeout:models=8",
+                runtime_confirmed=False,
+                target_form_reached=False,
+            )
+
+    http_server._provider_access_layer = _AccessLayer()
+    monkeypatch.setattr(
+        http_server,
+        "get_adapter",
+        lambda provider_name: SimpleNamespace(gateway_ready=True) if provider_name == "openai-codex" else None,
+    )
+
+    decision = RouteDecision(
+        target_model="openai-codex/gpt-5.4",
+        target_provider="openai-codex",
+        confidence=0.9,
+        decision_layers=["L2:semantic:quick_general"],
+        reason="semantic_general",
+    )
+    decision.model_preference = "free"
+
+    _, _, _, access_decision, failover_used, block_reason = http_server._ensure_provider_access(
+        decision=decision,
+        payload={"messages": [{"role": "user", "content": "Say hello."}]},
+        target_model="openai-codex/gpt-5.4",
+        target_provider="openai-codex",
+        balance_report=None,
+        allow_failover=False,
+    )
+
+    assert failover_used is False
+    assert access_decision.selected_method == "oauth"
+    assert block_reason.startswith("provider_access_unavailable:openai-codex:")
+
+
 def test_do_post_returns_json_500_on_unhandled_exception(monkeypatch):
     captured = {}
     handler = object.__new__(http_server.AichainDHandler)
@@ -771,10 +943,10 @@ def test_status_endpoint_returns_rich_operational_data():
     http_server._roles = {"fast_brain": "mock/model"}
     http_server._version = "9.9.9"
     http_server._controller = DummyController()
+    http_server._SERVER_START_TIME = 1700000000.0
     
     handler = object.__new__(http_server.AichainDHandler)
     handler.path = '/status'
-    handler._server_start_time = 1700000000.0
     handler._send_json = lambda status, data: captured.update({'status': status, 'data': data})
     
     # We call the internal method since do_GET parses url
@@ -794,3 +966,150 @@ def test_status_endpoint_returns_rich_operational_data():
     assert "provider_health" in data
     assert "openrouter" in data["provider_health"]
     assert "state" in data["provider_health"]["openrouter"]
+
+
+def test_parse_routing_control_supports_legacy_aichain_override_string():
+    parsed, error = http_server._parse_routing_control({
+        "aichain_override": "anthropic/claude-3-haiku-20240307"
+    })
+
+    assert error == ""
+    assert parsed["mode"] == "manual"
+    assert parsed["model"] == "anthropic/claude-3-haiku-20240307"
+    assert parsed["provider"] == "anthropic"
+    assert parsed["source"] == "explicit_legacy"
+
+
+def test_normalize_response_content_strips_fenced_json_for_json_object():
+    normalized = http_server._normalize_response_content(
+        "```json\n{\"ok\": true, \"answer\": 7}\n```",
+        {"type": "json_object"},
+    )
+
+    assert normalized == '{"ok":true,"answer":7}'
+
+
+def test_maybe_route_openai_codex_oauth_refreshes_stale_runtime_access(monkeypatch):
+    decision = ProviderAccessDecision(
+        provider="openai-codex",
+        selected_method="oauth",
+        status="configured",
+        runtime_confirmed=False,
+        target_form_reached=False,
+        billing_basis="subscription_plan_window",
+    )
+
+    class _AccessLayer:
+        def resolve(self, provider_name):
+            assert provider_name == "openai-codex"
+            return decision
+
+        def mark_runtime_result(self, provider, confirmed, reason="", target_form_reached=None, preferred_model="", verified_models=None, target_model=""):
+            assert provider == "openai-codex"
+            decision.runtime_confirmed = bool(confirmed)
+            decision.target_form_reached = bool(target_form_reached)
+            decision.status = "runtime_confirmed" if confirmed and target_form_reached else "target_form_not_reached"
+            decision.reason = reason
+            decision.preferred_model = preferred_model
+            decision.verified_models = list(verified_models or [])
+            decision.target_model = target_model
+
+    class _CodexAdapter:
+        def discover(self):
+            return SimpleNamespace(
+                status="authenticated",
+                available_models=["openai-codex/gpt-5.4"],
+                limits={
+                    "preferred_model": "openai-codex/gpt-5.4",
+                    "target_model": "openai-codex/gpt-5.4",
+                    "target_form_reached": True,
+                },
+            )
+
+        def resolve_preferred_model(self, requested_model="", available_models=None):
+            assert available_models == ["openai-codex/gpt-5.4"]
+            return "openai-codex/gpt-5.4"
+
+    http_server._provider_access_layer = _AccessLayer()
+    http_server._PROVIDER_RUNTIME_REFRESH_CACHE.clear()
+    monkeypatch.setattr(http_server, "get_adapter", lambda provider_name: _CodexAdapter() if provider_name == "openai-codex" else None)
+
+    route = RouteDecision(
+        target_model="openai/gpt-5.4",
+        target_provider="openai",
+        confidence=0.95,
+        decision_layers=["L1:semantic:coding"],
+        latency_ms=12.0,
+        reason="coding_intent",
+    )
+
+    updated, routed_model, routed_provider, bridged = http_server._maybe_route_openai_codex_oauth(
+        route,
+        "openai/gpt-5.4",
+        "openai",
+    )
+
+    assert bridged is True
+    assert routed_model == "openai-codex/gpt-5.4"
+    assert routed_provider == "openai-codex"
+    assert updated.target_model == "openai-codex/gpt-5.4"
+    assert updated.target_provider == "openai-codex"
+
+
+def test_maybe_refresh_provider_runtime_uses_quick_codex_probe(monkeypatch):
+    decision = ProviderAccessDecision(
+        provider="openai-codex",
+        selected_method="oauth",
+        status="configured",
+        runtime_confirmed=False,
+        target_form_reached=False,
+        billing_basis="subscription_plan_window",
+    )
+
+    class _AccessLayer:
+        def __init__(self):
+            self.calls = []
+
+        def resolve(self, provider_name):
+            assert provider_name == "openai-codex"
+            return decision
+
+        def mark_runtime_result(self, provider, confirmed, reason="", target_form_reached=None, preferred_model="", verified_models=None, target_model=""):
+            self.calls.append({
+                "provider": provider,
+                "confirmed": confirmed,
+                "reason": reason,
+                "target_form_reached": target_form_reached,
+                "preferred_model": preferred_model,
+                "verified_models": list(verified_models or []),
+                "target_model": target_model,
+            })
+            decision.runtime_confirmed = bool(confirmed)
+            decision.target_form_reached = bool(target_form_reached)
+            decision.status = "runtime_confirmed" if confirmed and target_form_reached else "target_form_not_reached"
+            decision.reason = reason
+            decision.preferred_model = preferred_model
+            decision.verified_models = list(verified_models or [])
+            decision.target_model = target_model
+
+    class _CodexAdapter:
+        _last_discovered_models = ["openai-codex/gpt-5.3-codex"]
+        _last_good_runtime = {"available_models": ["openai-codex/gpt-5.3-codex"]}
+
+        def _probe_target_model(self):
+            return False, "runtime_probe_timeout"
+
+        def discover(self):
+            raise AssertionError("quick codex runtime refresh should not call full discover")
+
+    access_layer = _AccessLayer()
+    http_server._provider_access_layer = access_layer
+    http_server._PROVIDER_RUNTIME_REFRESH_CACHE.clear()
+    monkeypatch.setattr(http_server, "get_adapter", lambda provider_name: _CodexAdapter() if provider_name == "openai-codex" else None)
+
+    refreshed = http_server._maybe_refresh_provider_runtime("openai-codex", force=True)
+
+    assert refreshed.status == "target_form_not_reached"
+    assert access_layer.calls[-1]["reason"].startswith("runtime_probe:runtime_probe_timeout")
+    assert access_layer.calls[-1]["verified_models"] == ["openai-codex/gpt-5.3-codex"]
+    assert access_layer.calls[-1]["target_model"] == "openai-codex/gpt-5.4"

@@ -355,6 +355,13 @@ def test_site_formula_matches_backend_constant():
     assert SCORING_DISPLAY_FORMULA in index_html
 
 
+def test_site_manifesto_starts_visible_instead_of_blank():
+    index_html = (Path(__file__).resolve().parents[1] / 'index.html').read_text(encoding='utf-8')
+    assert '@keyframes vertical-scroll' in index_html
+    assert 'transform: translateY(0);' in index_html
+    assert 'transform: translateY(-50%);' in index_html
+
+
 
 
 

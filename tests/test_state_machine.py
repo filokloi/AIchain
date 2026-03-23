@@ -94,6 +94,24 @@ class TestAtomicOps:
         h2 = sha256_of_dict({"x": 2})
         assert h1 != h2
 
+    def test_atomic_write_retries_transient_permission_error(self, tmp_dir, monkeypatch):
+        path = tmp_dir / "retry.json"
+        calls = {"count": 0}
+        real_replace = __import__("os").replace
+
+        def flaky_replace(src, dst):
+            calls["count"] += 1
+            if calls["count"] < 3:
+                raise PermissionError("transient lock")
+            return real_replace(src, dst)
+
+        monkeypatch.setattr("aichaind.core.state_machine.os.replace", flaky_replace)
+        monkeypatch.setattr("aichaind.core.state_machine.time.sleep", lambda *_: None)
+
+        atomic_write(path, {"ok": True})
+        assert calls["count"] == 3
+        assert safe_read_json(path)["ok"] is True
+
 
 # ─── Model ID resolution ───
 

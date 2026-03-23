@@ -15,6 +15,7 @@ Covers:
 import pytest
 import tempfile
 import shutil
+import threading
 from pathlib import Path
 
 from aichaind.core.session import (
@@ -179,4 +180,38 @@ class TestSessionStore:
         assert loaded.provider_runs[0].model == "openai/gpt-4o"
         assert loaded.provider_runs[0].latency_ms == 450.0
         assert loaded.budget_state.total_spent_usd == 0.003
+
+    def test_concurrent_load_save_does_not_raise(self, store):
+        session = store.create(session_id="race-proof")
+        errors = []
+
+        def saver():
+            try:
+                for idx in range(30):
+                    session.request_status = "running" if idx % 2 == 0 else "idle"
+                    session.request_label = "Thinking…" if idx % 2 == 0 else ""
+                    store.save(session)
+            except Exception as exc:
+                errors.append(exc)
+
+        def loader():
+            try:
+                for _ in range(30):
+                    loaded = store.load("race-proof")
+                    assert loaded is not None
+            except Exception as exc:
+                errors.append(exc)
+
+        threads = [
+            threading.Thread(target=saver),
+            threading.Thread(target=loader),
+            threading.Thread(target=saver),
+            threading.Thread(target=loader),
+        ]
+        for thread in threads:
+            thread.start()
+        for thread in threads:
+            thread.join()
+
+        assert errors == []
 

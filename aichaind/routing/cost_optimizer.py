@@ -603,13 +603,33 @@ class CostOptimizer:
     def _provider_task_allowed(self, provider: str, model_preference: str, task_hint: str = "") -> bool:
         normalized_provider = self._normalize_provider(provider)
         access = self._resolve_access(normalized_provider)
-        if self._prepaid_premium_enabled(normalized_provider, access) and model_preference in {"free", "heavy"}:
+        hint = (task_hint or "").lower()
+        auto_codegen_tokens = (
+            "write only",
+            "write code",
+            "python code",
+            "javascript code",
+            "typescript code",
+            "unit test",
+            "prototype",
+            "implement",
+            "build ",
+            "create ",
+            "generate ",
+            "game",
+            "tetris",
+            "board class",
+            "database schema",
+            "rest api endpoint",
+        )
+        if self._prepaid_premium_enabled(normalized_provider, access) and model_preference == "heavy":
+            if normalized_provider == "openai-codex" and any(token in hint for token in auto_codegen_tokens):
+                return False
             return True
         if access.selected_method not in {"oauth", "workspace_connector", "enterprise_connector"}:
             return True
         if model_preference != "heavy":
             return False
-        hint = (task_hint or "").lower()
         coding_tokens = ("code", "coding", "refactor", "debug", "unit_test", "function", "script", "endpoint", "api", "sql", "patch", "repository", "repo")
         reasoning_tokens = ("reason", "reasoning", "analysis", "security", "exploit", "proof", "theorem", "research")
         return any(token in hint for token in (*coding_tokens, *reasoning_tokens))
@@ -1217,6 +1237,8 @@ class CostOptimizer:
         task_hint: str = "",
     ) -> CostRoute | None:
         if model_preference == "visual":
+            return None
+        if model_preference == "free":
             return None
         if not self._routing_preferences.get("prefer_prepaid_premium"):
             return None

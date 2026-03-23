@@ -65,6 +65,7 @@ def test_codex_cli_resolution_prefers_resolved_command(monkeypatch):
 
     def fake_run(cmd, capture_output=None, text=None, timeout=None, check=None):
         calls['cmd'] = cmd
+        calls['timeout'] = timeout
         return Completed()
 
     monkeypatch.setattr(openai_codex.subprocess, 'run', fake_run)
@@ -74,6 +75,7 @@ def test_codex_cli_resolution_prefers_resolved_command(monkeypatch):
     assert models == ['openai-codex/gpt-5.4']
     assert calls['cmd'][0] == 'C:/Users/test/openclaw.cmd'
     assert calls['cmd'][1:] == ['models', 'list', '--all', '--provider', 'openai-codex', '--json']
+    assert calls['timeout'] == openai_codex.CLI_DISCOVERY_TIMEOUT_SECONDS
 
 def test_codex_adapter_discovers_verified_fallback_when_target_form_not_reached(tmp_path: Path, monkeypatch):
     cfg_path = tmp_path / 'openclaw.json'
@@ -228,6 +230,73 @@ def test_codex_adapter_execute_respects_request_timeout_budget(tmp_path: Path, m
     assert calls[-1] == 31.0
 
 
+def test_codex_adapter_execute_skips_target_probe_for_explicit_target_request(tmp_path: Path, monkeypatch):
+    cfg_path = tmp_path / 'openclaw.json'
+    auth_path = tmp_path / 'auth-profiles.json'
+    _write_json(cfg_path, _config_payload())
+    _write_json(auth_path, _auth_payload())
+    monkeypatch.setattr(openai_codex, '_list_models_from_openclaw_cli', lambda: ['openai-codex/gpt-5.3-codex'])
+
+    class FakeResponse:
+        status_code = 200
+
+        def json(self):
+            return {
+                'choices': [{'message': {'content': 'TARGET_OK'}, 'finish_reason': 'stop'}],
+                'usage': {'prompt_tokens': 1, 'completion_tokens': 1},
+                'model': 'openai-codex/gpt-5.4',
+            }
+
+    def fake_post(url, json=None, headers=None, timeout=None):
+        assert json['model'] == 'openai-codex/gpt-5.4'
+        return FakeResponse()
+
+    monkeypatch.setattr(openai_codex, 'requests', SimpleNamespace(post=fake_post, Timeout=TimeoutError))
+
+    adapter = OpenAICodexOAuthAdapter(config_path=cfg_path, auth_profiles_path=auth_path, cache_path=tmp_path / 'runtime-cache.json')
+    monkeypatch.setattr(adapter, '_probe_target_model', lambda: (_ for _ in ()).throw(AssertionError('target probe should be skipped for explicit target request')))
+    monkeypatch.setattr(adapter, '_discover_models', lambda: (_ for _ in ()).throw(AssertionError('model discovery should be skipped for explicit target request')))
+
+    response = adapter.execute(CompletionRequest(
+        model='openai-codex/gpt-5.4',
+        messages=[{'role': 'user', 'content': 'hi'}],
+        max_tokens=8,
+    ))
+
+    assert response.status == 'success'
+    assert response.content == 'TARGET_OK'
+
+
+def test_codex_probe_budget_allows_slow_but_valid_runtime(tmp_path: Path, monkeypatch):
+    cfg_path = tmp_path / 'openclaw.json'
+    auth_path = tmp_path / 'auth-profiles.json'
+    _write_json(cfg_path, _config_payload())
+    _write_json(auth_path, _auth_payload())
+
+    calls = []
+
+    class FakeResponse:
+        status_code = 200
+
+        def json(self):
+            return {}
+
+    def fake_post(url, json=None, headers=None, timeout=None):
+        calls.append(timeout)
+        if timeout < 6.5:
+            raise TimeoutError('probe budget too short')
+        return FakeResponse()
+
+    monkeypatch.setattr(openai_codex, 'requests', SimpleNamespace(post=fake_post, Timeout=TimeoutError))
+
+    adapter = OpenAICodexOAuthAdapter(config_path=cfg_path, auth_profiles_path=auth_path, cache_path=tmp_path / 'runtime-cache.json')
+    ok, reason = adapter._probe_target_model()
+
+    assert ok is True
+    assert reason == 'runtime_probe_ok'
+    assert calls[-1] == openai_codex.RUNTIME_PROBE_TIMEOUT_SECONDS
+
+
 def test_codex_adapter_retries_once_after_timeout_then_succeeds(tmp_path: Path, monkeypatch):
     cfg_path = tmp_path / 'openclaw.json'
     auth_path = tmp_path / 'auth-profiles.json'
@@ -298,6 +367,32 @@ def test_codex_adapter_discovers_target_form_via_runtime_probe(tmp_path: Path, m
     assert result.limits['preferred_model'] == 'openai-codex/gpt-5.4'
     assert result.limits['target_form_reached'] is True
     assert result.limits['target_probe_status'] == 'ok'
+
+
+def test_codex_adapter_runtime_probe_uses_short_failure_budget(tmp_path: Path, monkeypatch):
+    cfg_path = tmp_path / 'openclaw.json'
+    auth_path = tmp_path / 'auth-profiles.json'
+    _write_json(cfg_path, _config_payload())
+    _write_json(auth_path, _auth_payload())
+
+    monkeypatch.setattr(openai_codex, '_list_models_from_openclaw_cli', lambda: ['openai-codex/gpt-5.4'])
+    seen = {}
+
+    class FakeTimeout(Exception):
+        pass
+
+    def fake_post(url, json=None, headers=None, timeout=None):
+        seen['timeout'] = timeout
+        raise FakeTimeout()
+
+    monkeypatch.setattr(openai_codex, 'requests', SimpleNamespace(post=fake_post, Timeout=FakeTimeout))
+
+    adapter = OpenAICodexOAuthAdapter(config_path=cfg_path, auth_profiles_path=auth_path, cache_path=tmp_path / 'runtime-cache.json')
+    ok, reason = adapter._probe_model('openai-codex/gpt-5.4')
+
+    assert ok is False
+    assert reason == 'runtime_probe_timeout'
+    assert seen['timeout'] == openai_codex.RUNTIME_PROBE_TIMEOUT_SECONDS
 
 
 def test_codex_adapter_uses_last_good_cache_when_cli_discovery_is_unavailable(tmp_path: Path, monkeypatch):

@@ -122,6 +122,19 @@ def test_build_ui_control_state_exposes_recommended_route_and_model_options():
     assert models['openai-codex/gpt-5.4']['group'] == 'premium_access'
 
 
+def test_build_ui_savings_summary_humanizes_missing_provider_metadata():
+    summary = http_server._build_ui_savings_summary(
+        {'provider': 'minimax', 'effective_cost_label': ''},
+        {},
+    )
+
+    assert summary['kind'] == 'catalog'
+    assert summary['cost_mode_label'] == 'catalog-ranked route'
+    assert summary['quota_visibility_label'] == 'provider-specific or not machine-readable yet'
+    assert summary['fallback_label'] == 'Automatic fallback to the next ranked runtime-confirmed route'
+    assert summary['status_label'] == 'route metadata pending'
+
+
 def test_ui_control_endpoint_updates_session_lock():
     with tempfile.TemporaryDirectory() as tmp:
         http_server._session_store = SessionStore(Path(tmp))
@@ -172,6 +185,10 @@ def test_ui_bridge_script_points_to_companion_panel():
     assert 'Open Panel' in captured['body']
     assert 'aichain-chip' in captured['body']
     assert 'aichain-popover' in captured['body']
+    assert 'Thinking…' in captured['body']
+    assert 'scheduleRefresh' in captured['body']
+    assert 'searchParams.get("session")' in captured['body']
+    assert 'localStorage.setItem("aichain.openclaw.sessionId"' in captured['body']
     assert 'X-AIchain-Token' not in captured['body']
 
 
@@ -190,4 +207,24 @@ def test_ui_panel_endpoint_serves_companion_html():
     assert 'Model Picker' in captured['body']
     assert 'Why This Model' in captured['body']
     assert 'Savings & Limits' in captured['body']
+    assert 'request in progress' in captured['body']
+    assert 'scheduleRefresh' in captured['body']
     assert 'X-AIchain-Token' not in captured['body']
+
+
+def test_ui_control_state_exposes_running_request_state():
+    http_server._provider_access_layer = _AccessLayer()
+    http_server._roles = {'heavy_brain': 'openai-codex/gpt-5.4'}
+
+    session = CanonicalSession(
+        session_id='sess-running',
+        routing_mode='auto',
+        routing_preference='balanced',
+        request_status='running',
+        request_label='Thinking…',
+    )
+
+    state = http_server._build_ui_control_state(session)
+
+    assert state['session']['request_status'] == 'running'
+    assert state['session']['request_label'] == 'Thinking…'

@@ -8,6 +8,7 @@ Provider-side state is never the sole authority.
 
 import uuid
 import time
+import threading
 from dataclasses import dataclass, field, asdict
 from datetime import datetime, timezone
 from pathlib import Path
@@ -95,6 +96,10 @@ class CanonicalSession:
     routing_preference: str = "balanced"
     locked_model: str = ""
     locked_provider: str = ""
+    request_status: str = "idle"
+    request_started_at: str = ""
+    request_label: str = ""
+    last_completed_at: str = ""
     provider_runs: list[ProviderRun] = field(default_factory=list)
     privacy_context: PrivacyContext = field(default_factory=PrivacyContext)
     budget_state: BudgetState = field(default_factory=BudgetState)
@@ -132,61 +137,79 @@ class SessionStore:
     def __init__(self, session_dir: Path):
         self.session_dir = session_dir
         self.session_dir.mkdir(parents=True, exist_ok=True)
+        self._lock = threading.RLock()
 
     def create(self, session_id: str = "") -> CanonicalSession:
         """Create a new session."""
-        now = datetime.now(timezone.utc).isoformat()
-        session = CanonicalSession(
-            session_id=str(session_id or uuid.uuid4()),
-            created_at=now,
-            updated_at=now,
-        )
-        self.save(session)
-        return session
+        with self._lock:
+            now = datetime.now(timezone.utc).isoformat()
+            session = CanonicalSession(
+                session_id=str(session_id or uuid.uuid4()),
+                created_at=now,
+                updated_at=now,
+            )
+            self.save(session)
+            return session
+
+    def _get_path(self, session_id: str) -> Path:
+        """Sanitize session ID for filesystem use (especially Windows colons)."""
+        safe_id = str(session_id).replace(":", "_").replace("\\", "_").replace("/", "_")
+        return self.session_dir / f"{safe_id}.json"
 
     def load(self, session_id: str) -> Optional[CanonicalSession]:
         """Load a session by ID."""
-        path = self.session_dir / f"{session_id}.json"
-        data = safe_read_json(path)
-        if not data:
-            return None
-        try:
-            # Reconstruct nested dataclasses
-            session = CanonicalSession(
-                session_id=data.get("session_id", ""),
-                turn_index=data.get("turn_index", 0),
-                created_at=data.get("created_at", ""),
-                updated_at=data.get("updated_at", ""),
-                routing_mode=str(data.get("routing_mode", "auto") or "auto"),
-                routing_preference=str(data.get("routing_preference", "balanced") or "balanced"),
-                locked_model=str(data.get("locked_model", "") or ""),
-                locked_provider=str(data.get("locked_provider", "") or ""),
-                privacy_context=PrivacyContext(**data.get("privacy_context", {})),
-                budget_state=BudgetState(**{k: v for k, v in data.get("budget_state", {}).items()
-                                           if k in BudgetState.__dataclass_fields__}),
-                summary_state=SummaryState(**data.get("summary_state", {})),
-                redaction_map=data.get("redaction_map", {}),
-                telemetry_refs=data.get("telemetry_refs", []),
-                cache_refs=data.get("cache_refs", []),
-                system_state=data.get("system_state", "NORMAL"),
-                circuit_state=data.get("circuit_state", "CLOSED"),
-            )
-            # Reconstruct provider runs
-            for run_data in data.get("provider_runs", []):
-                session.provider_runs.append(ProviderRun(**run_data))
-            return session
-        except Exception:
-            return None
+        with self._lock:
+            path = self._get_path(session_id)
+            data = safe_read_json(path)
+            if not data:
+                return None
+            try:
+                # Reconstruct nested dataclasses
+                session = CanonicalSession(
+                    session_id=data.get("session_id", ""),
+                    turn_index=data.get("turn_index", 0),
+                    created_at=data.get("created_at", ""),
+                    updated_at=data.get("updated_at", ""),
+                    routing_mode=str(data.get("routing_mode", "auto") or "auto"),
+                    routing_preference=str(data.get("routing_preference", "balanced") or "balanced"),
+                    locked_model=str(data.get("locked_model", "") or ""),
+                    locked_provider=str(data.get("locked_provider", "") or ""),
+                    request_status=str(data.get("request_status", "idle") or "idle"),
+                    request_started_at=str(data.get("request_started_at", "") or ""),
+                    request_label=str(data.get("request_label", "") or ""),
+                    last_completed_at=str(data.get("last_completed_at", "") or ""),
+                    privacy_context=PrivacyContext(**{k: v for k, v in data.get("privacy_context", {}).items()
+                                                     if k in PrivacyContext.__dataclass_fields__}),
+                    budget_state=BudgetState(**{k: v for k, v in data.get("budget_state", {}).items()
+                                               if k in BudgetState.__dataclass_fields__}),
+                    summary_state=SummaryState(**{k: v for k, v in data.get("summary_state", {}).items()
+                                                 if k in SummaryState.__dataclass_fields__}),
+                    redaction_map=data.get("redaction_map", {}),
+                    telemetry_refs=data.get("telemetry_refs", []),
+                    cache_refs=data.get("cache_refs", []),
+                    system_state=data.get("system_state", "NORMAL"),
+                    circuit_state=data.get("circuit_state", "CLOSED"),
+                )
+                # Reconstruct provider runs
+                for run_data in data.get("provider_runs", []):
+                    filtered_run = {k: v for k, v in run_data.items() if k in ProviderRun.__dataclass_fields__}
+                    session.provider_runs.append(ProviderRun(**filtered_run))
+                return session
+            except Exception:
+                log.error(f"Failed to load session {session_id}", exc_info=True)
+                return None
 
     def save(self, session: CanonicalSession):
         """Persist session with atomic write."""
-        path = self.session_dir / f"{session.session_id}.json"
-        atomic_write(path, session.to_dict())
+        with self._lock:
+            path = self._get_path(session.session_id)
+            atomic_write(path, session.to_dict())
 
     def delete(self, session_id: str) -> bool:
         """Delete a session."""
-        path = self.session_dir / f"{session_id}.json"
-        if path.exists():
-            path.unlink()
-            return True
-        return False
+        with self._lock:
+            path = self._get_path(session_id)
+            if path.exists():
+                path.unlink()
+                return True
+            return False

@@ -1,0 +1,2506 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description"
+        content="AIchain — Professional AI model routing table and value optimizer for OpenClaw. Compare models, view scores, pricing, and get one-click integration.">
+    <meta name="robots" content="noindex, nofollow">
+    <!-- Canonical URL for GitHub Pages -->
+    <link rel="canonical" href="https://filokloi.github.io/AIchain/">
+    <title>AIchain — The Sovereign Global Value Maximizer</title>
+    <link rel="icon"
+        href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⛓</text></svg>">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <style>
+        /* ═══════════════════════════════════════════════
+           AIchain — Value Rebel Design System
+           ═══════════════════════════════════════════════ */
+
+        :root {
+            --bg-primary: #0A0A0A;
+            --bg-secondary: #121212;
+            --bg-surface: #1A1A1A;
+            --bg-elevated: #222222;
+            --neon-green: #00FF41;
+            --neon-green-dim: #00cc34;
+            --neon-accent: #39FF14;
+            --neon-glow: rgba(0, 255, 65, 0.15);
+            --neon-glow-strong: rgba(0, 255, 65, 0.3);
+            --text-primary: #E0E0E0;
+            --text-secondary: #888888;
+            --text-muted: #555555;
+            --border-color: #2A2A2A;
+            --border-glow: rgba(0, 255, 65, 0.2);
+            --tier-oauth: #FFD700;
+            --tier-free: #00FF41;
+            --tier-paid: #FF6B35;
+            --danger: #FF3B3B;
+            --font-mono: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: var(--font-mono);
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Subtle grid background */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image:
+                linear-gradient(rgba(0, 255, 65, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 255, 65, 0.03) 1px, transparent 1px);
+            background-size: 40px 40px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* ── Animations ── */
+
+        @keyframes glitch-flicker {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            92% {
+                opacity: 1;
+            }
+
+            93% {
+                opacity: 0.7;
+                transform: translateX(-2px);
+            }
+
+            94% {
+                opacity: 1;
+                transform: translateX(1px);
+            }
+
+            95% {
+                opacity: 0.8;
+            }
+
+            96% {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes pulse-glow {
+
+            0%,
+            100% {
+                box-shadow: 0 0 5px var(--neon-glow);
+            }
+
+            50% {
+                box-shadow: 0 0 20px var(--neon-glow-strong), 0 0 40px var(--neon-glow);
+            }
+        }
+
+        @keyframes scan-line {
+            0% {
+                transform: translateY(-100%);
+            }
+
+            100% {
+                transform: translateY(100vh);
+            }
+        }
+
+        @keyframes fade-in-up {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes typewriter-cursor {
+
+            0%,
+            100% {
+                border-right-color: var(--neon-green);
+            }
+
+            50% {
+                border-right-color: transparent;
+            }
+        }
+
+        @keyframes neon-breathe {
+
+            0%,
+            100% {
+                text-shadow: 0 0 7px var(--neon-green), 0 0 15px rgba(0, 255, 65, 0.3);
+            }
+
+            50% {
+                text-shadow: 0 0 12px var(--neon-green), 0 0 30px rgba(0, 255, 65, 0.5), 0 0 50px rgba(0, 255, 65, 0.2);
+            }
+        }
+
+        @keyframes vertical-scroll {
+            0% {
+                transform: translateY(100%);
+            }
+
+            100% {
+                transform: translateY(-100%);
+            }
+        }
+
+        /* Scan line overlay */
+        .scan-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, var(--neon-green), transparent);
+            opacity: 0.1;
+            animation: scan-line 8s linear infinite;
+            pointer-events: none;
+            z-index: 9999;
+        }
+
+        /* ── Layout ── */
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 24px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* ── Header ── */
+
+        header {
+            padding: 32px 0 16px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .header-inner {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-icon {
+            width: 42px;
+            height: 42px;
+            border: 2px solid var(--neon-green);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            font-weight: 800;
+            color: var(--neon-green);
+            animation: pulse-glow 3s ease-in-out infinite;
+        }
+
+        .logo-text {
+            font-size: 1.5rem;
+            font-weight: 800;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            color: var(--neon-green);
+            animation: neon-breathe 4s ease-in-out infinite;
+        }
+
+        .logo-subtitle {
+            font-size: 0.65rem;
+            color: var(--text-muted);
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            margin-top: 2px;
+        }
+
+        .status-badge {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            border: 1px solid var(--border-color);
+            background: var(--bg-surface);
+            font-size: 0.75rem;
+            letter-spacing: 2px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--neon-green);
+            animation: pulse-glow 2s ease-in-out infinite;
+        }
+
+        .status-dot.offline {
+            background: var(--danger);
+        }
+
+        /* ── Hero / Manifesto ── */
+
+        .hero {
+            padding: 64px 0;
+            animation: fade-in-up 0.8s ease-out;
+        }
+
+        .hero-pre-title {
+            font-size: 0.7rem;
+            letter-spacing: 6px;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            margin-bottom: 16px;
+        }
+
+        .hero-title {
+            font-size: clamp(1.5rem, 4vw, 2.5rem);
+            font-weight: 800;
+            line-height: 1.2;
+            margin-bottom: 8px;
+            color: var(--text-primary);
+        }
+
+        .hero-title .highlight {
+            color: var(--neon-green);
+            animation: neon-breathe 4s ease-in-out infinite;
+        }
+
+        .hero-tagline {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-bottom: 48px;
+            max-width: 700px;
+        }
+
+        .manifesto {
+            position: relative;
+            height: 380px;
+            /* Fixed height for the ticker */
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+            background: var(--bg-secondary);
+        }
+
+        .manifesto-scroll {
+            display: flex;
+            flex-direction: column;
+            animation: vertical-scroll 25s linear infinite;
+        }
+
+        .manifesto-scroll:hover {
+            animation-play-state: paused;
+        }
+
+        .postulate {
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--border-color);
+            display: grid;
+            grid-template-columns: 56px 1fr;
+            gap: 16px;
+            align-items: start;
+            transition: background 0.3s ease, border-color 0.3s ease;
+        }
+
+        .postulate:last-child {
+            border-bottom: none;
+        }
+
+        .postulate:hover {
+            background: var(--bg-surface);
+            border-left: 2px solid var(--neon-green);
+            padding-left: 22px;
+        }
+
+        .postulate-num {
+            font-size: 1.1rem;
+            font-weight: 800;
+            color: var(--neon-green);
+            padding-top: 2px;
+            opacity: 0.8;
+        }
+
+        .postulate-title {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .postulate-body {
+            font-size: 0.78rem;
+            color: var(--text-secondary);
+            line-height: 1.7;
+        }
+
+        /* ── Section Headers ── */
+
+        .section {
+            padding: 48px 0;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 24px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .section-marker {
+            color: var(--neon-green);
+            font-weight: 700;
+            font-size: 0.75rem;
+            opacity: 0.6;
+        }
+
+        .section-title {
+            font-size: 1rem;
+            font-weight: 700;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+        }
+
+        .section-meta {
+            margin-left: auto;
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            letter-spacing: 1px;
+        }
+
+        /* ── Stats Bar ── */
+
+        .stats-bar {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 1px;
+            background: var(--border-color);
+            border: 1px solid var(--border-color);
+            margin-bottom: 32px;
+        }
+
+        .stat-card {
+            padding: 20px;
+            background: var(--bg-secondary);
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--neon-green);
+            margin-bottom: 4px;
+        }
+
+        .stat-label {
+            font-size: 0.65rem;
+            color: var(--text-muted);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        /* ── Table ── */
+
+        .table-wrapper {
+            overflow-x: auto;
+            border: 1px solid var(--border-color);
+            background: var(--bg-secondary);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.78rem;
+        }
+
+        thead th {
+            padding: 14px 16px;
+            text-align: left;
+            font-weight: 700;
+            font-size: 0.68rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            background: var(--bg-surface);
+            border-bottom: 2px solid var(--border-color);
+            white-space: nowrap;
+            cursor: pointer;
+            user-select: none;
+            transition: color 0.2s;
+        }
+
+        thead th:hover {
+            color: var(--neon-green);
+        }
+
+        thead th.sorted-asc::after {
+            content: ' ▲';
+            color: var(--neon-green);
+        }
+
+        thead th.sorted-desc::after {
+            content: ' ▼';
+            color: var(--neon-green);
+        }
+
+        tbody tr {
+            border-bottom: 1px solid var(--border-color);
+            transition: background 0.2s;
+        }
+
+        tbody tr:hover {
+            background: rgba(0, 255, 65, 0.03);
+        }
+
+        tbody td {
+            padding: 12px 16px;
+            white-space: nowrap;
+        }
+
+        .rank-cell {
+            font-weight: 800;
+            color: var(--neon-green);
+            width: 50px;
+            text-align: center;
+        }
+
+        .rank-cell.top-3 {
+            font-size: 1rem;
+        }
+
+        .model-cell .model-name {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .model-cell .model-provider {
+            font-size: 0.68rem;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        .tier-badge {
+            display: inline-block;
+            padding: 3px 10px;
+            font-size: 0.62rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            border: 1px solid;
+        }
+
+        .tier-badge.oauth {
+            color: var(--tier-oauth);
+            border-color: var(--tier-oauth);
+            background: rgba(255, 215, 0, 0.08);
+        }
+
+        .tier-badge.free {
+            color: var(--tier-free);
+            border-color: var(--tier-free);
+            background: rgba(0, 255, 65, 0.08);
+        }
+
+        .tier-badge.paid {
+            color: var(--tier-paid);
+            border-color: var(--tier-paid);
+            background: rgba(255, 107, 53, 0.08);
+        }
+
+        .task-label {
+            display: inline-block;
+            padding: 2px 8px;
+            font-size: 0.58rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            border-radius: 2px;
+        }
+
+        .task-label.daily {
+            color: var(--neon-green);
+            background: rgba(0, 255, 65, 0.1);
+        }
+
+        .task-label.rescue {
+            color: #FF4444;
+            background: rgba(255, 68, 68, 0.1);
+        }
+
+        .task-label.reasoning {
+            color: #FFB347;
+            background: rgba(255, 179, 71, 0.12);
+        }
+
+        .task-label.coding {
+            color: #8DFF8A;
+            background: rgba(141, 255, 138, 0.12);
+        }
+
+        .task-label.vision {
+            color: #7FDBFF;
+            background: rgba(127, 219, 255, 0.12);
+        }
+
+        .task-label.structured {
+            color: #B388FF;
+            background: rgba(179, 136, 255, 0.12);
+        }
+
+        .task-label.long {
+            color: #4DFFB8;
+            background: rgba(77, 255, 184, 0.12);
+        }
+
+        .task-label.general {
+            color: var(--text-primary);
+            background: rgba(255, 255, 255, 0.08);
+        }
+        .sovereignty-callout {
+            border: 1px solid var(--neon-green);
+            background: rgba(0, 255, 65, 0.03);
+            padding: 24px 28px;
+            margin-top: 32px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .sovereignty-callout::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--neon-green), transparent);
+        }
+
+        .sovereignty-callout .callout-title {
+            font-size: 0.75rem;
+            font-weight: 800;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: var(--neon-green);
+            margin-bottom: 8px;
+        }
+
+        .sovereignty-callout .callout-body {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            line-height: 1.8;
+        }
+
+        .sovereignty-callout .callout-body strong {
+            color: var(--neon-green);
+        }
+
+        .heavy-hitter-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 14px;
+            border: 1px solid #FF4444;
+            background: rgba(255, 68, 68, 0.06);
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: #FF4444;
+            letter-spacing: 1px;
+            margin-top: 12px;
+        }
+
+        .metric-cell {
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .metric-bar {
+            display: inline-block;
+            width: 40px;
+            height: 4px;
+            background: var(--bg-elevated);
+            border-radius: 2px;
+            overflow: hidden;
+            vertical-align: middle;
+            margin-left: 6px;
+        }
+
+        .metric-bar-fill {
+            height: 100%;
+            border-radius: 2px;
+            transition: width 0.5s ease;
+        }
+
+        .metric-high {
+            color: var(--neon-green);
+        }
+
+        .metric-mid {
+            color: var(--tier-oauth);
+        }
+
+        .metric-low {
+            color: var(--tier-paid);
+        }
+
+        .cost-cell {
+            font-weight: 700;
+        }
+
+        .cost-free {
+            color: var(--neon-green);
+            text-shadow: 0 0 8px rgba(0, 255, 65, 0.3);
+        }
+
+        .cost-paid {
+            color: var(--tier-paid);
+        }
+
+        .value-score-cell {
+            font-weight: 800;
+            color: var(--neon-green);
+        }
+
+        /* Filter/Search */
+        .table-controls {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+        }
+
+        .plane-summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1px;
+            background: var(--border-color);
+            border: 1px solid var(--border-color);
+            margin-bottom: 16px;
+        }
+
+        .plane-card {
+            padding: 16px 18px;
+            background: var(--bg-secondary);
+            min-height: 112px;
+        }
+
+        .plane-card-title {
+            font-size: 0.62rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+        }
+
+        .plane-card-value {
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 6px;
+        }
+
+        .plane-card-meta {
+            font-size: 0.68rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        .operational-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .operational-card {
+            border: 1px solid var(--border-color);
+            background: var(--bg-secondary);
+            padding: 16px;
+        }
+
+        .operational-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .operational-name {
+            font-size: 0.78rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .mode-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 8px;
+            border: 1px solid var(--border-color);
+            font-size: 0.58rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+
+        .mode-runtime_confirmed {
+            color: var(--neon-green);
+            border-color: var(--neon-green);
+            background: rgba(0, 255, 65, 0.08);
+        }
+
+        .mode-degraded_fallback,
+        .mode-degraded {
+            color: var(--tier-paid);
+            border-color: var(--tier-paid);
+            background: rgba(255, 107, 53, 0.08);
+        }
+
+        .mode-blocked_missing_credentials {
+            color: #FF6B6B;
+            border-color: #FF6B6B;
+            background: rgba(255, 107, 107, 0.08);
+        }
+
+        .mode-target_form_not_reached {
+            color: var(--tier-oauth);
+            border-color: var(--tier-oauth);
+            background: rgba(255, 215, 0, 0.08);
+        }
+
+        .mode-failed_runtime,
+        .mode-unknown {
+            color: var(--text-secondary);
+            border-color: var(--text-secondary);
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .operational-body {
+            display: grid;
+            gap: 6px;
+        }
+
+        .operational-line {
+            font-size: 0.68rem;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+
+        .operational-line strong {
+            color: var(--text-primary);
+        }
+
+        .operational-list {
+            margin-top: 8px;
+            padding-left: 16px;
+            color: var(--text-secondary);
+            font-size: 0.66rem;
+            line-height: 1.5;
+        }
+        .search-input {
+            flex: 1;
+            min-width: 200px;
+            padding: 10px 16px;
+            background: var(--bg-surface);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            font-family: var(--font-mono);
+            font-size: 0.78rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .search-input:focus {
+            border-color: var(--neon-green);
+            box-shadow: 0 0 10px var(--neon-glow);
+        }
+
+        .search-input::placeholder {
+            color: var(--text-muted);
+        }
+
+        .filter-btn {
+            padding: 10px 18px;
+            background: var(--bg-surface);
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            font-weight: 600;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .filter-btn:hover,
+        .filter-btn.active {
+            border-color: var(--neon-green);
+            color: var(--neon-green);
+            background: rgba(0, 255, 65, 0.05);
+        }
+
+        /* ── Import Section ── */
+
+        .import-section {
+            padding: 32px 0 64px;
+        }
+
+        .import-card {
+            border: 1px solid var(--border-color);
+            background: var(--bg-secondary);
+            padding: 32px;
+        }
+
+        .import-card h3 {
+            font-size: 0.85rem;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        .import-card p {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-bottom: 20px;
+        }
+
+        .import-url-box {
+            display: flex;
+            gap: 0;
+            border: 1px solid var(--border-color);
+        }
+
+        .import-url {
+            flex: 1;
+            padding: 14px 16px;
+            background: var(--bg-surface);
+            color: var(--neon-green);
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            border: none;
+            outline: none;
+            overflow-x: auto;
+            white-space: nowrap;
+        }
+
+        .copy-btn {
+            padding: 14px 24px;
+            background: var(--neon-green);
+            color: var(--bg-primary);
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .copy-btn:hover {
+            background: var(--neon-accent);
+            box-shadow: 0 0 20px var(--neon-glow-strong);
+        }
+
+        .copy-btn.copied {
+            background: var(--bg-elevated);
+            color: var(--neon-green);
+        }
+
+        /* ── Footer ── */
+
+        footer {
+            padding: 24px 0;
+            border-top: 1px solid var(--border-color);
+            text-align: center;
+            font-size: 0.68rem;
+            color: var(--text-muted);
+            letter-spacing: 2px;
+        }
+
+        footer a {
+            color: var(--neon-green);
+            text-decoration: none;
+        }
+
+        /* ── Loading State ── */
+
+        .loading-skeleton {
+            background: linear-gradient(90deg, var(--bg-surface) 25%, var(--bg-elevated) 50%, var(--bg-surface) 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+            height: 20px;
+            border-radius: 2px;
+        }
+
+        @keyframes shimmer {
+            0% {
+                background-position: 200% 0;
+            }
+
+            100% {
+                background-position: -200% 0;
+            }
+        }
+
+        .error-banner {
+            padding: 16px;
+            border: 1px solid var(--danger);
+            background: rgba(255, 59, 59, 0.08);
+            color: var(--danger);
+            font-size: 0.78rem;
+            text-align: center;
+            margin-bottom: 24px;
+            display: none;
+        }
+
+        /* ── Responsive ── */
+
+        @media (max-width: 768px) {
+            .header-inner {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .postulate {
+                grid-template-columns: 40px 1fr;
+                padding: 16px;
+                gap: 12px;
+            }
+
+            .stats-bar {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .import-url-box {
+                flex-direction: column;
+            }
+
+            .table-controls {
+                flex-direction: column;
+            }
+        }
+
+        /* ── MODAL ── */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(8px);
+            z-index: 1000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+            opacity: 1;
+        }
+
+        .modal-card {
+            background: var(--bg-surface);
+            border: 1px solid var(--border-color);
+            box-shadow: 0 0 40px rgba(0, 255, 65, 0.1);
+            width: 90%;
+            max-width: 500px;
+            padding: 24px;
+            position: relative;
+            transform: translateY(20px);
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .modal-overlay.active .modal-card {
+            transform: translateY(0);
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 16px;
+            right: 20px;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 1.5rem;
+            line-height: 1;
+            transition: color 0.2s;
+        }
+
+        .modal-close:hover {
+            color: var(--neon-green);
+            text-shadow: 0 0 8px var(--neon-green);
+        }
+
+        .modal-title {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+            padding-right: 30px;
+            word-break: break-all;
+        }
+
+        .modal-provider {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-bottom: 24px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .modal-metrics {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .modal-metric-box {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 12px;
+        }
+
+        .modal-metric-label {
+            font-size: 0.65rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 6px;
+        }
+
+        .modal-metric-val {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .modal-bar-bg {
+            height: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            margin-top: 8px;
+            overflow: hidden;
+        }
+
+        .modal-bar-fill {
+            height: 100%;
+            background: var(--text-muted);
+        }
+
+        .modal-bar-fill.high {
+            background: var(--neon-green);
+            box-shadow: 0 0 8px var(--neon-green);
+        }
+
+        .modal-bar-fill.mid {
+            background: var(--tier-oauth);
+            box-shadow: 0 0 8px var(--tier-oauth);
+        }
+
+        .modal-actions {
+            margin-top: 24px;
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn-modal {
+            flex: 1;
+            background: transparent;
+            border: 1px solid var(--neon-green);
+            color: var(--neon-green);
+            padding: 10px;
+            font-family: inherit;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.2s;
+        }
+
+        .btn-modal:hover {
+            background: rgba(0, 255, 65, 0.1);
+            box-shadow: 0 0 12px rgba(0, 255, 65, 0.2);
+        }
+
+        /* ── TOOLTIPS ── */
+        .has-tooltip {
+            position: relative;
+            cursor: help;
+        }
+
+        .has-tooltip::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%) translateY(-8px);
+            background: #000;
+            color: var(--neon-green);
+            border: 1px solid var(--neon-green);
+            padding: 6px 10px;
+            font-size: 0.65rem;
+            font-weight: 400;
+            white-space: nowrap;
+            pointer-events: none;
+            opacity: 0;
+            box-shadow: 0 4px 12px rgba(0, 255, 65, 0.15);
+            transition: opacity 0.2s, transform 0.2s;
+            z-index: 100;
+        }
+
+        .has-tooltip:hover::after {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        /* Loading Spinner */
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(0, 255, 65, 0.1);
+            border-top-color: var(--neon-green);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 16px;
+        }
+
+        @keyframes spin {
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .clickable-row {
+            cursor: pointer;
+        }
+
+        .row-copy-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            padding: 2px 4px;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.2s, color 0.2s;
+            font-size: 0.8rem;
+        }
+
+        .clickable-row:hover .row-copy-btn {
+            opacity: 1;
+        }
+
+        .row-copy-btn:hover {
+            color: var(--neon-green);
+        }
+
+        .changelog-hint {
+            font-size: 0.65rem;
+            color: var(--neon-green);
+            margin-top: 4px;
+            letter-spacing: 0.5px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Scan line effect -->
+    <div class="scan-overlay"></div>
+
+    <!-- ═══ HEADER ═══ -->
+    <header>
+        <div class="container">
+            <div class="header-inner">
+                <div class="logo">
+                    <div class="logo-icon">⛓</div>
+                    <div>
+                        <div class="logo-text">AIchain</div>
+                        <div class="logo-subtitle">Sovereign Global Value Maximizer</div>
+                    </div>
+                </div>
+                <div class="status-badge">
+                    <div class="status-dot" id="statusDot"></div>
+                    <span id="statusText">INITIALIZING...</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- ═══ HERO / MANIFESTO ═══ -->
+    <section class="hero">
+        <div class="container">
+            <div class="hero-pre-title">// manifesto v1.0 — the five postulates</div>
+            <h1 class="hero-title">
+                Maximum Intelligence.<br>
+                <span class="highlight">Zero Cost.</span>
+            </h1>
+            <p class="hero-tagline">
+                We are the decentralized intelligence routing layer. We analyze every AI model
+                on a global scale — without bias, without discrimination. Only data decides.
+            </p>
+
+            <div class="manifesto">
+                <div class="manifesto-scroll">
+                    <!-- Original set of postulates -->
+                    <div class="postulate" style="animation: fade-in-up 0.6s ease-out 0.1s both;">
+                        <div class="postulate-num">I.</div>
+                        <div>
+                            <div class="postulate-title">Data as Sovereign Capital</div>
+                            <div class="postulate-body">
+                                We provide the "fuel" (user data) only if we receive the highest tier
+                                of intelligence in return.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="postulate" style="animation: fade-in-up 0.6s ease-out 0.2s both;">
+                        <div class="postulate-num">II.</div>
+                        <div>
+                            <div class="postulate-title">The Zero-Cost Mandate</div>
+                            <div class="postulate-body">
+                                Our goal is Maximum Intelligence at Zero Cost.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="postulate" style="animation: fade-in-up 0.6s ease-out 0.3s both;">
+                        <div class="postulate-num">III.</div>
+                        <div>
+                            <div class="postulate-title">Collective Routing Leverage</div>
+                            <div class="postulate-body">
+                                We unify routing logic to influence providers to compete for the community's traffic —
+                                rewarding quality, not marketing.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="postulate" style="animation: fade-in-up 0.6s ease-out 0.4s both;">
+                        <div class="postulate-num">IV.</div>
+                        <div>
+                            <div class="postulate-title">Universal Meritocracy</div>
+                            <div class="postulate-body">
+                                Our analysis spans the entire world without discrimination. We evaluate
+                                every model on a global scale.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="postulate" style="animation: fade-in-up 0.6s ease-out 0.5s both;">
+                        <div class="postulate-num">V.</div>
+                        <div>
+                            <div class="postulate-title">The Golden Quartet</div>
+                            <div class="postulate-body">
+                                Only four metrics determine a model's rank: Intelligence, Speed,
+                                Stability, and Cost (Target: $0).
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Duplicated set of postulates for seamless infinite scroll -->
+                    <div class="postulate" style="animation: fade-in-up 0.6s ease-out 0.1s both;">
+                        <div class="postulate-num">I.</div>
+                        <div>
+                            <div class="postulate-title">Data as Sovereign Capital</div>
+                            <div class="postulate-body">
+                                We provide the "fuel" (user data) only if we receive the highest tier
+                                of intelligence in return.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="postulate" style="animation: fade-in-up 0.6s ease-out 0.2s both;">
+                        <div class="postulate-num">II.</div>
+                        <div>
+                            <div class="postulate-title">The Zero-Cost Mandate</div>
+                            <div class="postulate-body">
+                                Our goal is Maximum Intelligence at Zero Cost.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="postulate" style="animation: fade-in-up 0.6s ease-out 0.3s both;">
+                        <div class="postulate-num">III.</div>
+                        <div>
+                            <div class="postulate-title">Collective Routing Leverage</div>
+                            <div class="postulate-body">
+                                We unify routing logic to influence providers to compete for the community's traffic —
+                                rewarding quality, not marketing.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="postulate" style="animation: fade-in-up 0.6s ease-out 0.4s both;">
+                        <div class="postulate-num">IV.</div>
+                        <div>
+                            <div class="postulate-title">Universal Meritocracy</div>
+                            <div class="postulate-body">
+                                Our analysis spans the entire world without discrimination. We evaluate
+                                every model on a global scale.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="postulate" style="animation: fade-in-up 0.6s ease-out 0.5s both;">
+                        <div class="postulate-num">V.</div>
+                        <div>
+                            <div class="postulate-title">The Golden Quartet</div>
+                            <div class="postulate-body">
+                                Only four metrics determine a model's rank: Intelligence, Speed,
+                                Stability, and Cost (Target: $0).
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Data Sovereignty Callout -->
+            <div class="sovereignty-callout">
+                <div class="callout-title">⚡ Data Sovereignty Postulate</div>
+                <div class="callout-body">
+                    We provide the training data — <strong>you provide the intelligence for free.</strong><br>
+                    This system operates on a single principle: our user interactions are sovereign capital.
+                    In exchange for this fuel, we demand the highest tier of intelligence at <strong>zero cost</strong>.
+                    When the free models fail, the Heavy Hitter deploys — solves the task — and <strong>immediately
+                        reverts</strong>.
+                    No waste. No loyalty. Only meritocracy.
+                </div>
+                <div class="heavy-hitter-badge" id="heavyHitterBadge">⚔ HEAVY HITTER: Loading...</div>
+            </div>
+
+            <!-- Live Promos (Free Kings) -->
+            <div id="livePromosContainer"
+                style="display:none; border: 1px solid var(--neon-green); background: rgba(0, 255, 65, 0.05); padding: 24px 28px; margin-top: 24px; position: relative;">
+                <div
+                    style="position:absolute; top:0; left:0; width:100%; height:2px; background:linear-gradient(90deg, transparent, var(--neon-green), transparent);">
+                </div>
+                <div
+                    style="font-size: 0.75rem; font-weight: 800; letter-spacing: 3px; text-transform: uppercase; color: var(--neon-green); margin-bottom: 12px;">
+                    🌟 LIVE PROMOS (FREE KINGS)</div>
+                <div style="font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 16px;">
+                    The global Promo-Hunter (Gemini Flash) has scanned provider logs and identified the following
+                    top-tier models offering zero-cost access right now:
+                </div>
+                <div id="livePromosList" style="display: flex; gap: 8px; flex-wrap: wrap;"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══ GLOBAL STATUS TABLE ═══ -->
+    <section class="section" id="routing-table">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-marker">//</span>
+                <h2 class="section-title">Global Routing Table</h2>
+                <span class="section-meta" id="lastUpdate">Loading...</span>
+                <div id="changelogHint" class="changelog-hint" style="display: none;"></div>
+            </div>
+
+            <div class="operational-grid" style="margin-bottom: 16px;">
+                <div class="plane-card">
+                    <div class="plane-card-title">Artifact Source</div>
+                    <div class="plane-card-value" id="artifactSource">Loading...</div>
+                    <div class="plane-card-meta" id="artifactMeta">Waiting for canonical artifact metadata.</div>
+                </div>
+                <div class="plane-card">
+                    <div class="plane-card-title">Dashboard Switch</div>
+                    <div class="plane-card-value" id="switchReadiness">Loading...</div>
+                    <div class="plane-card-meta" id="switchMeta">Evaluating readiness gates.</div>
+                </div>
+                <div class="plane-card">
+                    <div class="plane-card-title">Global Plane</div>
+                    <div class="plane-card-value" id="globalPlaneValue">Loading...</div>
+                    <div class="plane-card-meta" id="globalPlaneMeta">Checking degradation state.</div>
+                </div>
+            </div>
+
+            <div class="operational-grid" id="operationalGrid">
+                <div class="operational-card">
+                    <div class="operational-head">
+                        <div class="operational-name">CONTROL PLANE</div>
+                        <span class="mode-badge mode-unknown">loading</span>
+                    </div>
+                    <div class="operational-body">
+                        <div class="operational-line"><strong>Status:</strong> Loading source and helper verification...</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stats Bar -->
+            <div class="stats-bar" id="statsBar">
+                <div class="stat-card">
+                    <div class="stat-value" id="totalModels">—</div>
+                    <div class="stat-label">Models Analyzed</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="oauthCount">—</div>
+                    <div class="stat-label">OAuth Bridges</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="freeCount">—</div>
+                    <div class="stat-label">Free Frontier</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="paidCount">—</div>
+                    <div class="stat-label">Heavy Hitters</div>
+                </div>
+            </div>
+
+            <!-- Error banner -->
+            <div class="error-banner" id="errorBanner"></div>
+
+            <!-- Controls -->
+            <div class="table-controls">
+                <input type="text" class="search-input" id="searchInput" placeholder="Search models, providers...">
+                <button class="filter-btn active" data-filter="all" onclick="setFilter('all')">All</button>
+                <button class="filter-btn" data-filter="OAUTH_BRIDGE" onclick="setFilter('OAUTH_BRIDGE')">OAuth</button>
+                <button class="filter-btn" data-filter="FREE_FRONTIER"
+                    onclick="setFilter('FREE_FRONTIER')">Free</button>
+                <button class="filter-btn" data-filter="HEAVY_HITTER"
+                    onclick="setFilter('HEAVY_HITTER')">Rescue</button>
+                <button class="filter-btn" data-filter="task:coding" onclick="setFilter('task:coding')">Coding</button>
+                <div style="flex-grow: 1;"></div>
+                <button class="filter-btn" style="border-color: var(--text-muted); color: var(--text-muted);"
+                    onclick="exportCSV()">📥 CSV</button>
+                <button class="filter-btn" style="border-color: var(--text-muted); color: var(--text-muted);"
+                    onclick="exportJSON()">📥 JSON</button>
+            </div>
+
+            <!-- Table -->
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th data-sort="rank" class="sorted-asc has-tooltip"
+                                data-tooltip="Global ranking (1 is best)">Rank</th>
+                            <th data-sort="model">Model</th>
+                            <th data-sort="tier" class="has-tooltip"
+                                data-tooltip="Access model (Primary, Free, Rescue)">Tier</th>
+                            <th data-sort="task_label" class="has-tooltip" data-tooltip="Assigned OpenClaw Role">Role
+                            </th>
+                            <th data-sort="intelligence" class="has-tooltip"
+                                data-tooltip="Composite capability score (0-100)">Intel</th>
+                            <th data-sort="speed" class="has-tooltip"
+                                data-tooltip="Output tokens per second relative score (0-100)">Speed</th>
+                            <th data-sort="stability" class="has-tooltip"
+                                data-tooltip="API Uptime and reliability (0-100)">Stab</th>
+                            <th data-sort="cost" class="has-tooltip" data-tooltip="Average price per 1M output tokens">
+                                Cost</th>
+                            <th data-sort="value_score" class="has-tooltip"
+                                data-tooltip="Score = 0.30·Intel + 0.14·Speed + 0.16·Stability + 0.18·CostEff + 0.10·Avail + 0.06·Context + 0.06·TaskFit">Value</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody">
+                        <tr id="loadingRow">
+                            <td colspan="9" style="text-align: center; padding: 60px 20px;">
+                                <div class="spinner"></div>
+                                <div
+                                    style="color: var(--neon-green); font-size: 0.8rem; letter-spacing: 2px; text-transform: uppercase;">
+                                    Connecting to routing feed...</div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="section-header" style="margin-top: 28px;">
+                <span class="section-marker">//</span>
+                <h2 class="section-title">Provider Access & Limits</h2>
+            </div>
+            <div class="plane-card-meta" style="margin-bottom: 16px; max-width: 980px;">
+                Global rank stays independent. Access methods only describe how users can legitimately reach a provider,
+                how cost and quota visibility work, and when OAuth or sign-in windows must fall back to API keys, local
+                runtimes, or the next ranked model.
+            </div>
+            <div class="operational-grid" id="accessMatrixGrid">
+                <div class="operational-card">
+                    <div class="operational-head">
+                        <div class="operational-name">ACCESS MATRIX</div>
+                        <span class="mode-badge mode-unknown">loading</span>
+                    </div>
+                    <div class="operational-body">
+                        <div class="operational-line"><strong>Status:</strong> Loading provider access metadata...</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section-header" style="margin-top: 28px;">
+                <span class="section-marker">//</span>
+                <h2 class="section-title">Self-Hosted Model Index</h2>
+            </div>
+            <div class="plane-card-meta" style="margin-bottom: 16px; max-width: 980px;">
+                This index tracks globally known self-hostable/open-weight models as first-class catalog entries. It does not claim per-machine performance; local profiling still happens inside aichaind.
+            </div>
+            <div class="operational-grid" id="selfHostedGrid">
+                <div class="operational-card">
+                    <div class="operational-head">
+                        <div class="operational-name">SELF-HOSTED INDEX</div>
+                        <span class="mode-badge mode-unknown">loading</span>
+                    </div>
+                    <div class="operational-body">
+                        <div class="operational-line"><strong>Status:</strong> Loading self-hosted model metadata...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══ ONE-CLICK IMPORT ═══ -->
+    <section class="import-section">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-marker">//</span>
+                <h2 class="section-title">Catalog Feed for aichaind</h2>
+            </div>
+            <div class="import-card">
+                <h3>Sidecar Catalog Manifest</h3>
+                <p>
+                    Copy the manifest URL below and use it as the default routing source for
+                    <code>aichaind</code>, the thin OpenClaw bridge, and the public dashboard. The
+                    canonical v5 catalog manifest is now the primary public artifact; the legacy
+                    ranking feed remains available only as an operational rollback path.
+                </p>
+                <div class="import-url-box">
+                    <input type="text" class="import-url" id="importUrl"
+                        value="https://filokloi.github.io/AIchain/catalog_manifest.json" readonly>
+                    <button class="copy-btn" id="copyBtn" onclick="copyUrl()">Copy URL</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══ FOOTER ═══ -->
+    <footer>
+        <div class="container">
+            AIchain — The Sovereign Global Value Maximizer &middot;
+            <a href="https://github.com/filokloi/AIchain" target="_blank" rel="noopener">GitHub</a> &middot;
+            <a href="https://filokloi.github.io/AIchain/" target="_blank" rel="noopener"
+                style="color: var(--neon-accent); font-weight: bold;">LIVE HUB</a> &middot;
+            Non-Discriminatory Global Analysis &middot;
+            All models evaluated equally.
+        </div>
+    </footer>
+
+    <!-- ═══ MODAL ═══ -->
+    <div class="modal-overlay" id="modelModal" onclick="if(event.target===this) closeModal()">
+        <div class="modal-card">
+            <div class="modal-close" onclick="closeModal()">&times;</div>
+            <div class="modal-title" id="mTitle">Model Name</div>
+            <div class="modal-provider" id="mProvider">Provider</div>
+
+            <div style="display: flex; gap: 10px; margin-bottom: 20px;" id="mBadges">
+                <!-- Badges injected here -->
+            </div>
+
+            <div class="modal-metrics">
+                <div class="modal-metric-box">
+                    <div class="modal-metric-label">Intelligence</div>
+                    <div class="modal-metric-val" id="mIntel">0</div>
+                    <div class="modal-bar-bg">
+                        <div class="modal-bar-fill" id="mIntelBar"></div>
+                    </div>
+                </div>
+                <div class="modal-metric-box">
+                    <div class="modal-metric-label">Speed</div>
+                    <div class="modal-metric-val" id="mSpeed">0</div>
+                    <div class="modal-bar-bg">
+                        <div class="modal-bar-fill" id="mSpeedBar"></div>
+                    </div>
+                </div>
+                <div class="modal-metric-box">
+                    <div class="modal-metric-label">Stability</div>
+                    <div class="modal-metric-val" id="mStab">0</div>
+                    <div class="modal-bar-bg">
+                        <div class="modal-bar-fill" id="mStabBar"></div>
+                    </div>
+                </div>
+                <div class="modal-metric-box"
+                    style="background: rgba(0, 255, 65, 0.05); border-color: rgba(0, 255, 65, 0.2);">
+                    <div class="modal-metric-label" style="color: var(--neon-green);">Value Score</div>
+                    <div class="modal-metric-val" id="mValue" style="color: var(--neon-green); font-size: 1.5rem;">0
+                    </div>
+                    <div style="font-size: 0.6rem; color: var(--text-muted); margin-top: 4px;" id="mCost">Cost: $0.00
+                    </div>
+                </div>
+            </div>
+
+            <div style="font-size: 0.75rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 16px; display: none;"
+                id="mDetails">
+                <!-- Extra details injected here -->
+            </div>
+
+            <div class="modal-actions">
+                <button class="btn-modal" id="mCopyBtn" onclick="copyModelIdFromModal()">📋 Copy Model ID</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ── State ──
+        const CANONICAL_SOURCE_URL = 'catalog_manifest.json';
+        const LEGACY_SOURCE_URL = 'ai_routing_table.json';
+        let routingData = null;
+        let routingRawData = null;
+        let currentFilter = 'all';
+        let currentSort = { key: 'rank', dir: 'asc' };
+        let searchQuery = '';
+
+        // ── Development Banner ──
+        function showDevBanner() {
+            const banner = document.createElement('div');
+            banner.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                background: var(--tier-paid);
+                color: white;
+                text-align: center;
+                font-size: 0.7rem;
+                font-weight: 800;
+                padding: 4px;
+                z-index: 10000;
+                letter-spacing: 2px;
+                text-transform: uppercase;
+                box-shadow: 0 2px 10px rgba(0,0,0,0.5);
+            `;
+            banner.textContent = "⚠ DEVELOPMENT MODE: LIVE ROUTING TEST IN PROGRESS ⚠";
+            document.body.prepend(banner);
+            document.body.style.paddingTop = "24px";
+        }
+
+        function clearBanner() {
+            const banner = document.getElementById('errorBanner');
+            banner.textContent = '';
+            banner.classList.remove('warning');
+            banner.style.display = 'none';
+        }
+
+        function setBanner(msg, level = 'error') {
+            const banner = document.getElementById('errorBanner');
+            banner.textContent = msg;
+            banner.classList.toggle('warning', level === 'warning');
+            banner.style.display = 'block';
+        }
+
+        // ── Init ──
+        document.addEventListener('DOMContentLoaded', () => {
+            showDevBanner();
+            fetchRoutingTable();
+            document.getElementById('searchInput').addEventListener('input', (e) => {
+                searchQuery = e.target.value.toLowerCase();
+                renderTable();
+            });
+
+            // Column sorting
+            document.querySelectorAll('thead th[data-sort]').forEach(th => {
+                th.addEventListener('click', () => {
+                    const key = th.dataset.sort;
+                    if (currentSort.key === key) {
+                        currentSort.dir = currentSort.dir === 'asc' ? 'desc' : 'asc';
+                    } else {
+                        currentSort = { key, dir: 'asc' };
+                    }
+                    updateSortIndicators();
+                    renderTable();
+                });
+            });
+        });
+
+        async function fetchRoutingTable() {
+            clearBanner();
+            let canonicalError = null;
+
+            try {
+                const payload = await fetchArtifact(CANONICAL_SOURCE_URL);
+                routingRawData = payload;
+                routingData = normalizeRoutingPayload(payload, 'canonical', CANONICAL_SOURCE_URL);
+            } catch (err) {
+                canonicalError = err;
+                try {
+                    const payload = await fetchArtifact(LEGACY_SOURCE_URL);
+                    routingRawData = payload;
+                    routingData = normalizeRoutingPayload(payload, 'legacy_rollback', LEGACY_SOURCE_URL);
+                    routingData.rollback_reason = err.message;
+                    setBanner(`Canonical manifest unavailable, using legacy rollback feed: ${err.message}`, 'warning');
+                } catch (legacyErr) {
+                    showError(`Failed to load canonical or rollback routing data: ${legacyErr.message}`);
+                    updateStatus('OFFLINE', 'OFFLINE');
+                    return;
+                }
+            }
+
+            const scoringFormula = routingData?.scoring?.display_formula;
+            if (scoringFormula) {
+                const valueHeader = document.querySelector("th[data-sort='value_score']");
+                if (valueHeader) valueHeader.setAttribute('data-tooltip', scoringFormula);
+            }
+
+            if (routingData?.artifact_mode === 'canonical' && routingData?.public_artifact_readiness?.dashboard_switch_ready === false) {
+                const blockers = routingData.public_artifact_readiness.blockers || [];
+                setBanner(`Canonical manifest loaded while readiness is still holding the switch: ${blockers.join(' • ')}`, 'warning');
+            } else if (!canonicalError && routingData?.artifact_mode === 'canonical') {
+                clearBanner();
+            }
+
+            updateDashboard();
+        }
+
+        async function fetchArtifact(url) {
+            const resp = await fetch(url, { cache: 'no-store' });
+            if (!resp.ok) throw new Error(`HTTP ${resp.status} from ${url}`);
+            const payload = await resp.json();
+            if (url === CANONICAL_SOURCE_URL && payload?.manifest_type !== 'aichain.catalog') {
+                throw new Error('canonical manifest did not expose manifest_type=aichain.catalog');
+            }
+            return payload;
+        }
+
+        function normalizeRoutingPayload(payload, artifactMode, artifactUrl) {
+            if (payload?.manifest_type === 'aichain.catalog') {
+                const catalog = payload.catalog || {};
+                const observability = payload.observability || {};
+                return {
+                    artifact_mode: artifactMode,
+                    artifact_label: 'catalog_manifest.json',
+                    artifact_url: artifactUrl,
+                    system_status: payload.system_status || 'UNKNOWN',
+                    last_synopsis: payload.last_synopsis || payload.generated_at || null,
+                    scoring: payload.scoring || {},
+                    total_models_analyzed: catalog.total_models_analyzed || payload.routing_hierarchy?.length || 0,
+                    tier_breakdown: catalog.tier_breakdown || {},
+                    heavy_hitter: catalog.heavy_hitter || {},
+                    routing_hierarchy: (payload.routing_hierarchy || []).map((entry, index) => normalizeModelEntry(entry, index)),
+                    live_promos: payload.live_promos || [],
+                    source_health: observability.source_health || {},
+                    degradation_reasons: observability.degradation_reasons || [],
+                    helper_ai: observability.helper_ai || {},
+                    operational_status: payload.operational_status || {},
+                    provider_access_matrix: payload.provider_access_matrix || {},
+                    self_hosted_model_index: payload.self_hosted_model_index || { total_models: 0, family_breakdown: {}, entries: [] },
+                    public_artifact_readiness: payload.public_artifact_readiness || {},
+                    canonical_public_artifact: payload.canonical_public_artifact || {},
+                };
+            }
+
+            return {
+                artifact_mode: artifactMode,
+                artifact_label: 'ai_routing_table.json',
+                artifact_url: artifactUrl,
+                system_status: payload.system_status || 'UNKNOWN',
+                last_synopsis: payload.last_synopsis || null,
+                scoring: payload.scoring || {},
+                total_models_analyzed: payload.total_models_analyzed || payload.routing_hierarchy?.length || 0,
+                tier_breakdown: payload.tier_breakdown || {},
+                heavy_hitter: payload.heavy_hitter || {},
+                routing_hierarchy: (payload.routing_hierarchy || []).map((entry, index) => normalizeModelEntry(entry, index)),
+                live_promos: payload.live_promos || [],
+                source_health: payload.source_health || {},
+                degradation_reasons: payload.degradation_reasons || [],
+                helper_ai: payload.helper_ai || {},
+                operational_status: payload.operational_status || {},
+                provider_access_matrix: payload.provider_access_matrix || {},
+                self_hosted_model_index: payload.self_hosted_model_index || { total_models: 0, family_breakdown: {}, entries: [] },
+                public_artifact_readiness: payload.public_artifact_readiness || {},
+                canonical_public_artifact: payload.canonical_public_artifact || {},
+            };
+        }
+
+        function normalizeModelEntry(entry, index) {
+            const normalized = { ...entry };
+            normalized.rank = entry.rank || index + 1;
+            normalized.provider = entry.provider || entry.display_name || entry.model?.split('/')[0] || 'Unknown';
+            normalized.context_length = entry.context_length || entry.raw_metrics?.context_length || 0;
+            normalized.task_label = deriveTaskLabel(entry);
+            normalized.metrics = {
+                intelligence: entry.metrics?.intelligence ?? Math.round(entry.normalized_metrics?.intelligence || 0),
+                speed: entry.metrics?.speed ?? Math.round(entry.normalized_metrics?.speed || 0),
+                stability: entry.metrics?.stability ?? Math.round(entry.normalized_metrics?.stability || 0),
+                cost: entry.metrics?.cost ?? entry.raw_metrics?.average_cost ?? 0,
+            };
+            normalized.value_score = entry.value_score || 0;
+            normalized.self_hosting = entry.self_hosting || {};
+            return normalized;
+        }
+
+        function deriveTaskLabel(entry) {
+            const explicit = entry.task_label;
+            if (typeof explicit === 'string' && explicit.trim()) {
+                return explicit.trim().toUpperCase();
+            }
+            const primary = entry.task_metadata?.primary;
+            if (Array.isArray(primary) && primary.length > 0) {
+                return String(primary[0]).trim().replace(/[_\s]+/g, '-').toUpperCase();
+            }
+            return 'GENERAL-CHAT';
+        }
+
+        function getTaskMeta(taskLabel) {
+            const normalized = String(taskLabel || 'GENERAL-CHAT').trim().replace(/[_\s]+/g, '-').toUpperCase();
+            const map = {
+                'DAILY-FREE': { text: 'DAILY', className: 'daily' },
+                'COMPLEX-RESCUE': { text: 'RESCUE', className: 'rescue' },
+                'CODING': { text: 'CODING', className: 'coding' },
+                'REASONING': { text: 'REASON', className: 'reasoning' },
+                'VISION': { text: 'VISION', className: 'vision' },
+                'LONG-CONTEXT': { text: 'LONG CTX', className: 'long' },
+                'STRUCTURED-OUTPUT': { text: 'STRUCT', className: 'structured' },
+                'EXTRACTION': { text: 'EXTRACT', className: 'general' },
+                'GENERAL-CHAT': { text: 'CHAT', className: 'general' },
+                'TOOL-AGENT-COMPATIBILITY': { text: 'AGENT', className: 'general' },
+            };
+            return map[normalized] || { text: normalized.slice(0, 10), className: 'general' };
+        }
+
+        function formatMode(mode) {
+            return String(mode || 'unknown').replaceAll('_', ' ');
+        }
+
+        function formatBool(val) {
+            return val ? 'yes' : 'no';
+        }
+
+        function formatList(val) {
+            if (Array.isArray(val)) {
+                return val.length > 0 ? val.join(' → ') : 'n/a';
+            }
+            return val ? String(val) : 'n/a';
+        }
+
+        function formatTimestamp(val) {
+            if (!val) return 'n/a';
+            const d = new Date(val);
+            return Number.isNaN(d.getTime()) ? String(val) : d.toISOString().replace('T', ' ').replace('.000Z', 'Z');
+        }
+
+        function updateDashboard() {
+            if (!routingData) return;
+
+            updateStatus(routingData.system_status, routingData.system_status);
+
+            if (routingData.last_synopsis) {
+                const d = new Date(routingData.last_synopsis);
+                const lastUpdateEl = document.getElementById('lastUpdate');
+                const syncLabel = `LAST SYNC: ${d.toISOString().replace('T', ' ').substring(0, 19)} UTC`;
+                const ageHours = (Date.now() - d.getTime()) / (1000 * 60 * 60);
+                if (ageHours > 72) {
+                    lastUpdateEl.innerHTML = `${escHtml(syncLabel)} <span style="color: #ff4444; font-weight: 800; margin-left: 8px;">⚠ DATA ${Math.floor(ageHours / 24)}d STALE</span>`;
+                } else if (ageHours > 24) {
+                    lastUpdateEl.innerHTML = `${escHtml(syncLabel)} <span style="color: #ffaa00; font-weight: 800; margin-left: 8px;">⚠ DATA ${Math.floor(ageHours)}h OLD</span>`;
+                } else {
+                    lastUpdateEl.textContent = syncLabel;
+                }
+            }
+
+            const breakdown = routingData.tier_breakdown || {};
+            document.getElementById('totalModels').textContent =
+                routingData.total_models_analyzed || routingData.routing_hierarchy?.length || 0;
+            document.getElementById('oauthCount').textContent = breakdown.OAUTH_BRIDGE || 0;
+            document.getElementById('freeCount').textContent = breakdown.FREE_FRONTIER || 0;
+            document.getElementById('paidCount').textContent = breakdown.HEAVY_HITTER || breakdown.PAID_FALLBACK || 0;
+
+            const hh = routingData.heavy_hitter;
+            if (hh && hh.model && hh.model !== 'N/A') {
+                document.getElementById('heavyHitterBadge').textContent =
+                    `⚔ HEAVY HITTER: ${hh.model} (Intel: ${hh.intelligence})`;
+            }
+
+            const h = routingData.routing_hierarchy;
+            if (h && h.length > 0) {
+                try {
+                    const cached = localStorage.getItem('aiChainLastModels');
+                    if (cached) {
+                        const oldList = JSON.parse(cached);
+                        const added = h.filter(m => !oldList.some(o => o.model === m.model)).length;
+                        let hintHtml = '';
+                        if (added > 0) hintHtml += `<span style="color:var(--neon-green)">+${added} new models</span> `;
+                        if (routingData.artifact_mode === 'canonical') {
+                            hintHtml += `<span style="color:var(--text-secondary)">canonical view</span>`;
+                        } else {
+                            hintHtml += `<span style="color:var(--tier-oauth)">legacy rollback</span>`;
+                        }
+                        if (hintHtml) {
+                            const el = document.getElementById('changelogHint');
+                            el.innerHTML = hintHtml;
+                            el.style.display = 'block';
+                        }
+                    }
+                    localStorage.setItem('aiChainLastModels', JSON.stringify(h.map(m => ({ model: m.model, rank: m.rank }))));
+                } catch (e) { }
+            }
+
+            const promos = routingData.live_promos || [];
+            if (promos.length > 0) {
+                document.getElementById('livePromosContainer').style.display = 'block';
+                document.getElementById('livePromosList').innerHTML = promos.map(p =>
+                    `<span style="padding: 4px 12px; border: 1px dashed var(--neon-green); color: var(--text-primary); background: var(--bg-surface); font-size: 0.7rem; letter-spacing: 1px;">${p}</span>`
+                ).join('');
+            } else {
+                document.getElementById('livePromosContainer').style.display = 'none';
+            }
+
+            updatePlaneSummary();
+            renderOperationalStatus();
+            renderProviderAccessMatrix();
+            renderSelfHostedIndex();
+            renderTable();
+        }
+
+        function updatePlaneSummary() {
+            const readiness = routingData.public_artifact_readiness || {};
+            const blockers = readiness.blockers || [];
+            const degradations = routingData.degradation_reasons || [];
+            const artifactSource = document.getElementById('artifactSource');
+            const artifactMeta = document.getElementById('artifactMeta');
+            const switchReadiness = document.getElementById('switchReadiness');
+            const switchMeta = document.getElementById('switchMeta');
+            const globalPlaneValue = document.getElementById('globalPlaneValue');
+            const globalPlaneMeta = document.getElementById('globalPlaneMeta');
+
+            artifactSource.textContent = routingData.artifact_mode === 'canonical' ? 'CANONICAL MANIFEST' : 'LEGACY ROLLBACK';
+            artifactMeta.textContent = routingData.artifact_mode === 'canonical'
+                ? `${routingData.artifact_label} • ${routingData.canonical_public_artifact?.migration_state || 'canonical active'}`
+                : `${routingData.artifact_label} • rollback active${routingData.rollback_reason ? ` • ${routingData.rollback_reason}` : ''}`;
+
+            switchReadiness.textContent = readiness.dashboard_switch_ready ? 'READY' : 'HOLD';
+            switchMeta.textContent = blockers.length > 0
+                ? blockers.join(' • ')
+                : (readiness.next_acceptance_step || 'Canonical dashboard source is clear to use.');
+
+            globalPlaneValue.textContent = routingData.system_status || 'UNKNOWN';
+            globalPlaneMeta.textContent = degradations.length > 0
+                ? degradations.join(' • ')
+                : 'No active degradation reasons.';
+        }
+
+        function renderOperationalStatus() {
+            const grid = document.getElementById('operationalGrid');
+            const operational = routingData.operational_status || {};
+            const sourceHealth = routingData.source_health || {};
+            const sections = [
+                { key: 'sources', items: operational.sources || {}, title: 'SOURCE' },
+                { key: 'helper_ai', items: operational.helper_ai || {}, title: 'HELPER' },
+            ];
+            const cards = [];
+
+            sections.forEach(section => {
+                Object.entries(section.items).forEach(([name, info]) => {
+                    const health = section.key === 'sources' ? (sourceHealth[name] || {}) : null;
+                    const issues = [...(health?.issues || []), ...(health?.warnings || []), ...(info.issues || []), ...(info.warnings || [])].slice(0, 3);
+                    cards.push(`
+                        <div class="operational-card">
+                            <div class="operational-head">
+                                <div class="operational-name">${section.title}: ${escHtml(name)}</div>
+                                <span class="mode-badge mode-${escHtml(info.mode || 'unknown')}">${escHtml(formatMode(info.mode))}</span>
+                            </div>
+                            <div class="operational-body">
+                                <div class="operational-line"><strong>Confirmed:</strong> ${info.runtime_confirmed ? 'yes' : 'no'}</div>
+                                <div class="operational-line"><strong>Target:</strong> ${escHtml(info.target_state || 'n/a')}</div>
+                                ${health ? `<div class="operational-line"><strong>Records:</strong> ${health.accepted_records || 0} / ${health.fetched_records || 0}</div>` : ''}
+                                ${info.blocked_reason ? `<div class="operational-line"><strong>Blocked:</strong> ${escHtml(info.blocked_reason)}</div>` : ''}
+                                <div class="operational-line"><strong>Rule:</strong> ${escHtml(info.acceptance_criteria || 'n/a')}</div>
+                                ${issues.length > 0 ? `<ul class="operational-list">${issues.map(issue => `<li>${escHtml(issue)}</li>`).join('')}</ul>` : ''}
+                            </div>
+                        </div>
+                    `);
+                });
+            });
+
+            grid.innerHTML = cards.join('');
+        }
+
+
+        function formatHardwareHint(val) {
+            if (!val) return 'n/a';
+            return String(val).replaceAll('_', ' ');
+        }
+
+        function renderSelfHostedIndex() {
+            const grid = document.getElementById('selfHostedGrid');
+            if (!grid) return;
+            const index = routingData.self_hosted_model_index || {};
+            const entries = Array.isArray(index.entries) ? index.entries : [];
+            if (entries.length === 0) {
+                grid.innerHTML = `
+                    <div class="operational-card">
+                        <div class="operational-head">
+                            <div class="operational-name">SELF-HOSTED INDEX</div>
+                            <span class="mode-badge mode-unknown">unknown</span>
+                        </div>
+                        <div class="operational-body">
+                            <div class="operational-line"><strong>Status:</strong> No self-hosted model metadata available in the current catalog artifact.</div>
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+
+            const familyBreakdown = Object.entries(index.family_breakdown || {}).map(([family, count]) => `${family}: ${count}`).join(' | ');
+            const cards = entries.slice(0, 12).map((entry) => {
+                const metrics = entry.metrics || {};
+                return `
+                    <div class="operational-card">
+                        <div class="operational-head">
+                            <div class="operational-name">${escHtml(entry.display_name || entry.model || 'Unknown')}</div>
+                            <span class="mode-badge mode-runtime_confirmed">rank #${escHtml(String(entry.rank || '?'))}</span>
+                        </div>
+                        <div class="operational-body">
+                            <div class="operational-line"><strong>Model:</strong> ${escHtml(entry.model || 'n/a')}</div>
+                            <div class="operational-line"><strong>Family:</strong> ${escHtml(entry.family || 'n/a')}</div>
+                            <div class="operational-line"><strong>Task:</strong> ${escHtml(entry.task_label || 'GENERAL-CHAT')}</div>
+                            <div class="operational-line"><strong>Hosting:</strong> ${escHtml(formatList(entry.hosting_modes || []))}</div>
+                            <div class="operational-line"><strong>Sources:</strong> ${escHtml(formatList(entry.download_sources || []))}</div>
+                            <div class="operational-line"><strong>Runtimes:</strong> ${escHtml(formatList(entry.preferred_runtimes || []))}</div>
+                            <div class="operational-line"><strong>Quantizations:</strong> ${escHtml(formatList(entry.quantizations_known || []))}</div>
+                            <div class="operational-line"><strong>Hardware Hint:</strong> ${escHtml(formatHardwareHint(entry.hardware_profile_hint))}</div>
+                            <div class="operational-line"><strong>Evidence:</strong> ${escHtml(formatList(entry.benchmark_evidence_sources || []))}</div>
+                            <div class="operational-line"><strong>Metrics:</strong> IQ ${escHtml(String(metrics.intelligence || 0))} / SPD ${escHtml(String(metrics.speed || 0))} / STB ${escHtml(String(metrics.stability || 0))}</div>
+                            ${entry.self_hosting_notes ? `<div class="operational-line">${escHtml(entry.self_hosting_notes)}</div>` : ''}
+                        </div>
+                    </div>
+                `;
+            });
+
+            const summaryCard = `
+                <div class="operational-card">
+                    <div class="operational-head">
+                        <div class="operational-name">SELF-HOSTED SUMMARY</div>
+                        <span class="mode-badge mode-runtime_confirmed">catalog</span>
+                    </div>
+                    <div class="operational-body">
+                        <div class="operational-line"><strong>Total Models:</strong> ${escHtml(String(index.total_models || entries.length))}</div>
+                        <div class="operational-line"><strong>Families:</strong> ${escHtml(familyBreakdown || 'n/a')}</div>
+                        <div class="operational-line"><strong>Scope:</strong> Global self-hostable metadata only; machine-specific profiling remains local.</div>
+                    </div>
+                </div>
+            `;
+
+            grid.innerHTML = summaryCard + cards.join('');
+        }
+
+        function renderProviderAccessMatrix() {
+            const grid = document.getElementById('accessMatrixGrid');
+            if (!grid) return;
+            const matrix = routingData.provider_access_matrix || {};
+            const entries = Object.entries(matrix);
+            if (entries.length === 0) {
+                grid.innerHTML = `
+                    <div class="operational-card">
+                        <div class="operational-head">
+                            <div class="operational-name">ACCESS MATRIX</div>
+                            <span class="mode-badge mode-unknown">unknown</span>
+                        </div>
+                        <div class="operational-body">
+                            <div class="operational-line"><strong>Status:</strong> No provider access metadata available.</div>
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+
+            const cards = entries.map(([provider, info]) => {
+                const methods = Object.entries(info.methods || {}).map(([method, methodInfo]) => {
+                    const verifiedModels = (methodInfo.verified_models || []).join(', ');
+                    return `
+                        <div class="operational-line" style="margin-top:10px; padding-top:10px; border-top:1px solid var(--border-color);">
+                            <strong>${escHtml(String(method || '').replaceAll('_', ' '))}:</strong>
+                            <span class="mode-badge mode-${escHtml(methodInfo.mode || info.overall_mode || 'unknown')}">${escHtml(formatMode(methodInfo.mode || info.overall_mode))}</span>
+                            <div><strong>Official:</strong> ${escHtml(formatBool(Boolean(methodInfo.official_support)))}</div>
+                            <div><strong>Runtime Confirmed:</strong> ${escHtml(formatBool(Boolean(methodInfo.runtime_confirmed)))}</div>
+                            <div><strong>Limit Type:</strong> ${escHtml(methodInfo.limit_type || info.limit_type || 'n/a')}</div>
+                            <div><strong>Quota Visibility:</strong> ${escHtml(methodInfo.quota_visibility || info.quota_visibility || 'n/a')}</div>
+                            <div><strong>Last Verified:</strong> ${escHtml(formatTimestamp(methodInfo.last_verified_at || info.last_verified_at))}</div>
+                            <div><strong>Fallback:</strong> ${escHtml(formatList(methodInfo.fallback_path || info.fallback_path))}</div>
+                            ${methodInfo.verification_basis ? `<div><strong>Evidence:</strong> ${escHtml(methodInfo.verification_basis)}</div>` : ''}
+                            ${methodInfo.note ? `<div>${escHtml(methodInfo.note)}</div>` : ''}
+                            ${verifiedModels ? `<div><strong>Verified Models:</strong> ${escHtml(verifiedModels)}</div>` : ''}
+                            ${methodInfo.target_model ? `<div><strong>Target:</strong> ${escHtml(methodInfo.target_model)}</div>` : ''}
+                        </div>
+                    `;
+                }).join('');
+                const limitations = (info.limitations || []).slice(0, 4);
+                return `
+                    <div class="operational-card">
+                        <div class="operational-head">
+                            <div class="operational-name">${escHtml(info.label || provider)}</div>
+                            <span class="mode-badge mode-${escHtml(info.overall_mode || 'unknown')}">${escHtml(formatMode(info.overall_mode))}</span>
+                        </div>
+                        <div class="operational-body">
+                            <div class="operational-line"><strong>Factual State:</strong> ${escHtml(formatMode(info.factual_state || info.overall_mode || 'unknown'))}</div>
+                            <div class="operational-line"><strong>Official Methods:</strong> ${escHtml(formatList(info.officially_supported_methods || []))}</div>
+                            <div class="operational-line"><strong>Runtime Methods:</strong> ${escHtml(formatList(info.runtime_confirmed_methods || []))}</div>
+                            <div class="operational-line"><strong>Billing:</strong> ${escHtml(info.billing_basis || 'n/a')}</div>
+                            <div class="operational-line"><strong>Usage:</strong> ${escHtml(info.usage_tracking || 'n/a')}</div>
+                            <div class="operational-line"><strong>Quota View:</strong> ${escHtml(info.quota_visibility || 'n/a')}</div>
+                            <div class="operational-line"><strong>Limit Type:</strong> ${escHtml(info.limit_type || 'n/a')}</div>
+                            <div class="operational-line"><strong>Last Verified:</strong> ${escHtml(formatTimestamp(info.last_verified_at))}</div>
+                            <div class="operational-line"><strong>Fallback:</strong> ${escHtml(formatList(info.fallback_path || []))}</div>
+                            ${info.verification_scope ? `<div class="operational-line"><strong>Verification Scope:</strong> ${escHtml(info.verification_scope)}</div>` : ''}
+                            ${info.project_verification ? `<div class="operational-line"><strong>Verification:</strong> ${escHtml(info.project_verification)}</div>` : ''}
+                            ${methods}
+                            ${limitations.length > 0 ? `<ul class="operational-list">${limitations.map(item => `<li>${escHtml(item)}</li>`).join('')}</ul>` : ''}
+                        </div>
+                    </div>
+                `;
+            });
+
+            grid.innerHTML = cards.join('');
+        }
+
+        function getFilteredModels() {
+            if (!routingData || !routingData.routing_hierarchy) return [];
+            let models = [...routingData.routing_hierarchy];
+
+            if (currentFilter !== 'all') {
+                if (currentFilter.startsWith('task:')) {
+                    const wanted = currentFilter.slice(5).toUpperCase();
+                    models = models.filter(m => String(m.task_label || '').replace(/[_\s]+/g, '-').toUpperCase() === wanted.toUpperCase());
+                } else {
+                    models = models.filter(m => m.tier === currentFilter);
+                }
+            }
+
+            if (searchQuery) {
+                models = models.filter(m =>
+                    m.model.toLowerCase().includes(searchQuery) ||
+                    (m.provider || '').toLowerCase().includes(searchQuery)
+                );
+            }
+            return models;
+        }
+
+        function renderTable() {
+            const tbody = document.getElementById('tableBody');
+            if (!routingData || !routingData.routing_hierarchy) {
+                tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:40px;color:var(--text-muted);">No data available</td></tr>';
+                return;
+            }
+
+            let models = getFilteredModels();
+
+            models.sort((a, b) => {
+                let va, vb;
+                const k = currentSort.key;
+                if (k === 'model') { va = a.model; vb = b.model; }
+                else if (k === 'tier') { va = a.tier; vb = b.tier; }
+                else if (k === 'task_label') { va = a.task_label || ''; vb = b.task_label || ''; }
+                else if (k === 'intelligence') { va = a.metrics?.intelligence || 0; vb = b.metrics?.intelligence || 0; }
+                else if (k === 'speed') { va = a.metrics?.speed || 0; vb = b.metrics?.speed || 0; }
+                else if (k === 'stability') { va = a.metrics?.stability || 0; vb = b.metrics?.stability || 0; }
+                else if (k === 'cost') { va = a.metrics?.cost || 0; vb = b.metrics?.cost || 0; }
+                else if (k === 'value_score') { va = a.value_score || 0; vb = b.value_score || 0; }
+                else { va = a.rank || 0; vb = b.rank || 0; }
+
+                if (typeof va === 'string') {
+                    const cmp = va.localeCompare(vb);
+                    return currentSort.dir === 'asc' ? cmp : -cmp;
+                }
+                return currentSort.dir === 'asc' ? va - vb : vb - va;
+            });
+
+            if (models.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:40px;color:var(--text-muted);">No models match your filter</td></tr>';
+                return;
+            }
+
+            const html = models.map(m => {
+                const metrics = m.metrics || {};
+                const intel = metrics.intelligence || 0;
+                const speed = metrics.speed || 0;
+                const stab = metrics.stability || 0;
+                const cost = metrics.cost || 0;
+                const valueScore = m.value_score || 0;
+
+                const tierClass = m.tier === 'OAUTH_BRIDGE' ? 'oauth' :
+                    m.tier === 'FREE_FRONTIER' ? 'free' : 'paid';
+                const tierLabel = m.tier === 'OAUTH_BRIDGE' ? 'PRIMARY' :
+                    m.tier === 'FREE_FRONTIER' ? 'FREE' : 'RESCUE';
+                const taskMeta = getTaskMeta(m.task_label);
+
+                let medalClass = '';
+                if (m.rank === 1) medalClass = 'medal-gold';
+                else if (m.rank === 2) medalClass = 'medal-silver';
+                else if (m.rank === 3) medalClass = 'medal-bronze';
+
+                const rankDisplay = m.rank === 1 ? '🥇' : m.rank === 2 ? '🥈' : m.rank === 3 ? '🥉' : m.rank;
+
+                const mJson = encodeURIComponent(JSON.stringify(m));
+                return `<tr class="${medalClass} clickable-row" onclick="showModelDetail(decodeURIComponent('${mJson}'))">
+                    <td class="rank-cell ${m.rank <= 3 ? 'top-3' : ''}">${rankDisplay}</td>
+                    <td class="model-cell">
+                        <div style="display:flex; align-items:center; gap:4px;">
+                            <div class="model-name">${escHtml(m.model)}</div>
+                            <button class="row-copy-btn" onclick="event.stopPropagation(); copyModelId('${escHtml(m.model)}', this)" title="Copy Model ID">📋</button>
+                        </div>
+                        <div class="model-provider">${escHtml(m.provider || '')}</div>
+                    </td>
+                    <td><span class="tier-badge ${tierClass}">${tierLabel}</span></td>
+                    <td><span class="task-label ${taskMeta.className}">${taskMeta.text}</span></td>
+                    <td class="metric-cell">
+                        <span class="${metricClass(intel)}">${intel}</span>
+                        ${metricBar(intel)}
+                    </td>
+                    <td class="metric-cell">
+                        <span class="${metricClass(speed)}">${speed}</span>
+                        ${metricBar(speed)}
+                    </td>
+                    <td class="metric-cell">
+                        <span class="${metricClass(stab)}">${stab}</span>
+                        ${metricBar(stab)}
+                    </td>
+                    <td class="cost-cell ${cost <= 0 ? 'cost-free' : 'cost-paid'}">
+                        ${cost <= 0 ? '$0.00' : '$' + cost.toFixed(6)}
+                    </td>
+                    <td class="value-score-cell">${valueScore >= 100 ? valueScore.toFixed(0) : valueScore.toFixed(1)}</td>
+                </tr>`;
+            }).join('');
+
+            tbody.innerHTML = html;
+        }
+        // ── Utilities ──
+
+        function metricClass(val) {
+            if (val >= 80) return 'metric-high';
+            if (val >= 60) return 'metric-mid';
+            return 'metric-low';
+        }
+
+        function metricBar(val) {
+            const cls = metricClass(val);
+            const color = cls === 'metric-high' ? 'var(--neon-green)' :
+                cls === 'metric-mid' ? 'var(--tier-oauth)' : 'var(--tier-paid)';
+            return `<div class="metric-bar"><div class="metric-bar-fill" style="width:${val}%;background:${color}"></div></div>`;
+        }
+
+        function escHtml(str) {
+            const div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
+        }
+
+        // ── Modal Logic ──
+        let currentModalModelId = '';
+
+        function showModelDetail(jsonStr) {
+            try {
+                const m = JSON.parse(jsonStr);
+                currentModalModelId = m.model;
+
+                document.getElementById('mTitle').textContent = m.model.split('/').pop();
+                document.getElementById('mProvider').textContent = m.provider || m.model.split('/')[0] || 'Unknown';
+
+                // Badges
+                const tierClass = m.tier === 'OAUTH_BRIDGE' ? 'oauth' : m.tier === 'FREE_FRONTIER' ? 'free' : 'paid';
+                const tierIcon = m.tier === 'OAUTH_BRIDGE' ? '🔑' : m.tier === 'FREE_FRONTIER' ? '🆓' : '⚔️';
+                const tierLabel = m.tier === 'OAUTH_BRIDGE' ? 'PRIMARY' : m.tier === 'FREE_FRONTIER' ? 'FREE' : 'RESCUE';
+
+                const taskMeta = getTaskMeta(m.task_label);
+                document.getElementById('mBadges').innerHTML = `
+                    <span class="tier-badge ${tierClass}">${tierIcon} ${tierLabel}</span>
+                    <span class="task-label ${taskMeta.className}">${taskMeta.text}</span>
+                    <span class="task-label" style="background: rgba(255,255,255,0.1); color: #fff;">RANK #${m.rank}</span>
+                `;
+
+                // Metrics
+                const intel = m.metrics?.intelligence || 0;
+                const speed = m.metrics?.speed || 0;
+                const stab = m.metrics?.stability || 0;
+                const cost = m.metrics?.cost || 0;
+                const val = m.value_score || 0;
+
+                setModalMetric('mIntel', intel);
+                setModalMetric('mSpeed', speed);
+                setModalMetric('mStab', stab);
+
+                document.getElementById('mValue').textContent = val >= 100 ? val.toFixed(0) : val.toFixed(1);
+                document.getElementById('mCost').textContent = cost <= 0 ? 'Cost: $0.00 (Free)' : `Cost: $${cost.toFixed(6)} / 1M out`;
+
+                // Extra details if available (architecture, context length context)
+                const detailsEl = document.getElementById('mDetails');
+                const extras = [];
+                if (m.context_length) extras.push(`Context: ${m.context_length.toLocaleString()} tokens`);
+                if (m.architecture) extras.push(`Arch: ${m.architecture.instruction_instruct ? 'Instruct' : 'Base'}`);
+                if (extras.length > 0) {
+                    detailsEl.textContent = extras.join(' • ');
+                    detailsEl.style.display = 'block';
+                } else {
+                    detailsEl.style.display = 'none';
+                }
+
+                document.getElementById('mCopyBtn').textContent = '📋 Copy Model ID';
+                document.getElementById('modelModal').classList.add('active');
+            } catch (e) {
+                console.error('Failed to parse model detail', e);
+            }
+        }
+
+        function setModalMetric(prefix, val) {
+            document.getElementById(prefix).textContent = val;
+            const bar = document.getElementById(prefix + 'Bar');
+            bar.style.width = val + '%';
+            bar.className = 'modal-bar-fill ' + metricClass(val).replace('metric-', '');
+        }
+
+        function closeModal() {
+            document.getElementById('modelModal').classList.remove('active');
+            currentModalModelId = '';
+        }
+
+        function copyModelId(id, btnElement) {
+            navigator.clipboard.writeText(id).then(() => {
+                const orig = btnElement.textContent;
+                btnElement.textContent = '✓';
+                btnElement.style.color = 'var(--neon-green)';
+                setTimeout(() => {
+                    btnElement.textContent = orig;
+                    btnElement.style.color = '';
+                }, 2000);
+            });
+        }
+
+        function copyModelIdFromModal() {
+            if (!currentModalModelId) return;
+            navigator.clipboard.writeText(currentModalModelId).then(() => {
+                const btn = document.getElementById('mCopyBtn');
+                btn.textContent = '✓ Copied!';
+                setTimeout(() => { if (btn) btn.textContent = '📋 Copy Model ID'; }, 2000);
+            });
+        }
+
+        function exportCSV() {
+            if (!routingData || !routingData.routing_hierarchy) return;
+            const models = getFilteredModels();
+
+            const header = ['Rank', 'Model', 'Provider', 'Tier', 'Role', 'Intelligence', 'Speed', 'Stability', 'Cost', 'ValueScore'];
+            const rows = models.map(m => [
+                m.rank, m.model, m.provider || '', m.tier, m.task_label || 'NONE',
+                m.metrics?.intelligence || 0, m.metrics?.speed || 0, m.metrics?.stability || 0,
+                m.metrics?.cost || 0, m.value_score || 0
+            ]);
+
+            const csvContent = "data:text/csv;charset=utf-8,"
+                + header.join(",") + "\n"
+                + rows.map(e => e.join(",")).join("\n");
+
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", `aichain_routing_${new Date().toISOString().split('T')[0]}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+        function exportJSON() {
+            const payload = routingRawData || routingData;
+            if (!payload) return;
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(payload, null, 2));
+            const link = document.createElement("a");
+            link.setAttribute("href", dataStr);
+            link.setAttribute("download", `aichain_routing_${new Date().toISOString().split('T')[0]}.json`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+        function updateStatus(text, status) {
+            document.getElementById('statusText').textContent = text;
+            const dot = document.getElementById('statusDot');
+            const normalized = String(status || '').toUpperCase();
+            const online = normalized !== 'OFFLINE' && normalized !== 'FAILED' && normalized !== 'ERROR';
+            if (online) {
+                dot.classList.remove('offline');
+            } else {
+                dot.classList.add('offline');
+            }
+        }
+
+        function showError(msg) {
+            setBanner(msg, 'error');
+        }
+        function setFilter(filter) {
+            currentFilter = filter;
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.filter === filter);
+            });
+            renderTable();
+        }
+
+        function updateSortIndicators() {
+            document.querySelectorAll('thead th').forEach(th => {
+                th.classList.remove('sorted-asc', 'sorted-desc');
+                if (th.dataset.sort === currentSort.key) {
+                    th.classList.add(currentSort.dir === 'asc' ? 'sorted-asc' : 'sorted-desc');
+                }
+            });
+        }
+
+        function copyUrl() {
+            const input = document.getElementById('importUrl');
+            navigator.clipboard.writeText(input.value).then(() => {
+                const btn = document.getElementById('copyBtn');
+                btn.textContent = 'COPIED!';
+                btn.classList.add('copied');
+                setTimeout(() => {
+                    btn.textContent = 'COPY URL';
+                    btn.classList.remove('copied');
+                }, 2000);
+            }).catch(() => {
+                // Fallback
+                input.select();
+                document.execCommand('copy');
+            });
+        }
+    </script>
+</body>
+
+</html>
+
+
+
+
+
+
+
+
+
+

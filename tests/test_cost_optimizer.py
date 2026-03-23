@@ -306,6 +306,109 @@ def test_zero_marginal_access_does_not_override_catalog_first_free_route():
     assert result.model == 'google/gemini-2.5-flash'
 
 
+def test_prepaid_premium_codex_is_not_auto_selected_for_open_ended_code_generation():
+    class _Decision:
+        def __init__(self, provider, selected_method='disabled', runtime_confirmed=False, preferred_model=''):
+            self.provider = provider
+            self.selected_method = selected_method
+            self.status = 'runtime_confirmed' if runtime_confirmed else 'disabled'
+            self.reason = ''
+            self.runtime_confirmed = runtime_confirmed
+            self.target_form_reached = runtime_confirmed
+            self.quota_visibility = 'provider_console'
+            self.billing_basis = 'subscription_plan_window' if provider == 'openai-codex' else 'metered_api_billing'
+            self.preferred_model = preferred_model
+            self.verified_models = [preferred_model] if preferred_model else []
+            self.target_model = preferred_model
+
+    class _Layer:
+        def summary(self):
+            return {'openai-codex': {}, 'deepseek': {}}
+
+        def resolve(self, provider):
+            if provider == 'openai-codex':
+                return _Decision(provider, selected_method='oauth', runtime_confirmed=True, preferred_model='openai-codex/gpt-5.4')
+            if provider == 'deepseek':
+                return _Decision(provider, selected_method='api_key', runtime_confirmed=True, preferred_model='deepseek/deepseek-chat')
+            return _Decision(provider, selected_method='disabled', runtime_confirmed=False)
+
+    optimizer = CostOptimizer({'routing_hierarchy': []})
+    optimizer.configure_provider_access_layer(_Layer())
+    optimizer.configure_routing_preferences({
+        'prefer_prepaid_premium': True,
+        'prepaid_premium_providers': ['openai-codex'],
+    })
+    report = BalanceReport(
+        balances={
+            'openai-codex': ProviderBalance(provider='openai-codex', has_credits=True, is_subscription=True, source='estimated'),
+            'deepseek': ProviderBalance(provider='deepseek', has_credits=True, balance_usd=5.0, source='api'),
+        },
+        providers_with_credits=['openai-codex', 'deepseek'],
+    )
+
+    result = optimizer.optimize(
+        model_preference='heavy',
+        balance_report=report,
+        available_models={
+            'heavy': 'openrouter/google/gemini-2.5-pro',
+            'free': 'deepseek/deepseek-chat',
+        },
+        task_hint='Write only Python code for a tiny terminal Tetris prototype with one Board class.',
+    )
+
+    assert result.provider != 'openai-codex'
+
+
+def test_prepaid_premium_codex_still_allowed_for_reasoning_heavy_prompt():
+    class _Decision:
+        def __init__(self, provider, selected_method='disabled', runtime_confirmed=False, preferred_model=''):
+            self.provider = provider
+            self.selected_method = selected_method
+            self.status = 'runtime_confirmed' if runtime_confirmed else 'disabled'
+            self.reason = ''
+            self.runtime_confirmed = runtime_confirmed
+            self.target_form_reached = runtime_confirmed
+            self.quota_visibility = 'provider_console'
+            self.billing_basis = 'subscription_plan_window' if provider == 'openai-codex' else 'metered_api_billing'
+            self.preferred_model = preferred_model
+            self.verified_models = [preferred_model] if preferred_model else []
+            self.target_model = preferred_model
+
+    class _Layer:
+        def summary(self):
+            return {'openai-codex': {}}
+
+        def resolve(self, provider):
+            if provider == 'openai-codex':
+                return _Decision(provider, selected_method='oauth', runtime_confirmed=True, preferred_model='openai-codex/gpt-5.4')
+            return _Decision(provider, selected_method='disabled', runtime_confirmed=False)
+
+    optimizer = CostOptimizer({'routing_hierarchy': []})
+    optimizer.configure_provider_access_layer(_Layer())
+    optimizer.configure_routing_preferences({
+        'prefer_prepaid_premium': True,
+        'prepaid_premium_providers': ['openai-codex'],
+    })
+    report = BalanceReport(
+        balances={
+            'openai-codex': ProviderBalance(provider='openai-codex', has_credits=True, is_subscription=True, source='estimated'),
+        },
+        providers_with_credits=['openai-codex'],
+    )
+
+    result = optimizer.optimize(
+        model_preference='heavy',
+        balance_report=report,
+        available_models={
+            'heavy': 'openrouter/google/gemini-2.5-pro',
+        },
+        task_hint='Analyze the security implications of negative capability tokens in a multi-tenant agent runtime.',
+    )
+
+    assert result.provider == 'openai-codex'
+    assert result.model == 'openai-codex/gpt-5.4'
+
+
 def test_local_zero_marginal_path_is_selected_only_when_catalog_exposes_local_role():
     optimizer = CostOptimizer({'routing_hierarchy': []})
 
@@ -842,14 +945,14 @@ def test_prepaid_premium_preference_can_prefer_general_chat_when_enabled():
     )
 
     result = optimizer.optimize(
-        model_preference='free',
+        model_preference='heavy',
         balance_report=report,
         available_models={
             'free': 'deepseek/deepseek-chat',
             'heavy': 'deepseek/deepseek-reasoner',
         },
         estimated_tokens=64,
-        task_hint='casual_general_chat',
+        task_hint='deep_reasoning_analysis',
     )
 
     assert result.provider == 'openai-codex'
@@ -903,14 +1006,14 @@ def test_prepaid_premium_preference_can_be_inferred_from_billing_basis():
     )
 
     result = optimizer.optimize(
-        model_preference='free',
+        model_preference='heavy',
         balance_report=report,
         available_models={
             'free': 'deepseek/deepseek-chat',
             'heavy': 'deepseek/deepseek-reasoner',
         },
         estimated_tokens=64,
-        task_hint='casual_general_chat',
+        task_hint='deep_reasoning_analysis',
     )
 
     assert result.provider == 'openai-codex'
@@ -1188,3 +1291,53 @@ def test_quota_configurable_thresholds():
     assert not optimizer._provider_quota_suppressed('openai-codex')
     assert optimizer.record_provider_failure('openai-codex')
     assert optimizer._provider_quota_suppressed('openai-codex')
+
+
+def test_prepaid_premium_route_does_not_steal_free_general_chat_even_when_runtime_confirmed():
+    optimizer = _make_premium_optimizer()
+    report = BalanceReport(
+        balances={
+            'deepseek': ProviderBalance(provider='deepseek', has_credits=True, balance_usd=3.0, source='api'),
+        },
+        providers_with_credits=['deepseek'],
+    )
+
+    result = optimizer.optimize(
+        model_preference='free',
+        balance_report=report,
+        available_models={
+            'free': 'deepseek/deepseek-chat',
+            'heavy': 'deepseek/deepseek-reasoner',
+        },
+        estimated_tokens=64,
+        task_hint='casual_general_chat',
+    )
+
+    assert result.provider == 'deepseek'
+    assert result.model == 'deepseek/deepseek-chat'
+    assert not str(result.reason or '').startswith('prepaid_premium_preference:')
+
+
+def test_prepaid_premium_route_does_not_steal_free_structured_task_even_when_runtime_confirmed():
+    optimizer = _make_premium_optimizer()
+    report = BalanceReport(
+        balances={
+            'deepseek': ProviderBalance(provider='deepseek', has_credits=True, balance_usd=3.0, source='api'),
+        },
+        providers_with_credits=['deepseek'],
+    )
+
+    result = optimizer.optimize(
+        model_preference='free',
+        balance_report=report,
+        available_models={
+            'free': 'deepseek/deepseek-chat',
+            'heavy': 'deepseek/deepseek-reasoner',
+        },
+        estimated_tokens=96,
+        task_hint='return_structured_json_schema_only',
+    )
+
+    assert result.provider == 'deepseek'
+    assert result.model == 'deepseek/deepseek-chat'
+    assert not str(result.reason or '').startswith('prepaid_premium_preference:')

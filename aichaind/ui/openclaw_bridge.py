@@ -17,8 +17,21 @@ _TEMPLATE = r'''(() => {
       return;
     }
 
+    function urlSessionId() {
+      try {
+        const url = new URL(window.location.href);
+        return String(url.searchParams.get("session") || url.searchParams.get("session_id") || "").trim();
+      } catch {
+        return "";
+      }
+    }
+
+    function resolveInitialSessionId() {
+      return urlSessionId() || localStorage.getItem("aichain.openclaw.sessionId") || cfg.defaultSessionId;
+    }
+
     const state = {
-      sessionId: localStorage.getItem("aichain.openclaw.sessionId") || cfg.defaultSessionId,
+      sessionId: resolveInitialSessionId(),
       last: null,
       loading: false,
       error: "",
@@ -59,13 +72,23 @@ _TEMPLATE = r'''(() => {
       background: rgba(24, 31, 45, 0.97);
     }
     .aichain-chip-dot {
-      width: 9px;
-      height: 9px;
-      border-radius: 999px;
-      background: #8fb3ff;
-      box-shadow: 0 0 0 3px rgba(143, 179, 255, 0.16);
-      flex: 0 0 auto;
-    }
+        width: 9px;
+        height: 9px;
+        border-radius: 999px;
+        background: #8fb3ff;
+        box-shadow: 0 0 0 3px rgba(143, 179, 255, 0.16);
+        flex: 0 0 auto;
+      }
+    .aichain-chip-dot.is-running {
+        background: #9de0ff;
+        box-shadow: 0 0 0 3px rgba(157, 224, 255, 0.22);
+        animation: aichainPulse 1.05s ease-in-out infinite;
+      }
+    @keyframes aichainPulse {
+        0% { transform: scale(1); opacity: 0.8; }
+        50% { transform: scale(1.18); opacity: 1; }
+        100% { transform: scale(1); opacity: 0.8; }
+      }
     .aichain-chip-main {
       display: flex;
       min-width: 0;
@@ -191,6 +214,9 @@ _TEMPLATE = r'''(() => {
 
     function currentLine(data) {
       const session = data.session || {};
+      if ((session.request_status || "idle") === "running") {
+        return session.request_label || "Thinking…";
+      }
       if ((session.routing_mode || "auto") === "manual" && session.locked_model) {
         return session.locked_model;
       }
@@ -202,11 +228,36 @@ _TEMPLATE = r'''(() => {
 
     function metaLine(data) {
       const session = data.session || {};
+      if ((session.request_status || "idle") === "running") {
+        return "Request in progress · live routing active";
+      }
       const parts = [];
       if ((session.routing_mode || "auto") === "auto") parts.push(readablePreference(session.routing_preference));
       if (data.recommended_current?.access_method) parts.push(`via ${data.recommended_current.access_method}`);
       if (data.recommended_current?.provider) parts.push(data.recommended_current.provider);
+      if (state.sessionId) parts.push(`session ${state.sessionId}`);
       return parts.join(" · ") || "Open AIchain panel for details";
+    }
+
+    function syncSessionIdFromLocation() {
+      const next = urlSessionId();
+      if (!next || next === state.sessionId) return false;
+      state.sessionId = next;
+      try {
+        localStorage.setItem("aichain.openclaw.sessionId", state.sessionId);
+      } catch {}
+      state.last = null;
+      state.error = "";
+      return true;
+    }
+
+    let refreshTimer = null;
+    function scheduleRefresh() {
+      if (refreshTimer) window.clearTimeout(refreshTimer);
+      const session = state.last?.session || {};
+      const isRunning = (session.request_status || "idle") === "running";
+      const delay = state.loading ? 500 : (isRunning ? 800 : 1200);
+      refreshTimer = window.setTimeout(refresh, delay);
     }
 
     async function api(path) {
@@ -223,6 +274,7 @@ _TEMPLATE = r'''(() => {
     }
 
     async function refresh() {
+      syncSessionIdFromLocation();
       state.loading = true;
       render();
       try {
@@ -233,6 +285,7 @@ _TEMPLATE = r'''(() => {
       } finally {
         state.loading = false;
         render();
+        scheduleRefresh();
       }
     }
 
@@ -261,7 +314,9 @@ _TEMPLATE = r'''(() => {
       const modeLabel = (session.routing_mode || "auto") === "manual" ? "Locked" : "Auto";
       const current = state.loading ? "Loading…" : currentLine(data);
       const meta = metaLine(data);
+      const isRunning = (session.request_status || "idle") === "running";
       const tags = [];
+      if (isRunning) tags.push("Working");
       if ((session.routing_mode || "auto") === "auto") tags.push(readablePreference(session.routing_preference));
       if (data.recommended_current?.access_method) tags.push(`via ${data.recommended_current.access_method}`);
       if (data.recommended_current?.provider) tags.push(data.recommended_current.provider);
@@ -269,7 +324,7 @@ _TEMPLATE = r'''(() => {
       root.innerHTML = `
       <div class="aichain-shell">
         <div class="aichain-chip" data-action="toggle-popover" title="AIchain routing controls">
-          <span class="aichain-chip-dot"></span>
+          <span class="aichain-chip-dot${isRunning ? ' is-running' : ''}"></span>
           <div class="aichain-chip-main">
             <span class="aichain-chip-title">AIchain</span>
             <span class="aichain-chip-sub">${modeLabel}: ${current}</span>
@@ -327,8 +382,9 @@ _TEMPLATE = r'''(() => {
       syncCaret();
     }
 
+    window.addEventListener("popstate", refresh);
+    window.addEventListener("hashchange", refresh);
     refresh();
-    setInterval(refresh, 15000);
   }
 
   startBridge();

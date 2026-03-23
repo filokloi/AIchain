@@ -109,14 +109,23 @@ def cmd_chat(args):
         content = result["body"].get("choices", [{}])[0].get("message", {}).get("content", "")
         print(content)
     else:
-        # Prevent raw JSON dumps to OpenClaw's stderr
+        # Surface errors cleanly as user-facing messages rather than skill crashes
         body = result["body"]
         error_msg = body.get("error", "") if isinstance(body, dict) else str(body)
-        if result["status"] == 503 or result["status"] == 504:
-            print(f"[AIchain] Daemon offline or unreachable ({result['status']}): {error_msg}", file=sys.stderr)
+        
+        # Strip out raw tool trace formatting if present
+        error_msg = error_msg.replace("FailoverError: ", "")
+
+        normalized_error = error_msg.lower()
+        if result["status"] in (503, 504) and "provider_access_unavailable:" in normalized_error:
+            print("⚠️ The requested AI route is currently unavailable. Switch back to auto mode or choose another model.")
+        elif result["status"] == 503 or result["status"] == 504:
+            print(f"⚠️ AIchain daemon is offline or warming up. Please ensure it is running.")
         else:
-            print(f"[AIchain] Request failed ({result['status']}): {error_msg}", file=sys.stderr)
-        sys.exit(1)
+            print(f"⚠️ AIchain encountered an error: {error_msg}")
+        
+        # Exit cleanly so the user sees the message instead of an ugly stack trace
+        sys.exit(0)
 
 
 def cmd_status(args):

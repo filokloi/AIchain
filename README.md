@@ -37,9 +37,11 @@ Today the repository publishes two feed formats:
   - plane metadata for global catalog vs local execution
 - `ai_routing_table.json`
   - legacy ranking feed kept for compatibility
-  - still used by the dashboard UI
+  - retained as a rollback/compatibility feed during burn-in
 
-`aichaind` now validates both formats and prefers the native v5 contract when available.
+`aichaind` validates both formats and prefers the native v5 contract when available.
+The GitHub Pages dashboard hydrates from `catalog_manifest.json` first and only falls back to the legacy feed if the canonical artifact is unavailable.
+The local sidecar exposes `/health`, `/status`, provider access telemetry, session control state, and progress metadata for the OpenClaw bridge.
 
 ---
 
@@ -48,12 +50,13 @@ Today the repository publishes two feed formats:
 ```mermaid
 graph LR
     A["GitHub Actions"] --> B["tools/arbitrator.py"]
-    B --> C["ai_routing_table.json (legacy)"]
-    C --> D["tools/build_catalog_manifest.py"]
-    D --> E["catalog_manifest.json (v5)"]
-    C --> F["GitHub Pages Dashboard"]
+    B --> C["ai_routing_table.json (rollback compatibility)"]
+    B --> D["tools/build_catalog_manifest.py"]
+    D --> E["catalog_manifest.json (primary v5 contract)"]
+    E --> F["GitHub Pages Dashboard (primary hydrate)"]
+    C --> F
     E --> G["aichaind"]
-    H["openclaw-skill"] --> G
+    H["openclaw-skill + companion UI"] --> G
 ```
 
 ---
@@ -113,17 +116,16 @@ Already in place:
 - native v5 catalog contract validation in `aichaind`
 - direct-provider and balance-aware routing
 - thin OpenClaw bridge to local sidecar
-- audit trail, rate limiting, token auth, PII redaction baseline
+- `/health` and `/status` operational visibility with provider access and operator metrics
+- manual lock, semantic routing controls, and visible request-progress state
+- GitHub Pages provider access matrix and self-hosted model index
 - public `catalog_manifest.json` generation path
 
 Not finished yet:
 
-- canonical session lifecycle in the request path
-- hard fail-closed privacy and policy enforcement
-- stronger injection defense and output enforcement
-- full observability/metrics pipeline (`/status` endpoint)
-- agent adapters beyond stubs
-- packaging and distribution path for other operators (`setup.ps1` / `install.sh`)
+- the OpenClaw premium/Codex OAuth path still depends on a healthy local OpenClaw gateway/runtime
+- broader security hardening and policy depth remain future work
+- packaging/distribution polish for other operators still needs burn-in
 
 ---
 

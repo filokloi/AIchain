@@ -130,6 +130,60 @@ def test_cmd_chat_forwards_manual_control(monkeypatch, capsys):
     assert captured['payload']['_aichain_control']['mode'] == 'manual'
     assert captured['payload']['_aichain_control']['model'] == 'openai-codex/gpt-5.4'
 
+
+def test_cmd_chat_surfaces_clean_route_unavailable_message(monkeypatch, capsys):
+    monkeypatch.setattr(skill, 'forward_to_sidecar', lambda *args, **kwargs: {
+        'status': 503,
+        'body': {'error': 'provider_access_unavailable:openai-codex:runtime_probe_timeout'},
+    })
+
+    args = SimpleNamespace(
+        message='Use premium model',
+        max_tokens=32,
+        temperature=0.2,
+        session_id='sess-premium',
+        manual=True,
+        auto=False,
+        manual_model='openai-codex/gpt-5.4',
+        manual_provider='openai-codex',
+        persist=False,
+    )
+
+    try:
+        skill.cmd_chat(args)
+    except SystemExit as exc:
+        assert exc.code == 0
+    out = capsys.readouterr().out.strip()
+
+    assert out == '⚠️ The requested AI route is currently unavailable. Switch back to auto mode or choose another model.'
+
+
+def test_cmd_chat_keeps_daemon_offline_message_for_generic_503(monkeypatch, capsys):
+    monkeypatch.setattr(skill, 'forward_to_sidecar', lambda *args, **kwargs: {
+        'status': 503,
+        'body': {'error': 'HTTPConnectionPool(host=127.0.0.1, port=8080): Max retries exceeded'},
+    })
+
+    args = SimpleNamespace(
+        message='hello',
+        max_tokens=32,
+        temperature=0.2,
+        session_id='sess-offline',
+        manual=False,
+        auto=False,
+        manual_model='',
+        manual_provider='',
+        persist=False,
+    )
+
+    try:
+        skill.cmd_chat(args)
+    except SystemExit as exc:
+        assert exc.code == 0
+    out = capsys.readouterr().out.strip()
+
+    assert out == '⚠️ AIchain daemon is offline or warming up. Please ensure it is running.'
+
 def test_build_chat_payload_defaults_to_openclaw_session_id():
     args = SimpleNamespace(
         message='hello',

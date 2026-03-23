@@ -207,12 +207,20 @@ _HTML_TEMPLATE = r"""<!doctype html>
       if (!response.ok) throw new Error(body.error || `HTTP ${response.status}`);
       return body;
     }
+    let refreshTimer = null;
+    function scheduleRefresh() {
+      if (refreshTimer) window.clearTimeout(refreshTimer);
+      const session = state.last?.session || {};
+      const isRunning = (session.request_status || 'idle') === 'running';
+      const delay = state.loading ? 500 : (isRunning ? 800 : 1200);
+      refreshTimer = window.setTimeout(refresh, delay);
+    }
     async function refresh() {
       state.loading = true;
       render();
       try { state.last = await api(`/control-state?session_id=${encodeURIComponent(state.sessionId)}`); }
       catch (err) { state.last = state.last || {}; state.last.error = err.message || String(err); }
-      finally { state.loading = false; render(); }
+      finally { state.loading = false; render(); scheduleRefresh(); }
     }
     async function applyControl(control) {
       state.loading = true;
@@ -228,6 +236,10 @@ _HTML_TEMPLATE = r"""<!doctype html>
       }
     }
     function renderSession(session, recommended, confirmation, error) {
+      const running = (session.request_status || 'idle') === 'running';
+      const currentLabel = running
+        ? (session.request_label || 'Thinking…')
+        : (recommended?.label || recommended?.model || session.locked_model || 'Auto routing');
       document.getElementById('session-grid').innerHTML = `
         <div class="stat-card">
           <div class="stat-label">Routing Mode</div>
@@ -236,11 +248,13 @@ _HTML_TEMPLATE = r"""<!doctype html>
         </div>
         <div class="stat-card">
           <div class="stat-label">Current Route</div>
-          <div class="stat-value">${recommended?.model || session.locked_model || 'Not resolved yet'}</div>
-          <div class="stat-meta">${recommended?.provider || session.locked_provider || 'provider pending'}${recommended?.access_method ? ` · via ${recommended.access_method}` : ''}</div>
+          <div class="stat-value">${running ? (session.request_label || 'Thinking…') : (recommended?.model || session.locked_model || 'Not resolved yet')}</div>
+          <div class="stat-meta">${running ? 'Request in progress' : `${recommended?.provider || session.locked_provider || 'provider pending'}${recommended?.access_method ? ` · via ${recommended.access_method}` : ''}`}</div>
         </div>`;
-      document.getElementById('hero-current').textContent = recommended?.label || recommended?.model || session.locked_model || 'Auto routing';
-      document.getElementById('hero-meta').textContent = `Session ${state.sessionId} · ${readablePreference(session.routing_preference)}${recommended?.provider ? ` · ${recommended.provider}` : ''}`;
+      document.getElementById('hero-current').textContent = currentLabel;
+      document.getElementById('hero-meta').textContent = running
+        ? `Session ${state.sessionId} · request in progress`
+        : `Session ${state.sessionId} · ${readablePreference(session.routing_preference)}${recommended?.provider ? ` · ${recommended.provider}` : ''}`;
       document.getElementById('confirmation').textContent = confirmation || '';
       document.getElementById('error').textContent = error || '';
     }
@@ -265,7 +279,7 @@ _HTML_TEMPLATE = r"""<!doctype html>
       root.innerHTML = models.map((model) => `
         <div class="list-card">
           <div class="item-top">
-            <div><h4>${model.label}</h4><p>${model.model} · ${model.provider} · ${model.access_method || 'unknown access'}</p></div>
+            <div><h4>${model.label}</h4><p>${model.model} · ${model.provider} · ${model.access_method || 'access metadata pending'}</p></div>
             <span class="status-pill ${statusClass(model.status || 'runtime_confirmed')}">${model.status || 'runtime_confirmed'}</span>
           </div>
           <p>${model.effective_cost_label || 'Cost not estimated'}${model.badges?.length ? ` · ${model.badges.join(', ')}` : ''}</p>
@@ -281,13 +295,13 @@ _HTML_TEMPLATE = r"""<!doctype html>
         </div>
         <div class="stat-card">
           <div class="stat-label">Cost Mode</div>
-          <div class="stat-value">${savings?.cost_mode || 'unknown'}</div>
-          <div class="stat-meta">Quota visibility: ${savings?.quota_visibility || access?.quota_visibility || 'unknown'}</div>
+          <div class="stat-value">${savings?.cost_mode_label || savings?.cost_mode || 'catalog-ranked route'}</div>
+          <div class="stat-meta">Quota visibility: ${savings?.quota_visibility_label || savings?.quota_visibility || access?.quota_visibility || 'provider-specific or not machine-readable yet'}</div>
         </div>
         <div class="stat-card">
           <div class="stat-label">Fallback</div>
-          <div class="stat-value">${access?.fallback_path || 'No fallback declared'}</div>
-          <div class="stat-meta">Status: ${access?.status || 'unknown'}</div>
+          <div class="stat-value">${savings?.fallback_label || access?.fallback_path || 'Automatic fallback to the next ranked runtime-confirmed route'}</div>
+          <div class="stat-meta">Status: ${savings?.status_label || access?.status || 'route metadata pending'}</div>
         </div>`;
     }
     function renderModelPicker(models) {
@@ -309,7 +323,7 @@ _HTML_TEMPLATE = r"""<!doctype html>
                 <div><h4>${model.label}</h4><p>${model.model}</p></div>
                 <span class="status-pill ${statusClass(model.status || 'runtime_confirmed')}">${model.status || 'runtime_confirmed'}</span>
               </div>
-              <p>${model.provider} · ${model.access_method || 'unknown access'}${model.effective_cost_label ? ` · ${model.effective_cost_label}` : ''}</p>
+              <p>${model.provider} · ${model.access_method || 'access metadata pending'}${model.effective_cost_label ? ` · ${model.effective_cost_label}` : ''}</p>
               <div class="chip-row" style="margin-top: 8px;">${(model.badges || []).map(tag => `<span class="chip">${tag}</span>`).join('')}</div>
               <div class="action-row" style="margin-top: 12px;"><button class="btn full" data-action="lock" data-model="${model.model}" data-provider="${model.provider}">Lock to ${model.label}</button></div>
             </div>`).join('')}</div>
@@ -325,11 +339,11 @@ _HTML_TEMPLATE = r"""<!doctype html>
       root.innerHTML = items.map(([provider, item]) => `
         <div class="list-card">
           <div class="item-top">
-            <div><h4>${provider}</h4><p>${item.method || 'disabled'} · ${item.billing_basis || 'unknown billing'}</p></div>
+            <div><h4>${provider}</h4><p>${item.method || 'disabled'} · ${item.billing_basis || 'billing details not exported yet'}</p></div>
             <span class="status-pill ${statusClass(item.status || 'disabled')}">${item.status || 'disabled'}</span>
           </div>
-          <p>Official: ${item.official_support ? 'yes' : 'no'} · Quota: ${item.quota_visibility || 'unknown'}${item.limit_type ? ` · ${item.limit_type}` : ''}</p>
-          <p>Fallback: ${item.fallback_path || 'n/a'}${item.reason ? ` · ${item.reason}` : ''}</p>
+          <p>Official: ${item.official_support ? 'yes' : 'no'} · Quota: ${item.quota_visibility || 'provider-specific or not machine-readable yet'}${item.limit_type ? ` · ${item.limit_type}` : ''}</p>
+          <p>Fallback: ${item.fallback_path || 'AIchain will fall back to the next ranked usable route.'}${item.reason ? ` · ${item.reason}` : ''}</p>
         </div>`).join('');
     }
     function renderLocal(localProfiles) {
@@ -365,7 +379,6 @@ _HTML_TEMPLATE = r"""<!doctype html>
       bindActions();
     }
     refresh();
-    setInterval(refresh, 15000);
   </script>
 </body>
 </html>

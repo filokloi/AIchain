@@ -41,6 +41,13 @@ OPENCLAW_AICHAIN_DIR = Path.home() / ".openclaw" / "aichain"
 OPENAI_CODEX_CACHE = OPENCLAW_AICHAIN_DIR / "openai_codex_runtime_cache.json"
 TARGET_MODEL = "openai-codex/gpt-5.4"
 DEFAULT_FALLBACK_MODEL = "openai-codex/gpt-5.3-codex"
+CLI_DISCOVERY_TIMEOUT_SECONDS = 5
+# The OpenClaw Codex bridge can cold-start a little slower than ordinary API
+# routes. A 5s probe budget was short enough to incorrectly mark a working
+# premium route as unavailable on this machine, so keep the probe budget just
+# high enough to confirm a real runtime without turning failures into long
+# stalls.
+RUNTIME_PROBE_TIMEOUT_SECONDS = 8.0
 
 
 class OpenAICodexOAuthAdapter(ProviderAdapter):
@@ -64,6 +71,7 @@ class OpenAICodexOAuthAdapter(ProviderAdapter):
         self._responses_endpoint_enabled = _resolve_gateway_endpoint_enabled(self._config, "responses")
         self._profile_id, self._profile = _load_codex_profile(self.auth_profiles_path)
         self._timeout = 150
+        self._probe_timeout = RUNTIME_PROBE_TIMEOUT_SECONDS
         self._last_discovered_models: list[str] = []
         self._last_discovery_source = ""
         self._last_discovered_at = 0.0
@@ -221,12 +229,11 @@ class OpenAICodexOAuthAdapter(ProviderAdapter):
         if not self.gateway_ready:
             return CompletionResponse(model=request.model, content="", error="openclaw gateway codex bridge unavailable", status="error")
 
-        models, _ = self._discover_models()
         if self._should_try_target_model(request.model):
-            target_probe_ok, _ = self._probe_target_model()
-            if target_probe_ok:
-                models = self._merge_models_with_target(models, TARGET_MODEL)
-        selected_model = self.resolve_preferred_model(request.model, models)
+            selected_model = TARGET_MODEL
+        else:
+            models, _ = self._discover_models()
+            selected_model = self.resolve_preferred_model(request.model, models)
         if not selected_model:
             return CompletionResponse(model=request.model, content="", error="no_openai_codex_model_available", status="error")
 
@@ -385,7 +392,7 @@ class OpenAICodexOAuthAdapter(ProviderAdapter):
                 f"{self.gateway_base_url}/v1/chat/completions",
                 json=payload,
                 headers=self._headers(),
-                timeout=min(self._timeout, 30),
+                timeout=min(self._timeout, self._probe_timeout),
             )
             if resp.status_code == 200:
                 self._probe_cache[cache_key] = (True, time.time(), "runtime_probe_ok")
@@ -531,7 +538,7 @@ def _list_models_from_openclaw_cli() -> list[str]:
             [*command, "models", "list", "--all", "--provider", "openai-codex", "--json"],
             capture_output=True,
             text=True,
-            timeout=20,
+            timeout=CLI_DISCOVERY_TIMEOUT_SECONDS,
             check=False,
         )
     except Exception as exc:
