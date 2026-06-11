@@ -21,6 +21,8 @@ AIchain is being refactored into a two-plane system:
 - **Global plane**: the GitHub Pages site publishes the public catalog, routing hierarchy, compatibility contract, and operator-facing information.
 - **Local plane**: the OpenClaw skill and `aichaind` sidecar execute requests locally, apply policy/privacy rules, choose providers, and stream results back safely.
 
+The catalog also powers the public **[AI Chain site](https://filokloi.github.io/ai-chain/)** ([repo](https://github.com/filokloi/ai-chain)) — the interface plane: a multi-provider chat with automatic failover plus model comparison, free-options, and self-hosting pages rendered directly from this repository's published manifest.
+
 The target outcome is simple:
 
 **maximum intelligence, maximum speed, maximum stability, minimum cost**
