@@ -57,18 +57,7 @@ jobs:
           print('All JSON files valid')
           PY
 
-      - name: Run focused regression tests
-        run: >-
-          python -m pytest
-          tests/test_catalog_contract.py
-          tests/test_catalog_manifest_builder.py
-          tests/test_site_backend_pipeline.py
-          tests/test_dashboard_cutover.py
-          tests/test_http_server_enforcement.py
-          tests/test_local_adapter.py
-          tests/test_operational_verifiers.py
-          tests/test_injection_guard.py
-          tests/test_output_validation.py
-          tests/test_policy.py
+      - name: Run full test suite
+        run: python -m pytest
 
 

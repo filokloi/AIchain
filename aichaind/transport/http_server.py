@@ -187,9 +187,10 @@ class AichainDHandler(BaseHTTPRequestHandler):
     def _handle_status(self):
         """Rich operational visibility endpoint."""
         state = _controller.state if _controller else {}
+        catalog_age_seconds = None
         if _discovery_report and hasattr(_discovery_report, "timestamp"):
             catalog_age_seconds = time.time() - getattr(_discovery_report, "timestamp", time.time())
-            
+
         # Provider health (circuit breakers)
         provider_health = {}
         from aichaind.providers.registry import list_providers, get_adapter
@@ -208,7 +209,7 @@ class AichainDHandler(BaseHTTPRequestHandler):
             "uptime_seconds": round(max(0.0, time.time() - (_SERVER_START_TIME or time.time())), 2),
             "system_state": str(state.get("system", "UNKNOWN")),
             "routing_mode": "godmode" if state.get("godmode") else "cascade",
-            "catalog_age_seconds": round(catalog_age_seconds, 2),
+            "catalog_age_seconds": round(catalog_age_seconds, 2) if catalog_age_seconds is not None else None,
             "provider_health": provider_health,
             "roles": _roles.copy(),
             "auth_active": _auth_manager.is_active if _auth_manager else False,

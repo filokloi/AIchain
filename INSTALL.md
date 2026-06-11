@@ -24,12 +24,18 @@ https://filokloi.github.io/AIchain/catalog_manifest.json
 cd C:\Users\filok\.openclaw\workspace
 git clone https://github.com/filokloi/AIchain.git
 cd AIchain
-pip install -r requirements.txt
+pip install -e .
 ```
+
+Installing the package (instead of just the requirements) registers the
+`aichaind` console command and makes the package importable from anywhere.
+For development extras (pytest): `pip install -e .[dev]`.
 
 ## Start the sidecar
 
 ```powershell
+aichaind config/default.json
+# or equivalently:
 python -m aichaind.main config/default.json
 ```
 
@@ -52,5 +58,10 @@ Still pending before wider distribution:
 
 - canonical session lifecycle in live request handling
 - stronger policy/privacy enforcement
-- package/install path cleanup for external users
 - final private workspace skill packaging
+
+Recently addressed:
+
+- package/install path cleanup: `pyproject.toml` now provides a standard
+  `pip install -e .` flow with an `aichaind` console script, and the test
+  suite no longer depends on machine-specific absolute paths.

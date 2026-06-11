@@ -6,7 +6,7 @@ import importlib.util
 from pathlib import Path
 
 
-_skill_path = Path(r"C:/Users/filok/OneDrive/Desktop/AI chain for Open Claw envirement/openclaw-skill/skill.py")
+_skill_path = Path(__file__).resolve().parent.parent / "openclaw-skill" / "skill.py"
 _spec = importlib.util.spec_from_file_location("openclaw_skill_bridge", _skill_path)
 skill = importlib.util.module_from_spec(_spec)
 assert _spec and _spec.loader
