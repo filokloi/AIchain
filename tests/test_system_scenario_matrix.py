@@ -100,7 +100,7 @@ def test_verify_case_reports_pii_semantics_without_redaction(monkeypatch):
         'choices': [{'message': {'content': 'PII_PATH_OK'}}],
         '_aichaind': {
             'routed_provider': 'deepseek',
-            'routed_model': 'deepseek/deepseek-chat',
+            'routed_model': 'deepseek/deepseek-v4-flash',
             'provider_access_method': 'api_key',
             'route_layers': ['L1:heuristic'],
             'pii_detected': True,

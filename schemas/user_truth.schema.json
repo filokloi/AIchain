@@ -1,0 +1,164 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://filokloi.github.io/AIchain/schemas/user_truth.schema.json",
+  "title": "AIchain User Truth (Layer 3)",
+  "description": "Passive local configuration describing everything the user already has and wants. Never leaves the machine. Consumed by aichaind together with the global catalog_manifest.json to compute effective cost and pick providers.",
+  "type": "object",
+  "required": ["version", "profile"],
+  "properties": {
+    "version": { "type": "integer", "const": 1 },
+
+    "profile": {
+      "type": "object",
+      "description": "Active routing preference. Presets map to weight overrides over the catalog role weights.",
+      "required": ["mode"],
+      "properties": {
+        "mode": {
+          "type": "string",
+          "enum": ["economy", "balanced", "power", "custom"],
+          "description": "economy = free paths first, paid only as last resort; power = best role_score regardless of cost within budget; custom = use weights below."
+        },
+        "custom_weights": {
+          "type": "object",
+          "description": "Only read when mode=custom. Must sum to 1.0.",
+          "properties": {
+            "intelligence": { "type": "number", "minimum": 0, "maximum": 1 },
+            "speed": { "type": "number", "minimum": 0, "maximum": 1 },
+            "cost": { "type": "number", "minimum": 0, "maximum": 1 },
+            "context": { "type": "number", "minimum": 0, "maximum": 1 },
+            "stability": { "type": "number", "minimum": 0, "maximum": 1 }
+          },
+          "additionalProperties": false
+        },
+        "min_intelligence": {
+          "type": "number", "minimum": 0, "maximum": 100,
+          "description": "Hard floor: never route to a model below this normalized intelligence score, even in economy mode."
+        }
+      }
+    },
+
+    "budget": {
+      "type": "object",
+      "description": "Spending ceilings. aichaind tracks actual token spend against these and degrades to cheaper/free paths as ceilings approach.",
+      "properties": {
+        "currency": { "type": "string", "default": "USD" },
+        "daily_limit": { "type": "number", "minimum": 0 },
+        "monthly_limit": { "type": "number", "minimum": 0 },
+        "soft_threshold": {
+          "type": "number", "minimum": 0, "maximum": 1, "default": 0.8,
+          "description": "Fraction of the limit at which the router starts preferring free paths regardless of mode."
+        },
+        "hard_stop": {
+          "type": "boolean", "default": true,
+          "description": "If true, paid providers are refused once a limit is hit; only free and local paths remain."
+        }
+      }
+    },
+
+    "assets": {
+      "type": "object",
+      "description": "What the user already owns. These change effective cost: a flat-rate subscription makes marginal cost ~0 up to its fair-use ceiling.",
+      "properties": {
+        "subscriptions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["provider", "plan"],
+            "properties": {
+              "provider": { "type": "string", "description": "Catalog provider id, e.g. 'anthropic', 'openai', 'google'." },
+              "plan": { "type": "string", "description": "e.g. 'pro', 'plus', 'max'." },
+              "monthly_price": { "type": "number", "minimum": 0 },
+              "access_type": {
+                "type": "string",
+                "enum": ["official_api_included", "app_only"],
+                "description": "app_only subscriptions are informational: aichaind will surface them as a suggestion ('this task fits your Pro plan — open the app') but never bridges them programmatically."
+              },
+              "renewal_day": { "type": "integer", "minimum": 1, "maximum": 31 }
+            }
+          }
+        },
+        "api_keys": {
+          "type": "array",
+          "description": "Providers with a configured key. Keys themselves live in the OS keyring / env, NOT in this file — this only declares existence and metadata.",
+          "items": {
+            "type": "object",
+            "required": ["provider"],
+            "properties": {
+              "provider": { "type": "string" },
+              "key_ref": { "type": "string", "description": "Name of env var or keyring entry holding the key." },
+              "prepaid_credit": { "type": "number", "minimum": 0 },
+              "credit_expires": { "type": "string", "format": "date" }
+            }
+          }
+        },
+        "free_quotas": {
+          "type": "array",
+          "description": "Free tiers the user has activated. aichaind decrements usage locally and resets on the stated cadence.",
+          "items": {
+            "type": "object",
+            "required": ["provider"],
+            "properties": {
+              "provider": { "type": "string" },
+              "quota_unit": { "type": "string", "enum": ["requests", "tokens"] },
+              "quota_per_day": { "type": "number", "minimum": 0 },
+              "reset_time_utc": { "type": "string", "pattern": "^([01][0-9]|2[0-3]):[0-5][0-9]$" }
+            }
+          }
+        },
+        "local_models": {
+          "type": "array",
+          "description": "Locally hosted open-weight models. Effective cost 0; speed measured by aichaind probes.",
+          "items": {
+            "type": "object",
+            "required": ["endpoint", "model_id"],
+            "properties": {
+              "endpoint": { "type": "string", "format": "uri", "description": "OpenAI-compatible base URL, e.g. http://localhost:11434/v1" },
+              "model_id": { "type": "string" },
+              "catalog_ref": { "type": "string", "description": "Optional link to the catalog entry so global intelligence scores apply." },
+              "max_concurrent": { "type": "integer", "minimum": 1, "default": 1 }
+            }
+          }
+        }
+      }
+    },
+
+    "privacy": {
+      "type": "object",
+      "description": "Data-boundary rules. Evaluated BEFORE any scoring — a request that matches a rule is constrained to the allowed destinations no matter what scores say.",
+      "properties": {
+        "default_boundary": {
+          "type": "string",
+          "enum": ["any", "no_training_data", "local_only"],
+          "default": "any"
+        },
+        "rules": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["match", "boundary"],
+            "properties": {
+              "match": {
+                "type": "object",
+                "description": "Simple matchers; at least one must be present.",
+                "properties": {
+                  "tags": { "type": "array", "items": { "type": "string" }, "description": "User- or harness-supplied request tags, e.g. 'work', 'personal', 'sensitive'." },
+                  "keywords": { "type": "array", "items": { "type": "string" } }
+                }
+              },
+              "boundary": { "type": "string", "enum": ["local_only", "no_training_data", "eu_hosted_only", "any"] }
+            }
+          }
+        }
+      }
+    },
+
+    "reliability": {
+      "type": "object",
+      "properties": {
+        "max_fallback_depth": { "type": "integer", "minimum": 1, "default": 4, "description": "How many chain links to try before returning an error." },
+        "request_timeout_s": { "type": "number", "minimum": 1, "default": 60 },
+        "sticky_session": { "type": "boolean", "default": true, "description": "Prefer keeping one conversation on one model unless it fails." }
+      }
+    }
+  }
+}

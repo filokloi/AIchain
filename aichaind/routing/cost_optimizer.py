@@ -65,9 +65,9 @@ _VERIFIED_DIRECT_MODELS = {
         "visual": "anthropic/claude-sonnet-4",
     },
     "deepseek": {
-        "heavy": "deepseek/deepseek-reasoner",
-        "free": "deepseek/deepseek-chat",
-        "visual": "deepseek/deepseek-chat",
+        "heavy": "deepseek/deepseek-v4-pro",
+        "free": "deepseek/deepseek-v4-flash",
+        "visual": "deepseek/deepseek-v4-flash",
     },
     "groq": {
         "heavy": "groq/llama-3.3-70b-versatile",
@@ -1422,7 +1422,7 @@ def _estimate_stability(model_id: str) -> float:
     mid = model_id.lower()
     if any(x in mid for x in ("preview", "experimental", "beta")):
         return 0.60
-    if any(x in mid for x in ("gpt-5", "gpt-4.1", "claude", "gemini-2.5", "deepseek-chat", "qwen3.5")):
+    if any(x in mid for x in ("gpt-5", "gpt-4.1", "claude", "gemini-2.5", "deepseek-chat", "deepseek-v4", "qwen3.5")):
         return 0.88
     if ":free" in mid:
         return 0.72

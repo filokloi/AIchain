@@ -179,7 +179,7 @@ def test_mark_provider_runtime_failure_marks_leaked_key_as_auth_failed():
 def test_mark_provider_runtime_failure_ignores_non_auth_errors():
     http_server._provider_access_layer = _MarkingAccessLayer()
     response = CompletionResponse(
-        model="deepseek/deepseek-chat",
+        model="deepseek/deepseek-v4-flash",
         content="",
         status="error",
         error="HTTP 429: rate limit",
@@ -193,7 +193,7 @@ def test_mark_provider_runtime_failure_ignores_non_auth_errors():
 def test_build_success_response_payload_normalizes_openclaw_compat_shape():
     session = CanonicalSession(session_id="compat-session")
     response = CompletionResponse(
-        model="deepseek/deepseek-chat",
+        model="deepseek/deepseek-v4-flash",
         content="GUI_CHAT_OK",
         input_tokens=11,
         output_tokens=4,
@@ -201,7 +201,7 @@ def test_build_success_response_payload_normalizes_openclaw_compat_shape():
         raw_response={"id": "provider-native-id", "choices": [{"message": {"content": ""}}]},
     )
     decision = RouteDecision(
-        target_model="deepseek/deepseek-chat",
+        target_model="deepseek/deepseek-v4-flash",
         target_provider="deepseek",
         confidence=0.91,
         decision_layers=["L1:heuristic", "L2:semantic:quick_general"],
@@ -211,7 +211,7 @@ def test_build_success_response_payload_normalizes_openclaw_compat_shape():
 
     payload = http_server._build_success_response_payload(
         requested_model="aichain/dual-brain",
-        target_model="deepseek/deepseek-chat",
+        target_model="deepseek/deepseek-v4-flash",
         session=session,
         response=response,
         decision=decision,
@@ -234,21 +234,21 @@ def test_build_success_response_payload_normalizes_openclaw_compat_shape():
     assert payload["model"] == "aichain/dual-brain"
     assert payload["choices"][0]["message"]["role"] == "assistant"
     assert payload["choices"][0]["message"]["content"] == "GUI_CHAT_OK"
-    assert payload["_aichaind"]["routed_model"] == "deepseek/deepseek-chat"
-    assert payload["_aichaind"]["provider_model"] == "deepseek/deepseek-chat"
+    assert payload["_aichaind"]["routed_model"] == "deepseek/deepseek-v4-flash"
+    assert payload["_aichaind"]["provider_model"] == "deepseek/deepseek-v4-flash"
 
 
 def test_build_success_response_payload_can_omit_aichain_metadata_for_openclaw_compat():
     session = CanonicalSession(session_id="compat-minimal")
     response = CompletionResponse(
-        model="deepseek/deepseek-chat",
+        model="deepseek/deepseek-v4-flash",
         content="GUI_CHAT_OK",
         input_tokens=11,
         output_tokens=4,
         finish_reason="stop",
     )
     decision = RouteDecision(
-        target_model="deepseek/deepseek-chat",
+        target_model="deepseek/deepseek-v4-flash",
         target_provider="deepseek",
         confidence=0.91,
         decision_layers=["L1:coding_intent"],
@@ -258,7 +258,7 @@ def test_build_success_response_payload_can_omit_aichain_metadata_for_openclaw_c
 
     payload = http_server._build_success_response_payload(
         requested_model="aichain/dual-brain",
-        target_model="deepseek/deepseek-chat",
+        target_model="deepseek/deepseek-v4-flash",
         session=session,
         response=response,
         decision=decision,
@@ -516,7 +516,7 @@ def test_force_local_privacy_route_rewrites_cloud_route_when_local_brain_exists(
 def test_force_local_privacy_route_prefers_local_without_strict_cloud_block():
     http_server._roles = {"local_brain": "local/qwen2.5-coder"}
     decision = RouteDecision(
-        target_model="deepseek/deepseek-chat",
+        target_model="deepseek/deepseek-v4-flash",
         target_provider="deepseek",
         confidence=0.85,
         decision_layers=["L1:heuristic"],
@@ -527,7 +527,7 @@ def test_force_local_privacy_route_prefers_local_without_strict_cloud_block():
     updated, model, provider, rerouted = http_server._maybe_force_local_privacy_route(
         decision=decision,
         initial_policy=initial,
-        target_model="deepseek/deepseek-chat",
+        target_model="deepseek/deepseek-v4-flash",
         target_provider="deepseek",
     )
 
@@ -540,7 +540,7 @@ def test_force_local_privacy_route_prefers_local_without_strict_cloud_block():
 def test_force_local_privacy_route_keeps_cloud_when_no_local_and_not_strict():
     http_server._roles = {"local_brain": ""}
     decision = RouteDecision(
-        target_model="deepseek/deepseek-chat",
+        target_model="deepseek/deepseek-v4-flash",
         target_provider="deepseek",
         confidence=0.85,
         decision_layers=["L1:heuristic"],
@@ -551,14 +551,14 @@ def test_force_local_privacy_route_keeps_cloud_when_no_local_and_not_strict():
     updated, model, provider, rerouted = http_server._maybe_force_local_privacy_route(
         decision=decision,
         initial_policy=initial,
-        target_model="deepseek/deepseek-chat",
+        target_model="deepseek/deepseek-v4-flash",
         target_provider="deepseek",
     )
 
     assert rerouted is False
-    assert model == "deepseek/deepseek-chat"
+    assert model == "deepseek/deepseek-v4-flash"
     assert provider == "deepseek"
-    assert updated.target_model == "deepseek/deepseek-chat"
+    assert updated.target_model == "deepseek/deepseek-v4-flash"
 
 
 def test_update_session_summary_state_tracks_commands_paths_and_model_ids():
@@ -672,7 +672,7 @@ def test_build_request_defaults_to_concise_budget_for_simple_chat_when_max_token
     request = http_server._build_request(
         payload={"temperature": 0.1, "stream": False},
         messages=[{"role": "user", "content": "What is DNS?"}],
-        target_model="deepseek/deepseek-chat",
+        target_model="deepseek/deepseek-v4-flash",
         adapter=adapter,
     )
 
@@ -698,7 +698,7 @@ def test_build_request_respects_explicit_max_tokens():
     request = http_server._build_request(
         payload={"max_tokens": 640, "stream": False},
         messages=[{"role": "user", "content": "What is DNS?"}],
-        target_model="deepseek/deepseek-chat",
+        target_model="deepseek/deepseek-v4-flash",
         adapter=adapter,
     )
 
@@ -754,7 +754,7 @@ def test_ensure_provider_access_fails_over_when_local_runtime_is_unhealthy(monke
     http_server._cascade_router = SimpleNamespace(
         _cost_optimizer=SimpleNamespace(
             optimize=lambda **kwargs: CostRoute(
-                model="deepseek/deepseek-chat",
+                model="deepseek/deepseek-v4-flash",
                 provider="deepseek",
                 estimated_cost_usd=0.001,
                 reason="verified_direct_fallback:deepseek",
@@ -789,7 +789,7 @@ def test_ensure_provider_access_fails_over_when_local_runtime_is_unhealthy(monke
     assert failover_used is True
     assert block_reason == ""
     assert target_provider == "deepseek"
-    assert target_model == "deepseek/deepseek-chat"
+    assert target_model == "deepseek/deepseek-v4-flash"
     assert access_decision.selected_method == "api_key"
 
 

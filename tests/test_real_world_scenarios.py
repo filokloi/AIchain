@@ -281,7 +281,7 @@ def test_execution_timeout_failover_uses_verified_direct_provider(monkeypatch):
     optimizer = CostOptimizer({})
     optimizer.configure_provider_capabilities({
         'openai-codex': {'openai-codex/gpt-5.4'},
-        'deepseek': {'deepseek/deepseek-reasoner', 'deepseek/deepseek-chat'},
+        'deepseek': {'deepseek/deepseek-v4-pro', 'deepseek/deepseek-v4-flash'},
     })
     http_server._cascade_router = SimpleNamespace(_cost_optimizer=optimizer)
     http_server._roles = {
@@ -296,7 +296,7 @@ def test_execution_timeout_failover_uses_verified_direct_provider(monkeypatch):
             CompletionResponse(model='openai-codex/gpt-5.4', content='', error='timeout', status='timeout'),
         ]),
         'deepseek': _StaticAdapter('deepseek', [
-            CompletionResponse(model='deepseek/deepseek-reasoner', content='def add(a, b):\n    return a + b', status='success'),
+            CompletionResponse(model='deepseek/deepseek-v4-pro', content='def add(a, b):\n    return a + b', status='success'),
         ]),
     }
     monkeypatch.setattr(http_server, 'get_adapter', lambda provider: adapters.get(provider))
@@ -339,5 +339,5 @@ def test_execution_timeout_failover_uses_verified_direct_provider(monkeypatch):
     assert failover_used is True
     assert response.status == 'success'
     assert target_provider == 'deepseek'
-    assert target_model == 'deepseek/deepseek-reasoner'
+    assert target_model == 'deepseek/deepseek-v4-pro'
     assert 'openai-codex/gpt-5.4' in decision.fallback_chain

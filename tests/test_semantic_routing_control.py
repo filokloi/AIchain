@@ -137,7 +137,7 @@ def test_cascade_routing_preference_promotes_heavy_for_max_intelligence():
     applied = router._apply_routing_preference(
         "free",
         "max_intelligence",
-        {"free": "deepseek/deepseek-chat", "heavy": "openai-codex/gpt-5.4", "local": "local/qwen"},
+        {"free": "deepseek/deepseek-v4-flash", "heavy": "openai-codex/gpt-5.4", "local": "local/qwen"},
     )
     assert applied == "heavy"
 
@@ -147,6 +147,6 @@ def test_cascade_routing_preference_promotes_local_when_requested():
     applied = router._apply_routing_preference(
         "free",
         "prefer_local",
-        {"free": "deepseek/deepseek-chat", "heavy": "openai-codex/gpt-5.4", "local": "lmstudio/qwen"},
+        {"free": "deepseek/deepseek-v4-flash", "heavy": "openai-codex/gpt-5.4", "local": "lmstudio/qwen"},
     )
     assert applied == "local"

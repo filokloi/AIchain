@@ -329,7 +329,7 @@ def test_prepaid_premium_codex_is_not_auto_selected_for_open_ended_code_generati
             if provider == 'openai-codex':
                 return _Decision(provider, selected_method='oauth', runtime_confirmed=True, preferred_model='openai-codex/gpt-5.4')
             if provider == 'deepseek':
-                return _Decision(provider, selected_method='api_key', runtime_confirmed=True, preferred_model='deepseek/deepseek-chat')
+                return _Decision(provider, selected_method='api_key', runtime_confirmed=True, preferred_model='deepseek/deepseek-v4-flash')
             return _Decision(provider, selected_method='disabled', runtime_confirmed=False)
 
     optimizer = CostOptimizer({'routing_hierarchy': []})
@@ -351,7 +351,7 @@ def test_prepaid_premium_codex_is_not_auto_selected_for_open_ended_code_generati
         balance_report=report,
         available_models={
             'heavy': 'openrouter/google/gemini-2.5-pro',
-            'free': 'deepseek/deepseek-chat',
+            'free': 'deepseek/deepseek-v4-flash',
         },
         task_hint='Write only Python code for a tiny terminal Tetris prototype with one Board class.',
     )
@@ -441,14 +441,14 @@ def test_local_runtime_does_not_override_general_free_route_when_other_credits_e
         balance_report=report,
         available_models={
             'local': 'lmstudio/qwen/qwen3-4b-thinking-2507',
-            'free': 'deepseek/deepseek-chat',
+            'free': 'deepseek/deepseek-v4-flash',
             'heavy': 'openai/o3-pro',
         },
         estimated_tokens=128,
     )
 
     assert result.provider == 'deepseek'
-    assert result.model == 'deepseek/deepseek-chat'
+    assert result.model == 'deepseek/deepseek-v4-flash'
 
 
 def test_local_runtime_can_be_selected_when_no_credits_exist():
@@ -525,7 +525,7 @@ def test_local_profile_task_hint_does_not_promote_weak_general_chat_local_runtim
         balance_report=report,
         available_models={
             'local': local_model,
-            'free': 'deepseek/deepseek-chat',
+            'free': 'deepseek/deepseek-v4-flash',
             'heavy': 'openai/o3-pro',
         },
         estimated_tokens=128,
@@ -533,7 +533,7 @@ def test_local_profile_task_hint_does_not_promote_weak_general_chat_local_runtim
     )
 
     assert result.provider == 'deepseek'
-    assert result.model == 'deepseek/deepseek-chat'
+    assert result.model == 'deepseek/deepseek-v4-flash'
 
 
 def test_local_profile_task_hint_can_promote_strong_coding_local_runtime():
@@ -574,8 +574,8 @@ def test_local_profile_task_hint_can_promote_strong_coding_local_runtime():
         balance_report=report,
         available_models={
             'local': local_model,
-            'free': 'deepseek/deepseek-chat',
-            'heavy': 'deepseek/deepseek-reasoner',
+            'free': 'deepseek/deepseek-v4-flash',
+            'heavy': 'deepseek/deepseek-v4-pro',
         },
         estimated_tokens=256,
         task_hint='heuristic_code_engineering',
@@ -652,7 +652,7 @@ def test_runtime_confirmed_openai_codex_gpt54_beats_weak_local_coding_runtime():
     optimizer.configure_provider_access_layer(_Layer())
     optimizer.configure_provider_capabilities({
         'openai-codex': {'openai-codex/gpt-5.4'},
-        'deepseek': {'deepseek/deepseek-reasoner', 'deepseek/deepseek-chat'},
+        'deepseek': {'deepseek/deepseek-v4-pro', 'deepseek/deepseek-v4-flash'},
     })
     local_model = 'lmstudio/qwen/qwen3-4b-thinking-2507'
     optimizer.configure_local_profiles({
@@ -690,8 +690,8 @@ def test_runtime_confirmed_openai_codex_gpt54_beats_weak_local_coding_runtime():
         balance_report=report,
         available_models={
             'local': local_model,
-            'free': 'deepseek/deepseek-chat',
-            'heavy': 'deepseek/deepseek-reasoner',
+            'free': 'deepseek/deepseek-v4-flash',
+            'heavy': 'deepseek/deepseek-v4-pro',
         },
         estimated_tokens=256,
         task_hint='heuristic_code_engineering',
@@ -740,8 +740,8 @@ def test_local_profile_reasoning_task_hint_keeps_cloud_heavy_route():
         balance_report=report,
         available_models={
             'local': local_model,
-            'free': 'deepseek/deepseek-chat',
-            'heavy': 'deepseek/deepseek-reasoner',
+            'free': 'deepseek/deepseek-v4-flash',
+            'heavy': 'deepseek/deepseek-v4-pro',
         },
         estimated_tokens=256,
         task_hint='deep_reasoning_analysis',
@@ -822,7 +822,7 @@ def test_runtime_confirmed_openai_codex_does_not_override_general_chat_free_rout
     optimizer.configure_provider_access_layer(_Layer())
     optimizer.configure_provider_capabilities({
         'openai-codex': {'openai-codex/gpt-5.4'},
-        'deepseek': {'deepseek/deepseek-chat'},
+        'deepseek': {'deepseek/deepseek-v4-flash'},
     })
     report = BalanceReport(
         balances={
@@ -835,15 +835,15 @@ def test_runtime_confirmed_openai_codex_does_not_override_general_chat_free_rout
         model_preference='free',
         balance_report=report,
         available_models={
-            'free': 'deepseek/deepseek-chat',
-            'heavy': 'deepseek/deepseek-reasoner',
+            'free': 'deepseek/deepseek-v4-flash',
+            'heavy': 'deepseek/deepseek-v4-pro',
         },
         estimated_tokens=64,
         task_hint='casual_general_chat',
     )
 
     assert result.provider == 'deepseek'
-    assert result.model == 'deepseek/deepseek-chat'
+    assert result.model == 'deepseek/deepseek-v4-flash'
 
 
 def test_runtime_confirmed_openai_codex_does_not_override_simple_structured_route():
@@ -875,7 +875,7 @@ def test_runtime_confirmed_openai_codex_does_not_override_simple_structured_rout
     optimizer.configure_provider_access_layer(_Layer())
     optimizer.configure_provider_capabilities({
         'openai-codex': {'openai-codex/gpt-5.4'},
-        'deepseek': {'deepseek/deepseek-chat'},
+        'deepseek': {'deepseek/deepseek-v4-flash'},
     })
     report = BalanceReport(
         balances={
@@ -888,15 +888,15 @@ def test_runtime_confirmed_openai_codex_does_not_override_simple_structured_rout
         model_preference='free',
         balance_report=report,
         available_models={
-            'free': 'deepseek/deepseek-chat',
-            'heavy': 'deepseek/deepseek-reasoner',
+            'free': 'deepseek/deepseek-v4-flash',
+            'heavy': 'deepseek/deepseek-v4-pro',
         },
         estimated_tokens=64,
         task_hint='return_structured_json_schema_only',
     )
 
     assert result.provider == 'deepseek'
-    assert result.model == 'deepseek/deepseek-chat'
+    assert result.model == 'deepseek/deepseek-v4-flash'
 
 
 def test_prepaid_premium_preference_can_prefer_general_chat_when_enabled():
@@ -931,7 +931,7 @@ def test_prepaid_premium_preference_can_prefer_general_chat_when_enabled():
     optimizer.configure_provider_access_layer(_Layer())
     optimizer.configure_provider_capabilities({
         'openai-codex': {'openai-codex/gpt-5.4'},
-        'deepseek': {'deepseek/deepseek-chat'},
+        'deepseek': {'deepseek/deepseek-v4-flash'},
     })
     optimizer.configure_routing_preferences({
         'prefer_prepaid_premium': True,
@@ -948,8 +948,8 @@ def test_prepaid_premium_preference_can_prefer_general_chat_when_enabled():
         model_preference='heavy',
         balance_report=report,
         available_models={
-            'free': 'deepseek/deepseek-chat',
-            'heavy': 'deepseek/deepseek-reasoner',
+            'free': 'deepseek/deepseek-v4-flash',
+            'heavy': 'deepseek/deepseek-v4-pro',
         },
         estimated_tokens=64,
         task_hint='deep_reasoning_analysis',
@@ -993,7 +993,7 @@ def test_prepaid_premium_preference_can_be_inferred_from_billing_basis():
     optimizer.configure_provider_access_layer(_Layer())
     optimizer.configure_provider_capabilities({
         'openai-codex': {'openai-codex/gpt-5.4'},
-        'deepseek': {'deepseek/deepseek-chat'},
+        'deepseek': {'deepseek/deepseek-v4-flash'},
     })
     optimizer.configure_routing_preferences({
         'prefer_prepaid_premium': True,
@@ -1009,8 +1009,8 @@ def test_prepaid_premium_preference_can_be_inferred_from_billing_basis():
         model_preference='heavy',
         balance_report=report,
         available_models={
-            'free': 'deepseek/deepseek-chat',
-            'heavy': 'deepseek/deepseek-reasoner',
+            'free': 'deepseek/deepseek-v4-flash',
+            'heavy': 'deepseek/deepseek-v4-pro',
         },
         estimated_tokens=64,
         task_hint='deep_reasoning_analysis',
@@ -1056,7 +1056,7 @@ def test_prepaid_premium_route_can_use_best_verified_model_when_target_form_not_
     optimizer.configure_provider_access_layer(_Layer())
     optimizer.configure_provider_capabilities({
         'openai-codex': {'openai-codex/gpt-5.3-codex'},
-        'deepseek': {'deepseek/deepseek-reasoner', 'deepseek/deepseek-chat'},
+        'deepseek': {'deepseek/deepseek-v4-pro', 'deepseek/deepseek-v4-flash'},
     })
     optimizer.configure_routing_preferences({
         'prefer_prepaid_premium': True,
@@ -1073,8 +1073,8 @@ def test_prepaid_premium_route_can_use_best_verified_model_when_target_form_not_
         model_preference='heavy',
         balance_report=report,
         available_models={
-            'free': 'deepseek/deepseek-chat',
-            'heavy': 'deepseek/deepseek-reasoner',
+            'free': 'deepseek/deepseek-v4-flash',
+            'heavy': 'deepseek/deepseek-v4-pro',
         },
         estimated_tokens=256,
         task_hint='heuristic_code_engineering',
@@ -1146,7 +1146,7 @@ def test_catalog_only_direct_model_is_rejected_until_runtime_capabilities_exist(
     )
 
     assert result.model != 'deepseek/deepseek-r1-distill-qwen-32b'
-    assert result.model in {'deepseek/deepseek-reasoner', 'deepseek/deepseek-chat', 'openrouter/google/gemini-2.5-pro'}
+    assert result.model in {'deepseek/deepseek-v4-pro', 'deepseek/deepseek-v4-flash', 'openrouter/google/gemini-2.5-pro'}
 
 
 # --- Quota Exhaustion Detection Tests ---
@@ -1228,8 +1228,8 @@ def test_quota_suppressed_premium_falls_back_to_api_key():
         model_preference='heavy',
         balance_report=report,
         available_models={
-            'free': 'deepseek/deepseek-chat',
-            'heavy': 'deepseek/deepseek-reasoner',
+            'free': 'deepseek/deepseek-v4-flash',
+            'heavy': 'deepseek/deepseek-v4-pro',
         },
         estimated_tokens=256,
         task_hint='heuristic_code_engineering',
@@ -1264,8 +1264,8 @@ def test_quota_healthy_premium_still_used():
         model_preference='heavy',
         balance_report=report,
         available_models={
-            'free': 'deepseek/deepseek-chat',
-            'heavy': 'deepseek/deepseek-reasoner',
+            'free': 'deepseek/deepseek-v4-flash',
+            'heavy': 'deepseek/deepseek-v4-pro',
         },
         estimated_tokens=256,
         task_hint='heuristic_code_engineering',
@@ -1306,15 +1306,15 @@ def test_prepaid_premium_route_does_not_steal_free_general_chat_even_when_runtim
         model_preference='free',
         balance_report=report,
         available_models={
-            'free': 'deepseek/deepseek-chat',
-            'heavy': 'deepseek/deepseek-reasoner',
+            'free': 'deepseek/deepseek-v4-flash',
+            'heavy': 'deepseek/deepseek-v4-pro',
         },
         estimated_tokens=64,
         task_hint='casual_general_chat',
     )
 
     assert result.provider == 'deepseek'
-    assert result.model == 'deepseek/deepseek-chat'
+    assert result.model == 'deepseek/deepseek-v4-flash'
     assert not str(result.reason or '').startswith('prepaid_premium_preference:')
 
 
@@ -1331,13 +1331,13 @@ def test_prepaid_premium_route_does_not_steal_free_structured_task_even_when_run
         model_preference='free',
         balance_report=report,
         available_models={
-            'free': 'deepseek/deepseek-chat',
-            'heavy': 'deepseek/deepseek-reasoner',
+            'free': 'deepseek/deepseek-v4-flash',
+            'heavy': 'deepseek/deepseek-v4-pro',
         },
         estimated_tokens=96,
         task_hint='return_structured_json_schema_only',
     )
 
     assert result.provider == 'deepseek'
-    assert result.model == 'deepseek/deepseek-chat'
+    assert result.model == 'deepseek/deepseek-v4-flash'
     assert not str(result.reason or '').startswith('prepaid_premium_preference:')

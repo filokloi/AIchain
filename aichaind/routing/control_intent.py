@@ -250,7 +250,7 @@ def _candidate_aliases(roles: dict, provider_access_summary: dict) -> dict[str, 
         names.add(_normalize_text(f"{provider} {leaf}"))
         if provider == "openai-codex" and "gpt-5.4" in model_id.lower():
             names.update({"gpt-5.4", "gpt 5 4", "gpt 5.4", "openai codex", "codex", "gpt 5 4 codex"})
-        if provider == "deepseek" and "deepseek-chat" in leaf:
+        if provider == "deepseek" and ("deepseek-chat" in leaf or "deepseek-v4" in leaf):
             names.update({"deepseek", "deepseek chat"})
         if provider in {"local", "lmstudio", "ollama", "vllm", "llamacpp"}:
             names.update({"local model", "local ai", "lokalni model", "lokalni ai"})

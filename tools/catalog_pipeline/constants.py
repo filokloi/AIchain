@@ -408,6 +408,7 @@ BENCHMARK_MAP = {
     "anthropic/claude-3.5-haiku": 83,
     "deepseek/deepseek-r1": 97, "deepseek/deepseek-r1-0528": 98, "deepseek/deepseek-r1-distill-llama-70b": 92,
     "deepseek/deepseek-chat": 93, "deepseek/deepseek-v3": 95,
+    "deepseek/deepseek-v4-flash": 96, "deepseek/deepseek-v4-pro": 98,
     "mistralai/mistral-large": 90, "mistralai/mistral-large-2407": 92, "mistralai/mistral-large-2411": 93,
     "mistralai/mistral-small-3.1-24b-instruct": 82, "mistralai/mistral-small": 78,
     "mistralai/ministral-8b-instruct": 74, "mistralai/pixtral-large-2411": 91,

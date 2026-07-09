@@ -8,13 +8,15 @@
 [![Status](https://img.shields.io/badge/Status-OPERATIONAL-00ff41?style=flat-square&labelColor=0a0a0a)](https://filokloi.github.io/AIchain/)
 [![Manifest](https://img.shields.io/badge/v5-Catalog_Manifest-FFD700?style=flat-square&labelColor=0a0a0a)](https://filokloi.github.io/AIchain/catalog_manifest.json)
 
-**[Live Dashboard](https://filokloi.github.io/AIchain/)** · **[Catalog Manifest](https://filokloi.github.io/AIchain/catalog_manifest.json)** · **[v5 Technical Index](docs/V5_INDEX.md)** · **[Issues](https://github.com/filokloi/AIchain/issues)**
+**[MANIFEST.md](MANIFEST.md)** · **[Live Dashboard](https://filokloi.github.io/AIchain/)** · **[Catalog Manifest](https://filokloi.github.io/AIchain/catalog_manifest.json)** · **[v5 Technical Index](docs/V5_INDEX.md)** · **[Issues](https://github.com/filokloi/AIchain/issues)**
 
 </div>
 
 ---
 
 ## Mission
+
+> Full methodology: **[docs/METHODOLOGY.md](docs/METHODOLOGY.md)**
 
 AIchain is being refactored into a two-plane system:
 

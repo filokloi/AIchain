@@ -39,6 +39,8 @@ _MANUAL_ALIASES = {
     "claude opus 4.6": "anthropic/claude-opus-4.6",
     "deepseek r1": "deepseek/deepseek-r1",
     "deepseek chat": "deepseek/deepseek-chat",
+    "deepseek v4 flash": "deepseek/deepseek-v4-flash",
+    "deepseek v4 pro": "deepseek/deepseek-v4-pro",
     "qwen max": "qwen/qwen-max",
 }
 

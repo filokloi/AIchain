@@ -257,8 +257,8 @@ class TestTableSyncUtils:
 
         cr.route(
             messages=[{"role": "user", "content": 'Return only minified JSON with keys ok and answer where ok is true and answer is 7.'}],
-            available_free_model="deepseek/deepseek-chat",
-            available_heavy_model="deepseek/deepseek-reasoner",
+            available_free_model="deepseek/deepseek-v4-flash",
+            available_heavy_model="deepseek/deepseek-v4-pro",
             balance_report=BalanceReport(
                 balances={
                     "deepseek": ProviderBalance(provider="deepseek", has_credits=True, balance_usd=2.0, source="api"),

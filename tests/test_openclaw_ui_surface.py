@@ -103,7 +103,7 @@ def test_get_ui_session_uses_default_openclaw_session_id():
 def test_build_ui_control_state_exposes_recommended_route_and_model_options():
     http_server._provider_access_layer = _AccessLayer()
     http_server._roles = {
-        'fast_brain': 'deepseek/deepseek-chat',
+        'fast_brain': 'deepseek/deepseek-v4-flash',
         'heavy_brain': 'openai-codex/gpt-5.4',
         'local_brain': 'lmstudio/qwen/qwen3-4b-thinking-2507',
     }

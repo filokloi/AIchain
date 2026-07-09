@@ -26,7 +26,7 @@ Run the bridge directly:
 ```powershell
 python skill.py chat "Explain this code"
 python skill.py chat "Use GPT-5.4 for this session" --session-id my-session
-python skill.py chat "Lock to DeepSeek Chat" --manual --manual-model deepseek/deepseek-chat --manual-provider deepseek --persist --session-id my-session
+python skill.py chat "Lock to DeepSeek Chat" --manual --manual-model deepseek/deepseek-v4-flash --manual-provider deepseek --persist --session-id my-session
 python skill.py chat "Return to auto routing" --auto --persist --session-id my-session
 python skill.py status
 python skill.py start

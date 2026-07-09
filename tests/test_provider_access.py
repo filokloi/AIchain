@@ -156,7 +156,7 @@ def test_ensure_provider_access_fails_over_when_target_form_not_reached(tmp_path
     optimizer = CostOptimizer({})
     optimizer.configure_provider_capabilities({
         'google': set(),
-        'deepseek': {'deepseek/deepseek-chat'},
+        'deepseek': {'deepseek/deepseek-v4-flash'},
     })
     http_server._provider_access_layer = layer
     http_server._cascade_router = SimpleNamespace(_cost_optimizer=optimizer)
@@ -192,7 +192,7 @@ def test_ensure_provider_access_fails_over_when_target_form_not_reached(tmp_path
     assert failover_used is True
     assert block_reason == ''
     assert provider == 'deepseek'
-    assert model == 'deepseek/deepseek-chat'
+    assert model == 'deepseek/deepseek-v4-flash'
     assert updated.target_provider == 'deepseek'
     assert access_decision.selected_method == 'api_key'
 
@@ -216,7 +216,7 @@ def test_ensure_provider_access_fails_over_when_selected_provider_is_disabled(tm
     layer = build_provider_access_layer(cfg, report)
 
     optimizer = CostOptimizer({})
-    optimizer.configure_provider_capabilities({'deepseek': {'deepseek/deepseek-chat'}})
+    optimizer.configure_provider_capabilities({'deepseek': {'deepseek/deepseek-v4-flash'}})
     http_server._provider_access_layer = layer
     http_server._cascade_router = SimpleNamespace(_cost_optimizer=optimizer)
     http_server._roles = {
@@ -250,7 +250,7 @@ def test_ensure_provider_access_fails_over_when_selected_provider_is_disabled(tm
     assert failover_used is True
     assert block_reason == ''
     assert provider == 'deepseek'
-    assert model == 'deepseek/deepseek-chat'
+    assert model == 'deepseek/deepseek-v4-flash'
     assert updated.target_provider == 'deepseek'
     assert access_decision.selected_method == 'api_key'
 

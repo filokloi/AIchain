@@ -19,7 +19,7 @@ def test_verify_case_reports_provider_class_and_success(monkeypatch):
                 'choices': [{'message': {'content': 'ok'}}],
                 '_aichaind': {
                     'routed_provider': 'deepseek',
-                    'routed_model': 'deepseek/deepseek-chat',
+                    'routed_model': 'deepseek/deepseek-v4-flash',
                     'route_layers': ['L1:heuristic'],
                 },
             }
@@ -34,7 +34,7 @@ def test_verify_case_reports_provider_class_and_success(monkeypatch):
 
     assert result.ok is True
     assert result.provider_class == 'cloud'
-    assert result.routed_model == 'deepseek/deepseek-chat'
+    assert result.routed_model == 'deepseek/deepseek-v4-flash'
 
 
 def test_verify_case_flags_wrong_provider_class(monkeypatch):
