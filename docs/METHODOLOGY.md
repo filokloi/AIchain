@@ -27,33 +27,46 @@ This document explains exactly how every score in the AIchain catalog is produce
 | Free access paths | Provider announcements, OpenRouter `:free` variants | Manual review before publish | Semi-automated |
 | License / openness | Model cards, provider docs | — | Manual on model addition |
 
-**Freshness rule:** every raw input carries a `fetched_at` timestamp. Inputs older than 7 days lower the model's `confidence` field; inputs older than 30 days mark the affected score as `stale` and it is excluded from role rankings until refreshed.
+**Freshness:** the catalog is regenerated every 12 hours from live fetches, so published values are at most one cycle old. A per-input `fetched_at`/staleness downgrade rule is **planned, not yet implemented** (see §9); today a source that fails to fetch simply keeps the pipeline's mid-range defaults and the failure is recorded in `source_health`.
 
 ---
 
 ## 3. Normalization
 
-All raw values are normalized to a 0–100 scale per dimension across the current catalog snapshot:
+All dimensions are expressed on a 0–100 scale in `normalized_metrics`. Exact rules, as implemented in `tools/catalog_pipeline/rank/scoring.py`:
 
-- **Intelligence:** min–max normalization of the benchmark aggregate over all catalog models. Where multiple benchmark sources exist, the median of available sources is used (median is robust to a single outlier source).
-- **Speed:** log-scale min–max of measured tokens/s (log scale because the perceptual difference between 20 and 40 tok/s matters more than between 200 and 220).
-- **Cost:** inverse log-scale of blended price per million tokens, computed as `0.3 × input_price + 0.7 × output_price` (output-weighted, reflecting typical chat/agent usage). Models with a genuinely free path receive `cost_score = 100` on that path, listed separately from their paid score.
-- **Context:** log2 of context window, min–max normalized.
-- **Stability:** rolling 30-day availability estimate, mapped linearly (99.9%+ → 100, <95% → 0).
+- **Intelligence:** taken directly from the merged benchmark base (`intelligence_base`, already 0–100). Source merge priority: curated benchmark map → Artificial Analysis → LMArena Elo → helper AI → heuristic; the first available source wins. Missing everywhere → default **70**. Models on an active verified promotion ("promo kings") receive **+8** (capped at 99), recorded as `helper_metadata.promo_boost`.
+- **Speed:** `35 + 65 × (tokens_per_second / max_tokens_per_second_in_snapshot)`, clamped to 0–100. Source: Artificial Analysis speed, else the OpenRouter speed hint. Unknown speed → default **62**.
+- **Context:** log-ratio normalization with a 4096-token floor: `100 × (ln(1+ctx) − ln(1+4096)) / (ln(1+max_ctx) − ln(1+4096))`, where `max_ctx` is the largest context window in the snapshot.
+- **Stability:** provider stability hint (0–100) as merged from sources; unknown → default **72**.
+- **Availability:** provider availability hint; unknown → default **75**.
+- **Task fit:** `coverage_score` = arithmetic mean of the model's `quality_by_task` scores across the 8 task dimensions; unknown → default **60**.
+- **Cost:** raw cost is the plain average of list prices, `(input_price + output_price) / 2` per token. Cost efficiency is inverse log-scale against the most expensive model in the snapshot: `100 − 100 × log10(1 + 9 × cost / max_cost)`, clamped to 0–100. Genuinely free (`cost ≤ 0`) → **100**.
 
-## 4. Role scores
+Defaults are deliberately mid-range so that a model missing a signal is neither buried nor promoted by the gap; every default is visible in `raw_metrics` as an absent source.
 
-The v5 contract assigns each model role-specific composite scores. Weights per role:
+## 4. Value score, tiers, and rank
 
-| Role | Intelligence | Speed | Cost | Context | Stability |
-|---|---|---|---|---|---|
-| `heavy` (complex reasoning) | 0.50 | 0.05 | 0.15 | 0.20 | 0.10 |
-| `fast` (interactive / everyday) | 0.25 | 0.35 | 0.20 | 0.05 | 0.15 |
-| `visual` (image/video input) | 0.45 | 0.15 | 0.15 | 0.10 | 0.15 |
+Every model gets one composite **value score** (`value_score`, also echoed in the manifest's `scoring` block):
 
-`role_score = Σ (weight_i × normalized_dimension_i)`, rounded to one decimal. Models missing a required dimension for a role (e.g. no vision support for `visual`) are excluded from that role rather than scored at zero.
+```
+Score = 0.30·Intelligence + 0.14·Speed + 0.16·Stability + 0.18·CostEfficiency
+      + 0.10·Availability + 0.06·Context + 0.06·TaskFit
+```
 
-> Weights are a policy decision, not a fact. They are versioned: any change to this table increments the methodology version and is noted in the changelog below. Users who disagree with the weights can re-run the arbitrator with their own — the local plane exists precisely so global weights are only a default.
+Weights live in `tools/catalog_pipeline/constants.py` (`SCORING_WEIGHTS`, version `2026.03-control-plane-v1`) and each entry's `score_breakdown` shows the per-dimension contribution (`normalized × weight`), so the published score is reproducible by summation.
+
+**Tiers** partition the ranking before scores are compared: `OAUTH_BRIDGE` (subscription-bridged access) → `FREE_FRONTIER` (zero list cost) → `HEAVY_HITTER` (paid). Rank is assigned by `(tier, −value_score, −intelligence, model_id)` — a free model always outranks a paid one *within the published hierarchy ordering*; the sidecar re-ranks per user anyway.
+
+Each entry also carries `task_label` (its strongest task dimension), and `geopolitical_risk` (LOW/MEDIUM/HIGH by provider origin — informational only, never a scoring input).
+
+**Role derivation** (`tools/build_catalog_manifest.py::derive_roles`) selects the v5 contract's `fast`/`heavy`/`visual` defaults heuristically:
+
+- `heavy` = the model with the highest normalized intelligence in the snapshot.
+- `fast` = among zero-marginal-cost candidates (free tier or OAuth bridge), the max of `4×speed + 2×stability + intelligence` plus token bonuses (e.g. "flash", "mini") and tier bonuses.
+- `visual` = among models whose id signals vision ("gpt-4o", "vision", "gemini", "-vl"), the max of `3×intelligence + 2×stability + speed` plus token bonuses; falls back to `fast`.
+
+> Weights and role heuristics are a policy decision, not a fact. Any change to `SCORING_WEIGHTS` or the role formulas increments the methodology version and is noted in the changelog. Users who disagree can re-run the arbitrator with their own weights — the local plane exists precisely so global weights are only a default.
 
 ## 5. Free-path scoring
 
@@ -85,4 +98,15 @@ python -m pytest tests -q                # contract validation
 
 | Date | Methodology version | Change |
 |---|---|---|
-| 2026-07 | 1.0 | Initial public methodology: sources, normalization, role weights, free-path criteria. |
+| 2026-07 | 1.0 | Initial public methodology draft: sources, proposed role weights, free-path criteria. |
+| 2026-07 | 1.1 | Aligned with the shipped pipeline (`rank/scoring.py`): documented the actual 7-dimension value score, per-dimension normalization with defaults, promo boost, tiers/rank ordering, and heuristic role derivation. Moved unimplemented v1.0 ideas to §9. |
+
+## 9. Planned (documented but not yet implemented)
+
+These v1.0 proposals remain goals; the pipeline does not do them yet. Until a row moves to the changelog as implemented, no published number depends on it.
+
+- **Median across benchmark sources** for intelligence (today: first source by merge priority wins).
+- **Output-weighted cost blend** `0.3×input + 0.7×output` (today: plain average of input and output price).
+- **Per-input freshness rule** — `fetched_at` older than 7 days lowers `confidence`, older than 30 days marks the score `stale` and excludes it from role rankings.
+- **Measured stability** — rolling 30-day availability estimate mapped 99.9%→100, <95%→0 (today: source-provided hints with mid-range defaults).
+- **Per-role composite scores** with role-specific weight tables (today: single global value score + heuristic role picks).
