@@ -388,6 +388,18 @@ def main():
     cascade_router.configure_cost_optimizer(cost_optimizer)
     log.info("Cost optimizer: ACTIVE")
 
+    # Phase 8: POM value-density router (subjective truth x global catalog)
+    from aichaind.user_truth import UserTruthError, load_user_truth
+    from aichaind.routing.pom_bridge import PomRouter
+    user_truth_path = cfg.get("user_truth_path") or (paths["data_dir"] / "user_truth.json")
+    try:
+        user_truth = load_user_truth(user_truth_path)
+        pom_router = PomRouter(routing_table, user_truth)
+        cascade_router.configure_pom(pom_router)
+        log.info(f"POM router: {'ACTIVE' if pom_router.enabled else 'STANDBY (no user_truth assets)'}")
+    except UserTruthError as e:
+        log.error(f"POM router disabled — {e}")
+
     from aichaind.telemetry.route_eval import RouteEvalCollector
     route_eval_collector = RouteEvalCollector(paths["data_dir"] / "route_eval.jsonl")
     log.info("Route eval: ACTIVE")

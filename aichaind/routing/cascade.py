@@ -64,6 +64,9 @@ class CascadeRouter:
         # Phase 7: cost optimization hook
         self._cost_optimizer = None
 
+        # Phase 8: POM value-density router (user_truth x catalog)
+        self._pom_router = None
+
     def configure_cloud(self, adapter, model: str):
         """Configure Layer 4 cloud classifier with an adapter and model."""
         if self._cloud:
@@ -73,6 +76,14 @@ class CascadeRouter:
     def configure_cost_optimizer(self, optimizer):
         """Attach a Phase 7 cost optimizer instance."""
         self._cost_optimizer = optimizer
+
+    def configure_pom(self, pom_router):
+        """Attach a Phase 8 POM value-density router (pom_bridge.PomRouter).
+
+        When attached and it produces a non-empty chain, POM decides the
+        target model; the legacy cost optimizer remains the fallback.
+        """
+        self._pom_router = pom_router
 
     def route(
         self,
@@ -236,9 +247,37 @@ class CascadeRouter:
         decision.model_preference = effective_preference
         decision.routing_preference = routing_preference
 
-        if not self._cost_optimizer or not balance_report or not effective_preference:
-            return decision
         if not self._should_optimize(decision):
+            return decision
+
+        # Phase 8: POM value-density chain decides first (graceful: empty
+        # chain or any error falls through to the legacy optimizer).
+        if self._pom_router is not None and getattr(self._pom_router, "enabled", False):
+            try:
+                chain = self._pom_router.route(
+                    task_hint=self._build_task_hint(decision, messages),
+                    model_preference=effective_preference,
+                    messages=messages,
+                    est_input_tokens=self._estimate_tokens(messages),
+                    sticky_model_id=decision.target_model or None,
+                )
+            except Exception as e:
+                log.warning(f"POM router failed, using legacy optimizer: {e}")
+                chain = []
+            if chain:
+                top = chain[0]
+                decision.target_model = top.path.model.model_id
+                decision.target_provider = top.path.model.provider or \
+                    self._infer_provider(top.path.model.model_id)
+                decision.estimated_cost_usd = top.effective_cost
+                decision.cost_tier = top.path.path_type.value
+                decision.fallback_chain = [s.path.model.model_id for s in chain[1:]]
+                decision.decision_layers = (decision.decision_layers or []) + ["L5:pom_value_density"]
+                pom_reason = f"pom_chain:{top.path.path_type.value}"
+                decision.reason = f"{decision.reason}|{pom_reason}" if decision.reason else pom_reason
+                return decision
+
+        if not self._cost_optimizer or not balance_report or not effective_preference:
             return decision
 
         optimized = self._cost_optimizer.optimize(
