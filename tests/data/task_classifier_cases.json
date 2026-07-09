@@ -1,0 +1,61 @@
+[
+  {"expected": "chat_casual", "messages": [{"role": "user", "content": "zdravo, kako si danas?"}]},
+  {"expected": "chat_casual", "messages": [{"role": "user", "content": "hey, what's up"}]},
+  {"expected": "chat_casual", "messages": [{"role": "user", "content": "hvala ti puno!"}]},
+  {"expected": "chat_casual", "messages": [{"role": "user", "content": "good morning"}]},
+  {"expected": "chat_casual", "messages": [{"role": "user", "content": "ok super, vidimo se sutra"}]},
+
+  {"expected": "creative_writing", "messages": [{"role": "user", "content": "Napisi kratku pricu o svetioniku na Jadranu, melanholican ton."}]},
+  {"expected": "creative_writing", "messages": [{"role": "user", "content": "Write a poem about the last day of summer, four stanzas."}]},
+  {"expected": "creative_writing", "messages": [{"role": "user", "content": "Compose a song about a robot learning to dance"}]},
+  {"expected": "creative_writing", "messages": [{"role": "user", "content": "Napisi pesmu za rodjendan moje bake, duhovito ali toplo"}]},
+  {"expected": "creative_writing", "messages": [{"role": "user", "content": "Continue the story: The door creaked open and Mira stepped into the dark hallway..."}]},
+
+  {"expected": "knowledge", "messages": [{"role": "user", "content": "Ko je bio Nikola Tesla i gde je rodjen?"}]},
+  {"expected": "knowledge", "messages": [{"role": "user", "content": "What is the capital of Australia?"}]},
+  {"expected": "knowledge", "messages": [{"role": "user", "content": "Koliko stanovnika ima Beograd?"}]},
+  {"expected": "knowledge", "messages": [{"role": "user", "content": "When did the Berlin Wall fall and why?"}]},
+  {"expected": "knowledge", "messages": [{"role": "user", "content": "Which planet has the most moons in our solar system?"}]},
+
+  {"expected": "legal_formal", "messages": [{"role": "user", "content": "Pregledaj ovaj ugovor o zakupu i reci mi da li je klauzula o otkazu rizicna po zakupca."}]},
+  {"expected": "legal_formal", "messages": [{"role": "user", "content": "Draft an NDA clause covering liability for data breaches, pursuant to GDPR."}]},
+  {"expected": "legal_formal", "messages": [{"role": "user", "content": "Sta kaze clan 45 zakona o radu o prekovremenom radu?"}]},
+  {"expected": "legal_formal", "messages": [{"role": "user", "content": "Summarize the indemnification obligations in these terms of service."}]},
+  {"expected": "legal_formal", "messages": [{"role": "user", "content": "Da li aneks ugovora mora da bude overen kod notara u Srbiji?"}]},
+
+  {"expected": "coding", "messages": [{"role": "user", "content": "Fix this bug:\n```python\ndef total(xs):\n    return sum(x for x in xs if x > 0\n```"}]},
+  {"expected": "coding", "messages": [{"role": "user", "content": "Napisi mi python skriptu koja preimenuje sve fajlove u folderu po datumu."}]},
+  {"expected": "coding", "messages": [{"role": "user", "content": "Why does main.py throw this?\nTraceback (most recent call last):\n  File \"main.py\", line 12, in <module>\nKeyError: 'user_id'"}]},
+  {"expected": "coding", "messages": [{"role": "user", "content": "Refactor utils.js to use async/await instead of callbacks"}]},
+  {"expected": "coding", "messages": [{"role": "user", "content": "Implement a rate limiter class with a token bucket algorithm, unit tests included."}]},
+
+  {"expected": "agentic_tool_use", "tool_schema_present": true, "messages": [{"role": "user", "content": "Book me a table for two tomorrow at 8pm"}]},
+  {"expected": "agentic_tool_use", "tool_schema_present": true, "messages": [{"role": "user", "content": "Pronadji najjeftiniji let za Minhen u petak"}]},
+  {"expected": "agentic_tool_use", "tool_schema_present": true, "messages": [{"role": "user", "content": "Check the weather and schedule my run accordingly"}]},
+  {"expected": "agentic_tool_use", "tool_schema_present": true, "messages": [{"role": "user", "content": "Posalji mail timu da je build prosao"}]},
+  {"expected": "agentic_tool_use", "tool_schema_present": true, "messages": [{"role": "user", "content": "Search my files for last month's invoice and total the amounts"}]},
+
+  {"expected": "vision_ocr", "attachment_types": ["image/png"], "messages": [{"role": "user", "content": "Izvuci tekst sa ove slike racuna u tabelu"}]},
+  {"expected": "vision_ocr", "attachment_types": ["image/jpeg"], "messages": [{"role": "user", "content": "Extract the table from this screenshot into CSV"}]},
+  {"expected": "vision_ocr", "attachment_types": ["image/png"], "messages": [{"role": "user", "content": "Procitaj serijski broj sa ove nalepnice"}]},
+  {"expected": "vision_ocr", "attachment_types": ["image/png"], "messages": [{"role": "user", "content": "Transcribe the handwriting in this photo"}]},
+  {"expected": "vision_ocr", "attachment_types": ["image/jpeg"], "messages": [{"role": "user", "content": "OCR this receipt and list the items"}]},
+
+  {"expected": "vision_reasoning", "attachment_types": ["image/png"], "messages": [{"role": "user", "content": "Zasto je ovaj grafikon obmanjujuci? Analiziraj ose i skalu."}]},
+  {"expected": "vision_reasoning", "attachment_types": ["image/jpeg"], "messages": [{"role": "user", "content": "What architectural style is this building and how can you tell?"}]},
+  {"expected": "vision_reasoning", "attachment_types": ["image/png"], "messages": [{"role": "user", "content": "Da li je ova pecurka jestiva? Objasni po cemu zakljucujes."}]},
+  {"expected": "vision_reasoning", "attachment_types": ["image/png"], "messages": [{"role": "user", "content": "Compare these two UI mockups and tell me which has better hierarchy"}]},
+  {"expected": "vision_reasoning", "attachment_types": ["image/jpeg"], "messages": [{"role": "user", "content": "Sta je uzrok ostecenja na ovom zidu, vlaga ili sleganje?"}]},
+
+  {"expected": "math_logic", "messages": [{"role": "user", "content": "Dokazi da je koren iz 2 iracionalan broj."}]},
+  {"expected": "math_logic", "messages": [{"role": "user", "content": "Solve the equation $x^2 - 5x + 6 = 0$ and explain the steps."}]},
+  {"expected": "math_logic", "messages": [{"role": "user", "content": "Resi jednacinu 3x + 7 = 22 i objasni postupak"}]},
+  {"expected": "math_logic", "messages": [{"role": "user", "content": "Three friends cross a bridge at night with one lantern... solve this classic puzzle step by step."}]},
+  {"expected": "math_logic", "messages": [{"role": "user", "content": "Kolika je verovatnoca da iz spila izvucem dva asa zaredom?"}]},
+
+  {"expected": "translation_language", "messages": [{"role": "user", "content": "Prevedi ovaj pasus na engleski: Ponuda vazi do kraja meseca."}]},
+  {"expected": "translation_language", "messages": [{"role": "user", "content": "Translate this email into German, keep it formal."}]},
+  {"expected": "translation_language", "messages": [{"role": "user", "content": "Kako se kaze 'rok isporuke' na engleski u poslovnom kontekstu?"}]},
+  {"expected": "translation_language", "messages": [{"role": "user", "content": "Prevedi jelovnik na nemacki i francuski"}]},
+  {"expected": "translation_language", "messages": [{"role": "user", "content": "Rewrite this paragraph in English, it was machine-translated from Serbian and sounds off."}]}
+]

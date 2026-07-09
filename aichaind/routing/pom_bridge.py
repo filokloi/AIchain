@@ -18,6 +18,7 @@ from typing import Optional
 
 from aichaind.pom import (AccessPath, Boundary, Budget, CatalogModel,
                           PathType, Profile, Request, ScoredPath, build_chain)
+from aichaind.routing.task_classifier import classify
 from aichaind.user_truth import (boundary_from_truth, budget_from_truth,
                                  profile_from_truth)
 
@@ -160,21 +161,37 @@ class PomRouter:
               est_input_tokens: int = 1000, est_output_tokens: int = 500,
               transcript_tokens: int = 0,
               needs_tools: bool = False, needs_vision: bool = False,
+              tool_schema_present: bool = False,
+              attachment_types: list[str] | None = None,
               sticky_model_id: str | None = None,
               locked_model_id: str | None = None,
               max_depth: int = 4) -> list[ScoredPath]:
-        """Rank this user's access paths for one request via pom.build_chain."""
+        """Rank this user's access paths for one request via pom.build_chain.
+
+        Task type and difficulty come from the tier-1 deterministic
+        classifier (DYNAMIC_AUTO §2); task_hint/model_preference act as the
+        tier-3 harness hint when the classifier is not confident.
+        """
         if not self._paths:
             return []
         text = " ".join(str(m.get("content", "")) for m in (messages or [])
                         if isinstance(m.get("content"), str))
-        task_type = map_task_type(task_hint, model_preference)
+        cls = classify(messages, tool_schema_present=tool_schema_present,
+                       attachment_types=attachment_types,
+                       transcript_tokens=transcript_tokens)
+        if cls.confidence >= 0.6:
+            task_type = cls.catalog_dimension
+            difficulty = cls.difficulty
+        else:
+            task_type = map_task_type(task_hint, model_preference)
+            difficulty = max(cls.difficulty,
+                             _PREFERENCE_DIFFICULTY.get(model_preference, 50.0))
         req = Request(
             task_type=task_type,
-            difficulty=_PREFERENCE_DIFFICULTY.get(model_preference, 50.0),
+            difficulty=difficulty,
             est_input_tokens=est_input_tokens,
             est_output_tokens=est_output_tokens,
-            needs_tools=needs_tools,
+            needs_tools=needs_tools or cls.task_type == "agentic_tool_use",
             needs_vision=needs_vision or task_type == "vision",
             boundary=boundary_from_truth(self._truth, text=text),
             transcript_tokens=transcript_tokens,
