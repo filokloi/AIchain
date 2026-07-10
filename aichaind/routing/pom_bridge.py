@@ -18,6 +18,7 @@ from typing import Optional
 
 from aichaind.pom import (AccessPath, Boundary, Budget, CatalogModel,
                           PathType, Profile, Request, ScoredPath, build_chain)
+from aichaind.routing.ensemble import plan_ensemble
 from aichaind.routing.task_classifier import classify
 from aichaind.user_truth import (boundary_from_truth, budget_from_truth,
                                  profile_from_truth)
@@ -80,6 +81,7 @@ def catalog_model_from_entry(entry: dict) -> Optional[CatalogModel]:
     raw = entry.get("raw_metrics", {}) or {}
     tm = entry.get("task_metadata", {}) or {}
     scores = dict(tm.get("quality_by_task", {}) or {})
+    scores.update(tm.get("taxonomy_scores", {}) or {})
     if not scores:
         intelligence = float(entry.get("normalized_metrics", {}).get("intelligence", 0.0) or 0.0)
         scores = {DEFAULT_TASK_TYPE: intelligence}
@@ -209,15 +211,40 @@ class PomRouter:
         classifier (DYNAMIC_AUTO §2); task_hint/model_preference act as the
         tier-3 harness hint when the classifier is not confident.
         """
+        chain, _ = self.route_ex(
+            task_hint=task_hint, model_preference=model_preference,
+            messages=messages, est_input_tokens=est_input_tokens,
+            est_output_tokens=est_output_tokens,
+            transcript_tokens=transcript_tokens, needs_tools=needs_tools,
+            needs_vision=needs_vision, tool_schema_present=tool_schema_present,
+            attachment_types=attachment_types, sticky_model_id=sticky_model_id,
+            locked_model_id=locked_model_id, max_depth=max_depth)
+        return chain
+
+    def route_ex(self, *, task_hint: str = "", model_preference: str = "",
+                 messages: list[dict] | None = None,
+                 est_input_tokens: int = 1000, est_output_tokens: int = 500,
+                 transcript_tokens: int = 0,
+                 needs_tools: bool = False, needs_vision: bool = False,
+                 tool_schema_present: bool = False,
+                 attachment_types: list[str] | None = None,
+                 sticky_model_id: str | None = None,
+                 locked_model_id: str | None = None,
+                 max_depth: int = 4) -> tuple[list[ScoredPath], dict]:
+        """route() plus routing metadata: classification and, for hard
+        requests, a confirmation-gated ensemble proposal (roadmap #9)."""
         if not self._paths:
-            return []
+            return [], {}
         text = " ".join(str(m.get("content", "")) for m in (messages or [])
                         if isinstance(m.get("content"), str))
         cls = classify(messages, tool_schema_present=tool_schema_present,
                        attachment_types=attachment_types,
                        transcript_tokens=transcript_tokens)
         if cls.confidence >= 0.6:
-            task_type = cls.catalog_dimension
+            # Native taxonomy score when the catalog carries it (roadmap #8),
+            # otherwise the mapped catalog dimension.
+            has_native = any(cls.task_type in p.model.task_scores for p in self._paths)
+            task_type = cls.task_type if has_native else cls.catalog_dimension
             difficulty = cls.difficulty
         else:
             task_type = map_task_type(task_hint, model_preference)
@@ -252,7 +279,15 @@ class PomRouter:
             top = chain[0]
             log.debug(f"POM chain: {[s.path.model.model_id for s in chain]} "
                       f"(top vd={top.value_density:.2f}, cost=${top.effective_cost:.6f})")
-        return chain
+
+        meta: dict = {"task_type": task_type, "difficulty": difficulty,
+                      "classifier_confidence": cls.confidence}
+        if not req.locked_model_id:
+            plan = plan_ensemble(chain, task_type, difficulty,
+                                 budget_headroom=budget.headroom)
+            if plan is not None:
+                meta["ensemble_proposal"] = plan.to_dict()
+        return chain, meta
 
 
 def _days_until(iso_date: str) -> Optional[int]:

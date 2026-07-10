@@ -54,12 +54,29 @@ def infer_task_metadata(
         for task in helper_tasks:
             quality_by_task[task] = min(100, quality_by_task.get(task, 60) + 12)
 
+    # DYNAMIC_AUTO §2 10-type taxonomy, derived deterministically from the
+    # 8 catalog dimensions (documented in METHODOLOGY §3; roadmap #8).
+    q = quality_by_task
+    taxonomy_scores = {
+        "chat_casual": q["general_chat"],
+        "creative_writing": _cap(q["general_chat"] * 0.85 + q["reasoning"] * 0.15),
+        "knowledge": _cap(q["general_chat"] * 0.60 + q["reasoning"] * 0.40),
+        "legal_formal": _cap(q["reasoning"] * 0.70 + q["extraction"] * 0.30),
+        "coding": q["coding"],
+        "agentic_tool_use": q["tool_agent_compatibility"],
+        "vision_ocr": _cap(q["vision"] * 0.80 + q["extraction"] * 0.20),
+        "vision_reasoning": _cap(q["vision"] * 0.70 + q["reasoning"] * 0.30),
+        "math_logic": q["reasoning"],
+        "translation_language": _cap(q["general_chat"] * 0.70 + q["extraction"] * 0.30),
+    }
+
     supported = sorted(task for task, score in quality_by_task.items() if score >= 70)
     primary = [task for task, _score in sorted(quality_by_task.items(), key=lambda item: (-item[1], item[0]))[:3]]
     coverage_score = round(sum(quality_by_task.values()) / len(quality_by_task), 2)
 
     return {
         "quality_by_task": quality_by_task,
+        "taxonomy_scores": taxonomy_scores,
         "supported": supported,
         "primary": primary,
         "coverage_score": coverage_score,

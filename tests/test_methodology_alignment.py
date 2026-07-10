@@ -96,3 +96,16 @@ def test_intelligence_merge_is_median_of_sources():
         assert got == expected
     # the outlier case is the whole point: 10 must not drag the score
     assert "median" in DOC.split("## 3.")[1].split("## 4.")[0].lower()
+
+
+def test_taxonomy_scores_emitted_and_documented():
+    """Roadmap #8: catalog carries native 10-type taxonomy scores."""
+    from tools.catalog_pipeline.rank.tasks import infer_task_metadata
+    from aichaind.routing.task_classifier import TASK_TYPES
+    meta = infer_task_metadata(model_id="acme/frontier", provider="acme",
+                               context_length=128_000, intelligence=90)
+    ts = meta["taxonomy_scores"]
+    assert set(ts) == set(TASK_TYPES)
+    assert all(0 <= v <= 100 for v in ts.values())
+    assert ts["math_logic"] == meta["quality_by_task"]["reasoning"]
+    assert "taxonomy_scores" in DOC

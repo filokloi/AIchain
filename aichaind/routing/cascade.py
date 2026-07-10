@@ -262,8 +262,11 @@ class CascadeRouter:
         # chain or any error falls through to the legacy optimizer).
         if self._pom_router is not None and getattr(self._pom_router, "enabled", False):
             sc = session_context or {}
+            pom_meta = {}
             try:
-                chain = self._pom_router.route(
+                route_ex = getattr(self._pom_router, "route_ex", None)
+                router_call = route_ex or self._pom_router.route
+                chain = router_call(
                     task_hint=self._build_task_hint(decision, messages),
                     model_preference=effective_preference,
                     messages=messages,
@@ -274,9 +277,11 @@ class CascadeRouter:
                     transcript_tokens=int(sc.get("transcript_tokens", 0) or 0),
                     locked_model_id=sc.get("locked_model_id"),
                 )
+                if route_ex is not None:
+                    chain, pom_meta = chain
             except Exception as e:
                 log.warning(f"POM router failed, using legacy optimizer: {e}")
-                chain = []
+                chain, pom_meta = [], {}
             if chain:
                 top = chain[0]
                 decision.target_model = top.path.model.model_id
@@ -286,6 +291,8 @@ class CascadeRouter:
                 decision.cost_tier = top.path.path_type.value
                 decision.fallback_chain = [s.path.model.model_id for s in chain[1:]]
                 decision.decision_layers = (decision.decision_layers or []) + ["L5:pom_value_density"]
+                if pom_meta.get("ensemble_proposal"):
+                    decision.ensemble_proposal = pom_meta["ensemble_proposal"]
                 pom_reason = f"pom_chain:{top.path.path_type.value}"
                 decision.reason = f"{decision.reason}|{pom_reason}" if decision.reason else pom_reason
                 return decision

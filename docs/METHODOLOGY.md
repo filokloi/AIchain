@@ -41,6 +41,7 @@ All dimensions are expressed on a 0–100 scale in `normalized_metrics`. Exact r
 - **Stability:** provider stability hint (0–100) as merged from sources; unknown → default **72**.
 - **Availability:** provider availability hint; unknown → default **75**.
 - **Task fit:** `coverage_score` = arithmetic mean of the model's `quality_by_task` scores across the 8 task dimensions; unknown → default **60**.
+- **Taxonomy scores:** each entry additionally publishes `task_metadata.taxonomy_scores` — the 10-type routing taxonomy (DYNAMIC_AUTO §2) derived deterministically from the 8 dimensions (e.g. `math_logic` = reasoning; `vision_ocr` = 0.8·vision + 0.2·extraction; `legal_formal` = 0.7·reasoning + 0.3·extraction; full table in `tools/catalog_pipeline/rank/tasks.py`). The local router matches its classifier output against these directly.
 - **Cost:** raw cost is the plain average of list prices, `(input_price + output_price) / 2` per token. Cost efficiency is inverse log-scale against the most expensive model in the snapshot: `100 − 100 × log10(1 + 9 × cost / max_cost)`, clamped to 0–100. Genuinely free (`cost ≤ 0`) → **100**.
 
 Defaults are deliberately mid-range so that a model missing a signal is neither buried nor promoted by the gap; every default is visible in `raw_metrics` as an absent source.
@@ -101,6 +102,7 @@ python -m pytest tests -q                # contract validation
 | 2026-07 | 1.0 | Initial public methodology draft: sources, proposed role weights, free-path criteria. |
 | 2026-07 | 1.1 | Aligned with the shipped pipeline (`rank/scoring.py`): documented the actual 7-dimension value score, per-dimension normalization with defaults, promo boost, tiers/rank ordering, and heuristic role derivation. Moved unimplemented v1.0 ideas to §9. |
 | 2026-07 | 1.2 | Intelligence merge switched from 3/2/1 weighted mean to **median of available sources** (implements the v1.0 robustness intent); moved out of §9 Planned. |
+| 2026-07 | 1.3 | Added `taxonomy_scores`: per-entry scores for the 10-type routing taxonomy, derived deterministically from the 8 catalog dimensions. |
 
 ## 9. Planned (documented but not yet implemented)
 
