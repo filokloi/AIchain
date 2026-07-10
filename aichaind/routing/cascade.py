@@ -98,8 +98,14 @@ class CascadeRouter:
         available_local_model: str = "",
         balance_report=None,
         routing_preference: str = "balanced",
+        session_context: dict = None,
     ) -> RouteDecision:
-        """Run the cascading router. Returns the best RouteDecision."""
+        """Run the cascading router. Returns the best RouteDecision.
+
+        session_context (optional) carries the canonical session's routing
+        memory: {"sticky_model_id", "transcript_tokens", "locked_model_id",
+        "spent_today_usd"} — feeds POM cache-aware cost + hysteresis.
+        """
         start_t = time.time()
         all_layers = []
         available_models = {
@@ -130,6 +136,7 @@ class CascadeRouter:
                 balance_report=balance_report,
                 messages=messages,
                 routing_preference=routing_preference,
+                session_context=session_context,
             )
             if all_layers:
                 decision.decision_layers = all_layers
@@ -238,6 +245,7 @@ class CascadeRouter:
         balance_report,
         messages: list[dict],
         routing_preference: str = "balanced",
+        session_context: dict = None,
     ) -> RouteDecision:
         if not decision.target_provider and decision.target_model:
             decision.target_provider = self._infer_provider(decision.target_model)
@@ -253,13 +261,18 @@ class CascadeRouter:
         # Phase 8: POM value-density chain decides first (graceful: empty
         # chain or any error falls through to the legacy optimizer).
         if self._pom_router is not None and getattr(self._pom_router, "enabled", False):
+            sc = session_context or {}
             try:
                 chain = self._pom_router.route(
                     task_hint=self._build_task_hint(decision, messages),
                     model_preference=effective_preference,
                     messages=messages,
                     est_input_tokens=self._estimate_tokens(messages),
-                    sticky_model_id=decision.target_model or None,
+                    # Session memory, not the L1 guess: hysteresis must
+                    # protect the model the user is actually talking to.
+                    sticky_model_id=sc.get("sticky_model_id"),
+                    transcript_tokens=int(sc.get("transcript_tokens", 0) or 0),
+                    locked_model_id=sc.get("locked_model_id"),
                 )
             except Exception as e:
                 log.warning(f"POM router failed, using legacy optimizer: {e}")

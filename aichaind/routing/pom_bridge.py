@@ -37,6 +37,25 @@ _TASK_TYPE_MAP = {
 }
 DEFAULT_TASK_TYPE = "general_chat"
 
+#: Cached-prefix price multiplier per provider (verified July 2026):
+#: DeepSeek v4 bills cache hits at ~2% of miss price; Anthropic, OpenAI
+#: (GPT-5.x) and Google (Gemini 2.5+) discount cached input ~90%.
+#: Unknown providers get 1.0 — assume NO cache discount rather than
+#: overstate stickiness.
+PROVIDER_CACHE_FACTORS = {
+    "deepseek": 0.02,
+    "anthropic": 0.1,
+    "openai": 0.1,
+    "google": 0.1,
+    "openrouter": 0.25,   # mixed upstreams; conservative middle
+}
+DEFAULT_CACHE_FACTOR = 1.0
+
+#: Quota pacing (PROJECT_STATE §3): when a free quota is nearly burned,
+#: save the remainder for hard questions instead of casual traffic.
+QUOTA_PACING_RESERVE = 0.2       # bottom 20% of the daily quota...
+QUOTA_PACING_MIN_DIFFICULTY = 40.0  # ...is reserved for difficulty >= 40
+
 #: preference tier -> difficulty estimate when nothing better is known
 _PREFERENCE_DIFFICULTY = {"free": 35.0, "local": 30.0, "heavy": 75.0, "visual": 60.0}
 
@@ -65,15 +84,19 @@ def catalog_model_from_entry(entry: dict) -> Optional[CatalogModel]:
         intelligence = float(entry.get("normalized_metrics", {}).get("intelligence", 0.0) or 0.0)
         scores = {DEFAULT_TASK_TYPE: intelligence}
     supported = set(tm.get("supported", []) or [])
+    provider = str(entry.get("provider", "")).lower()
     return CatalogModel(
         model_id=model_id,
-        provider=str(entry.get("provider", "")).lower(),
+        provider=provider,
         task_scores=scores,
         price_in=float(raw.get("prompt_cost", 0.0) or 0.0) * 1e6,
         price_out=float(raw.get("completion_cost", 0.0) or 0.0) * 1e6,
         context_window=int(raw.get("context_length", 0) or 0),
         supports_tools="tool_agent_compatibility" in supported,
         supports_vision="vision" in supported or scores.get("vision", 0.0) >= 50.0,
+        cached_rate_factor=PROVIDER_CACHE_FACTORS.get(
+            model_id.split("/")[0].lower(),
+            PROVIDER_CACHE_FACTORS.get(provider, DEFAULT_CACHE_FACTOR)),
     )
 
 
@@ -94,8 +117,22 @@ class PomRouter:
             self._catalog[cm.model_id] = cm
             self._by_provider.setdefault(cm.provider, []).append(cm)
         self._paths = self._build_paths()
+        self._quota_initial = {id(p): p.quota_remaining for p in self._paths
+                               if p.path_type == PathType.FREE_QUOTA}
         log.info(f"PomRouter: {len(self._catalog)} catalog models, "
                  f"{len(self._paths)} access paths from user_truth assets")
+
+    def record_usage(self, model_id: str, path_type: str | PathType) -> None:
+        """Telemetry hook: decrement free quota after a successful call so
+        the matrix reflects temporal state (POM spec: recomputed, not cached).
+        """
+        if str(path_type) not in (PathType.FREE_QUOTA.value, str(PathType.FREE_QUOTA)):
+            return
+        for p in self._paths:
+            if p.path_type == PathType.FREE_QUOTA and p.model.model_id == model_id \
+                    and p.quota_remaining >= 1:
+                p.quota_remaining -= 1
+                return
 
     # ---------------------------------------------------------------- paths
 
@@ -199,7 +236,18 @@ class PomRouter:
             locked_model_id=locked_model_id,
         )
         budget = budget_from_truth(self._truth, spent_today=self._spent_today_fn())
-        chain = build_chain(self._paths, req, self._profile, budget, max_depth=max_depth)
+
+        # Quota pacing: reserve the bottom of a daily free quota for hard
+        # questions — an easy request must not burn the last free calls.
+        pool = []
+        for p in self._paths:
+            if p.path_type == PathType.FREE_QUOTA and req.difficulty < QUOTA_PACING_MIN_DIFFICULTY:
+                initial = self._quota_initial.get(id(p), 0.0)
+                if initial > 0 and p.quota_remaining <= initial * QUOTA_PACING_RESERVE:
+                    continue  # saved for a hard question later today
+            pool.append(p)
+
+        chain = build_chain(pool, req, self._profile, budget, max_depth=max_depth)
         if chain:
             top = chain[0]
             log.debug(f"POM chain: {[s.path.model.model_id for s in chain]} "

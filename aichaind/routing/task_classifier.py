@@ -21,6 +21,9 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass, field
 
+from aichaind.routing.encoder import (_compute_idf, _cosine_similarity,
+                                      _tfidf_vector, _tokenize)
+
 TASK_TYPES = (
     "chat_casual", "creative_writing", "knowledge", "legal_formal",
     "coding", "agentic_tool_use", "vision_ocr", "vision_reasoning",
@@ -41,6 +44,86 @@ TAXONOMY_TO_CATALOG = {
     "math_logic": "reasoning",
     "translation_language": "general_chat",
 }
+
+#: Tier 2 reference documents — few-shot centroids per taxonomy type
+#: (DYNAMIC_AUTO §2 tier 2, TF-IDF variant: local, no ML dependencies).
+#: Deliberately DISJOINT from tests/data/task_classifier_cases.json so the
+#: accuracy gate measures generalization, not memorization.
+_TIER2_DOCS = {
+    "chat_casual": (
+        "hello there how are you doing thanks a lot see you later good evening "
+        "zdravo kako ide pozdrav vidimo se hvala lepo dobro vece nema na cemu "
+        "sure sounds good no problem talk soon"
+    ),
+    "creative_writing": (
+        "write a short story poem novel scene dialogue character plot twist "
+        "napisi pricu pesmu esej scenu dijalog lik zaplet stil ton atmosfera "
+        "creative fiction narrative verse stanza metaphor imagery"
+    ),
+    "knowledge": (
+        "what is the capital population history who invented when did happen "
+        "sta je glavni grad istorija ko je izmislio kada se desilo koliko ima "
+        "fact encyclopedia definition explain concept origin founded"
+    ),
+    "legal_formal": (
+        "contract clause agreement liability termination notice party breach "
+        "ugovor klauzula sporazum odgovornost raskid otkazni rok strana povreda "
+        "statute regulation compliance jurisdiction arbitration damages zakon"
+    ),
+    "coding": (
+        "function class variable loop array bug error debug refactor test "
+        "funkcija klasa promenljiva petlja niz greska testiranje skripta kod "
+        "python javascript compile import module library framework api"
+    ),
+    "agentic_tool_use": (
+        "book schedule search send email call tool execute action workflow "
+        "rezervisi zakazi pretrazi posalji izvrsi akcija automatizuj nalog "
+        "browse fetch retrieve calendar reminder automation agent"
+    ),
+    "vision_ocr": (
+        "extract text image screenshot scan receipt document read transcribe "
+        "izvuci tekst slika ekran racun dokument procitaj prekucaj tabela "
+        "ocr handwriting label serial number photo picture"
+    ),
+    "vision_reasoning": (
+        "analyze image photo picture diagram chart compare visual identify "
+        "analiziraj sliku fotografiju dijagram grafikon uporedi prepoznaj "
+        "why does this look what style is shown in the picture"
+    ),
+    "math_logic": (
+        "solve equation integral derivative proof theorem probability puzzle "
+        "resi jednacinu integral izvod dokaz teorema verovatnoca zagonetka "
+        "calculate compute algebra geometry logic riddle number sequence"
+    ),
+    "translation_language": (
+        "translate translation language english german french spanish serbian "
+        "prevedi prevod jezik engleski nemacki francuski spanski srpski "
+        "how do you say meaning phrase idiom localize"
+    ),
+}
+
+_TIER2_STATE: dict = {}
+
+
+def _tier2_classify(text: str) -> tuple[str, float]:
+    """Centroid cosine match against the taxonomy. Returns (type, similarity)."""
+    if not _TIER2_STATE:
+        corpus = {k: _tokenize(v) for k, v in _TIER2_DOCS.items()}
+        idf = _compute_idf(list(corpus.values()))
+        _TIER2_STATE["idf"] = idf
+        _TIER2_STATE["vectors"] = {k: _tfidf_vector(toks, idf)
+                                   for k, toks in corpus.items()}
+    tokens = _tokenize(text)
+    if not tokens:
+        return "chat_casual", 0.0
+    vec = _tfidf_vector(tokens, _TIER2_STATE["idf"])
+    best_type, best_sim = "chat_casual", 0.0
+    for task_type, ref in _TIER2_STATE["vectors"].items():
+        sim = _cosine_similarity(vec, ref)
+        if sim > best_sim:
+            best_type, best_sim = task_type, sim
+    return best_type, best_sim
+
 
 #: difficulty priors per DYNAMIC_AUTO §2 table (low~20, medium~45, high~72)
 _DIFFICULTY_PRIOR = {
@@ -207,6 +290,11 @@ def classify(messages: list[dict] | None = None, *,
     # 10. Short casual message.
     if len(text) < 120 or _GREETING.match(text.strip()):
         return _result("chat_casual", 0.7, signals + ["short"], text)
+
+    # Tier 2: local TF-IDF centroid match (DYNAMIC_AUTO §2, tier 2).
+    t2_type, t2_sim = _tier2_classify(text)
+    if t2_sim >= 0.08:
+        return _result(t2_type, min(0.55, 0.3 + t2_sim), signals + ["tier2_centroid"], text)
 
     # Tier 3 fallbacks: harness hint, then previous turn's type.
     if harness_hint in TASK_TYPES:

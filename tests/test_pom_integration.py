@@ -181,3 +181,115 @@ def test_cascade_pom_error_falls_through():
     decision = _route(cascade)
     assert decision.target_model  # legacy path still answered
     assert "L5:pom_value_density" not in decision.decision_layers
+
+
+# ---------------------------------------------------------------- phase 8b:
+# session-aware stickiness, cache economics, quota pacing (roadmap #5)
+
+from aichaind.pom import Boundary as _B  # noqa: E402
+from aichaind.routing.pom_bridge import (DEFAULT_CACHE_FACTOR,  # noqa: E402
+                                         PROVIDER_CACHE_FACTORS,
+                                         catalog_model_from_entry as _cme)
+
+
+def test_provider_cache_factors():
+    ds = _cme(_entry("deepseek/deepseek-v4-flash", "Deepseek", {"coding": 90}))
+    assert ds.cached_rate_factor == PROVIDER_CACHE_FACTORS["deepseek"] == 0.02
+    an = _cme(_entry("anthropic/claude-sonnet-4.6", "Anthropic", {"coding": 95}))
+    assert an.cached_rate_factor == 0.1
+    unknown = _cme(_entry("acme/frontier", "acme", {"coding": 92}))
+    assert unknown.cached_rate_factor == DEFAULT_CACHE_FACTOR == 1.0
+
+
+def test_sticky_hysteresis_keeps_session_model():
+    """A near-tie challenger must NOT unseat the session's model — switching
+    would discard the provider-side prefix cache for a ~2% quality gain."""
+    near_tie = {"routing_hierarchy": [
+        _entry("alpha/a", "alpha", {"general_chat": 91}),
+        _entry("omega/b", "omega", {"general_chat": 90}),
+    ]}
+    truth = {"version": 1, "profile": {"mode": "balanced"},
+             "assets": {"free_quotas": [{"provider": "alpha", "quota_per_day": 50},
+                                        {"provider": "omega", "quota_per_day": 50}]}}
+    r = PomRouter(near_tie, truth)
+    fresh = r.route(messages=[{"role": "user", "content": "cao, jos si tu?"}])
+    assert fresh[0].path.model.model_id == "alpha/a"  # better model wins cold
+    sticky = r.route(messages=[{"role": "user", "content": "cao, jos si tu?"}],
+                     sticky_model_id="omega/b", transcript_tokens=40_000)
+    assert sticky[0].path.model.model_id == "omega/b", \
+        "2% quality gap must not beat 19-point switch threshold"
+
+
+def test_long_transcript_excludes_small_context_models():
+    """Context hard filter: a 200k-token conversation cannot route to a
+    128k-window model at all."""
+    r = PomRouter(TABLE, TRUTH)
+    chain = r.route(task_hint="chatting", transcript_tokens=200_000)
+    assert chain == []
+
+
+def test_locked_model_via_session_context():
+    r = PomRouter(TABLE, TRUTH)
+    chain = r.route(task_hint="chat", locked_model_id="acme/frontier")
+    assert chain and all(s.path.model.model_id == "acme/frontier" for s in chain)
+
+
+def test_quota_pacing_reserves_bottom_for_hard_questions():
+    truth = dict(TRUTH)
+    truth["assets"] = {"free_quotas": [{"provider": "beta", "quota_per_day": 10}]}
+    r = PomRouter(TABLE, truth)
+    # burn quota down into the reserve zone
+    for _ in range(9):
+        r.record_usage("beta/mid", PathType.FREE_QUOTA)
+    easy = r.route(messages=[{"role": "user", "content": "zdravo"}])
+    assert not any(s.path.path_type == PathType.FREE_QUOTA for s in easy), \
+        "easy request must not burn the reserved quota tail"
+    hard = r.route(messages=[{"role": "user", "content":
+                              "Dokazi teoremu i izvedi formalni dokaz indukcijom"}])
+    assert any(s.path.path_type == PathType.FREE_QUOTA for s in hard), \
+        "hard request may use the reserve"
+
+
+def test_record_usage_decrements_quota():
+    truth = dict(TRUTH)
+    truth["assets"] = {"free_quotas": [{"provider": "beta", "quota_per_day": 2}]}
+    r = PomRouter(TABLE, truth)
+    r.record_usage("beta/mid", PathType.FREE_QUOTA)
+    r.record_usage("beta/mid", PathType.FREE_QUOTA)
+    chain = r.route(messages=[{"role": "user", "content":
+                               "Dokazi teoremu i izvedi formalni dokaz"}])
+    assert not any(s.path.path_type == PathType.FREE_QUOTA and s.effective_cost == 0.0
+                   for s in chain), "exhausted quota must not appear as free"
+
+
+def test_cascade_passes_session_memory_to_pom():
+    captured = {}
+    class Spy:
+        enabled = True
+        def route(self, **kw):
+            captured.update(kw)
+            return []
+    cascade = CascadeRouter({"layer3_enabled": False})
+    cascade.configure_pom(Spy())
+    cascade.route(messages=[{"role": "user", "content": "nastavi gde smo stali sa refaktorisanjem koda"}],
+                  available_free_model="beta/mid",
+                  session_context={"sticky_model_id": "beta/mid",
+                                   "transcript_tokens": 42_000,
+                                   "locked_model_id": None})
+    assert captured.get("sticky_model_id") == "beta/mid"
+    assert captured.get("transcript_tokens") == 42_000
+
+
+def test_build_session_context_from_canonical_session():
+    from aichaind.core.session import CanonicalSession, ProviderRun
+    from aichaind.transport.http_server import _build_session_context
+    s = CanonicalSession(session_id="t1")
+    s.record_run(ProviderRun(model="beta/mid", status="success",
+                             input_tokens=1000, output_tokens=500, cost_usd=0.01))
+    s.record_run(ProviderRun(model="acme/frontier", status="error",
+                             input_tokens=200, output_tokens=0))
+    ctx = _build_session_context(s)
+    assert ctx["sticky_model_id"] == "beta/mid"      # last SUCCESSFUL run
+    assert ctx["transcript_tokens"] == 1700
+    assert ctx["spent_today_usd"] == 0.01
+    assert _build_session_context(None) == {}

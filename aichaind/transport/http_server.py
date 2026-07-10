@@ -459,6 +459,7 @@ class AichainDHandler(BaseHTTPRequestHandler):
                 balance_report=balance_report,
                 budget_state=session.budget_state if session else None,
                 routing_preference=routing_control.get("routing_preference", "balanced"),
+                session_context=_build_session_context(session),
             )
 
             target_model = decision.target_model or _roles.get("fast_brain", "openrouter/google/gemini-2.5-flash:free")
@@ -1083,6 +1084,32 @@ def _resolve_routing_control(session, payload: dict) -> tuple[dict, str, bool]:
         "control_only": control_only,
         "sanitized_messages": sanitized_messages,
     }, "", changed
+
+
+def _build_session_context(session) -> dict:
+    """Extract POM routing memory from the canonical session: which model the
+    conversation is actually on (sticky), how long the transcript is (cache
+    economics), and any hard lock. Never raises — routing must not die on a
+    malformed session."""
+    if session is None:
+        return {}
+    try:
+        sticky = ""
+        transcript_tokens = 0
+        for run in getattr(session, "provider_runs", []) or []:
+            if getattr(run, "status", "") == "success":
+                sticky = getattr(run, "model", "") or sticky
+            transcript_tokens += int(getattr(run, "input_tokens", 0) or 0)
+            transcript_tokens += int(getattr(run, "output_tokens", 0) or 0)
+        return {
+            "sticky_model_id": sticky or None,
+            "transcript_tokens": transcript_tokens,
+            "locked_model_id": getattr(session, "locked_model", "") or None,
+            "spent_today_usd": float(getattr(getattr(session, "budget_state", None),
+                                             "total_spent_usd", 0.0) or 0.0),
+        }
+    except Exception:
+        return {}
 
 
 def _build_manual_route_decision(control: dict):
@@ -2267,6 +2294,17 @@ def _record_session_run(
     )
     session.record_run(run)
     _save_session(session)
+
+    # POM temporal state: burn one unit of free quota on a successful call
+    # so pacing sees reality (pom_bridge.record_usage is a no-op for other
+    # path types and for models without a FREE_QUOTA path).
+    if run.status == "success" and _cascade_router is not None:
+        pom = getattr(_cascade_router, "_pom_router", None)
+        if pom is not None:
+            try:
+                pom.record_usage(model, "free_quota")
+            except Exception:
+                pass
 
 
 def _restore_redactions(response, redaction_map: dict) -> None:
