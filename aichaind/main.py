@@ -394,7 +394,8 @@ def main():
     user_truth_path = cfg.get("user_truth_path") or (paths["data_dir"] / "user_truth.json")
     try:
         user_truth = load_user_truth(user_truth_path)
-        pom_router = PomRouter(routing_table, user_truth)
+        pom_router = PomRouter(routing_table, user_truth,
+                               spent_today_fn=session_store.spent_today_usd)
         cascade_router.configure_pom(pom_router)
         log.info(f"POM router: {'ACTIVE' if pom_router.enabled else 'STANDBY (no user_truth assets)'}")
     except UserTruthError as e:
@@ -407,6 +408,12 @@ def main():
     from aichaind.core.summarizer import ContextSummarizer
     summarizer = ContextSummarizer()
     log.info("Structured summarizer: ACTIVE")
+
+    from aichaind.compression import LinguaCompressor
+    lingua_compressor = LinguaCompressor(cfg.get("compression", {}))
+    if lingua_compressor.enabled and not lingua_compressor.available:
+        log.warning("Compression enabled in config but llmlingua is not installed — inert")
+    log.info(f"LLMLingua-2 compression: {'ACTIVE' if lingua_compressor.enabled and lingua_compressor.available else 'OFF'}")
 
     from aichaind.security.redactor import PIIRedactor
     pii_redactor = PIIRedactor()
@@ -439,6 +446,7 @@ def main():
         input_redaction_enabled=cfg.get("security", {}).get("redact_inputs_before_cloud", False),
         routing_preferences=cost_optimizer._routing_preferences,
         operator_metrics=operator_metrics,
+        lingua_compressor=lingua_compressor,
     )
 
     bootstrap_thread = threading.Thread(

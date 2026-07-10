@@ -293,3 +293,31 @@ def test_build_session_context_from_canonical_session():
     assert ctx["transcript_tokens"] == 1700
     assert ctx["spent_today_usd"] == 0.01
     assert _build_session_context(None) == {}
+
+
+def test_session_store_spent_today_aggregates_across_sessions(tmp_path):
+    from aichaind.core.session import SessionStore, ProviderRun
+    from datetime import datetime, timezone, timedelta
+    store = SessionStore(tmp_path)
+    now = datetime.now(timezone.utc).isoformat()
+    yesterday = (datetime.now(timezone.utc) - timedelta(days=1)).isoformat()
+    s1 = store.create("a")
+    s1.record_run(ProviderRun(model="m1", timestamp=now, cost_usd=0.5, status="success"))
+    s1.record_run(ProviderRun(model="m1", timestamp=yesterday, cost_usd=9.0, status="success"))
+    store.save(s1)
+    s2 = store.create("b")
+    s2.record_run(ProviderRun(model="m2", timestamp=now, cost_usd=0.25, status="success"))
+    store.save(s2)
+    assert store.spent_today_usd() == 0.75  # yesterday's 9.0 excluded
+
+
+def test_budget_hard_stop_uses_daily_aggregate():
+    truth = {"version": 1, "profile": {"mode": "balanced"},
+             "budget": {"daily_limit": 1.0, "hard_stop": True},
+             "assets": {"api_keys": [{"provider": "acme", "key_ref": "env:K"}]}}
+    r = PomRouter(TABLE, truth, spent_today_fn=lambda: 0.999)
+    # paid path costs > headroom (0.001) -> excluded by budget hard stop
+    chain = r.route(messages=[{"role": "user", "content":
+                               "Dokazi teoremu formalno i detaljno"}],
+                    est_input_tokens=50_000, est_output_tokens=20_000)
+    assert not any(s.path.path_type == PathType.PAY_AS_YOU_GO for s in chain)

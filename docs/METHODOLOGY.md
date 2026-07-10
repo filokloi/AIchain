@@ -35,7 +35,7 @@ This document explains exactly how every score in the AIchain catalog is produce
 
 All dimensions are expressed on a 0–100 scale in `normalized_metrics`. Exact rules, as implemented in `tools/catalog_pipeline/rank/scoring.py`:
 
-- **Intelligence:** taken directly from the merged benchmark base (`intelligence_base`, already 0–100). Source merge priority: curated benchmark map → Artificial Analysis → LMArena Elo → helper AI → heuristic; the first available source wins. Missing everywhere → default **70**. Models on an active verified promotion ("promo kings") receive **+8** (capped at 99), recorded as `helper_metadata.promo_boost`.
+- **Intelligence:** the **median** of available benchmark sources (curated benchmark map, Artificial Analysis quality, LMArena Elo normalized to 0–100) — median is robust to a single outlier source. `source_attribution.intelligence` labels the highest-priority source present (benchmark → Artificial Analysis → LMArena → helper → heuristic). No source at all → heuristic estimate; missing everywhere → default **70**. Models on an active verified promotion ("promo kings") receive **+8** (capped at 99), recorded as `helper_metadata.promo_boost`.
 - **Speed:** `35 + 65 × (tokens_per_second / max_tokens_per_second_in_snapshot)`, clamped to 0–100. Source: Artificial Analysis speed, else the OpenRouter speed hint. Unknown speed → default **62**.
 - **Context:** log-ratio normalization with a 4096-token floor: `100 × (ln(1+ctx) − ln(1+4096)) / (ln(1+max_ctx) − ln(1+4096))`, where `max_ctx` is the largest context window in the snapshot.
 - **Stability:** provider stability hint (0–100) as merged from sources; unknown → default **72**.
@@ -100,12 +100,12 @@ python -m pytest tests -q                # contract validation
 |---|---|---|
 | 2026-07 | 1.0 | Initial public methodology draft: sources, proposed role weights, free-path criteria. |
 | 2026-07 | 1.1 | Aligned with the shipped pipeline (`rank/scoring.py`): documented the actual 7-dimension value score, per-dimension normalization with defaults, promo boost, tiers/rank ordering, and heuristic role derivation. Moved unimplemented v1.0 ideas to §9. |
+| 2026-07 | 1.2 | Intelligence merge switched from 3/2/1 weighted mean to **median of available sources** (implements the v1.0 robustness intent); moved out of §9 Planned. |
 
 ## 9. Planned (documented but not yet implemented)
 
 These v1.0 proposals remain goals; the pipeline does not do them yet. Until a row moves to the changelog as implemented, no published number depends on it.
 
-- **Median across benchmark sources** for intelligence (today: first source by merge priority wins).
 - **Output-weighted cost blend** `0.3×input + 0.7×output` (today: plain average of input and output price).
 - **Per-input freshness rule** — `fetched_at` older than 7 days lowers `confidence`, older than 30 days marks the score `stale` and excludes it from role rankings.
 - **Measured stability** — rolling 30-day availability estimate mapped 99.9%→100, <95%→0 (today: source-provided hints with mid-range defaults).

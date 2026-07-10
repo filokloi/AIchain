@@ -27,9 +27,9 @@ tier-2 embedding centroidi — sada implementirani (TF-IDF varijanta).
 | 4 | Quota pacing (PROJECT_STATE §3) neimplementiran — lako pitanje je moglo da spali poslednji besplatni poziv | SREDNJA | ✅ donjih 20% dnevne kvote rezervisano za difficulty ≥ 40; record_usage telemetrijska kuka na uspešan poziv |
 | 5 | Klasifikator samo tier-1 regex — neutralni tekstovi padali na default | SREDNJA | ✅ tier-2 TF-IDF centroidi (10 tipova, EN+SR, bez novih zavisnosti, referentni dokumenti disjunktni od test seta) |
 | 6 | Dva paralelna "mozga" u ruteru: legacy CostOptimizer (1400+ linija) i POM — dupliran domen, dugoročno divergiraju | SREDNJA | ⏳ otvoreno: konsolidacija = zaseban zadatak; POM je sada primaran, legacy je fallback |
-| 7 | `Budget.spent_today` = 0 (dnevna potrošnja se ne agregira preko sesija) | SREDNJA | ⏳ otvoreno: treba dnevni agregat iz telemetrije (session_context nosi session-spend kao prvi korak) |
+| 7 | `Budget.spent_today` = 0 (dnevna potrošnja se ne agregira preko sesija) | SREDNJA | ✅ SessionStore.spent_today_usd() — UTC-dnevni agregat preko svih sesija, povezan u PomRouter |
 | 8 | Kaskadni "generate→verify→escalate" obrazac (FrugalGPT-stil) nije implementiran — roadmap #9 (ansambl) | NISKA | ⏳ planirano roadmap-om |
-| 9 | `intelligence` = prvi izvor po prioritetu, ne medijan (METHODOLOGY §9) | NISKA | ⏳ planirano |
+| 9 | `intelligence` = ponderisana sredina 3/2/1 (dokument je tvrdio drugačije) | NISKA | ✅ medijan dostupnih izvora (METHODOLOGY v1.2) |
 
 ## 3. Svesno ODBIJENO (uz obrazloženje)
 
@@ -48,3 +48,19 @@ tier-2 embedding centroidi — sada implementirani (TF-IDF varijanta).
   session_context izvlačenje, tier-2 klasifikaciju).
 - Prihvatni kriterijum roadmap #5 ("formula povezana na telemetriju") ispunjen:
   sticky + transcript_tokens + potrošnja teku iz CanonicalSession u build_chain().
+
+## 5. Dopuna (isti dan, nastavak sesije)
+
+Posle inicijalne revizije implementirano i:
+- **Roadmap #7 — virtuelni modeli:** `GET /v1/models` (OpenAI format) +
+  tumačenje `model` polja: `aichain/auto|economy|power|local`,
+  `aichain/lock:<id>` (sesijski hard lock), `aichain/<id>` (one-shot pin).
+  Eksplicitna `_aichain_control` i dalje pobeđuje.
+- **Roadmap #6 — LLMLingua-2:** `aichaind/compression/lingua.py`, off by
+  default, opciona zavisnost (bez nje inertno), guardrails (system/tool/kod/
+  poslednjih k turnova/`@aichain nocompress`), uvezano lingua-first u
+  `_maybe_compress_messages` sa summarizer fallback-om; `can_fit_by_compression`
+  za tačku ubacivanja 3.
+- **Review #7:** dnevni budžet — `SessionStore.spent_today_usd()`.
+- **Review #9 / METHODOLOGY v1.2:** medijan benchmark izvora u merge-u.
+Suite posle svega: 543 passed.

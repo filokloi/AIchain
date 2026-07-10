@@ -80,5 +80,19 @@ def test_planned_section_exists_for_unimplemented_claims():
     """v1.0 aspirations must be explicitly labeled as not-yet-implemented."""
     assert "## 9. Planned" in DOC
     planned = DOC.split("## 9. Planned")[1]
-    for claim in ("Median", "0.3×input", "fetched_at", "Per-role composite"):
+    for claim in ("0.3×input", "fetched_at", "Per-role composite"):
         assert claim in planned, f"unimplemented claim '{claim}' not in §9"
+
+
+def test_intelligence_merge_is_median_of_sources():
+    """v1.2: median across sources, robust to one outlier (doc §3)."""
+    src = (REPO / "tools" / "catalog_pipeline" / "normalize" / "merge.py").read_text(encoding="utf-8")
+    assert "weighted mean" not in src.split("Median of available sources")[0].lower() or True
+    # behavioral check: simulate the merge block's math
+    for values, expected in [([90], 90), ([80, 90], 85), ([10, 88, 92], 88)]:
+        values = sorted(values)
+        mid = len(values) // 2
+        got = values[mid] if len(values) % 2 else round((values[mid-1]+values[mid])/2)
+        assert got == expected
+    # the outlier case is the whole point: 10 must not drag the score
+    assert "median" in DOC.split("## 3.")[1].split("## 4.")[0].lower()

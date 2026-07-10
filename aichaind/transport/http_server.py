@@ -132,7 +132,9 @@ class AichainDHandler(BaseHTTPRequestHandler):
         log.info(f"DEBUG: GET {self.path} from {self.headers.get('Origin')}")
         try:
             parsed = urlparse(self.path)
-            if parsed.path == "/health":
+            if parsed.path == "/v1/models":
+                self._send_json(200, build_models_listing())
+            elif parsed.path == "/health":
                 self._handle_health()
             elif parsed.path == "/status":
                 self._handle_status()
@@ -887,11 +889,75 @@ def _canonicalize_manual_target(model: str, provider: str) -> tuple[str, str]:
     return normalized_model, normalized_provider
 
 
+#: Virtual models (DYNAMIC_AUTO §"Virtual models"): harness selects routing
+#: policy through the standard OpenAI `model` field — zero integration code.
+VIRTUAL_MODELS = {
+    "aichain/auto": {"description": "Full dynamic pipeline (classifier + POM value density + hysteresis)", "routing_preference": "balanced"},
+    "aichain/economy": {"description": "Cost-first: free/cheap paths preferred, quality floor still applies", "routing_preference": "min_cost"},
+    "aichain/power": {"description": "Quality-first: max intelligence within budget", "routing_preference": "max_intelligence"},
+    "aichain/local": {"description": "Prefer local execution paths", "routing_preference": "prefer_local"},
+}
+
+
+def build_models_listing() -> dict:
+    """OpenAI-compatible GET /v1/models payload: virtual models first, then
+    the concrete role defaults so harness pickers show something real."""
+    created = int(time.time())
+    data = []
+    for vid, meta in VIRTUAL_MODELS.items():
+        data.append({"id": vid, "object": "model", "created": created,
+                     "owned_by": "aichaind",
+                     "aichain": {"virtual": True, "description": meta["description"]}})
+    data.append({"id": "aichain/lock:<model_id>", "object": "model", "created": created,
+                 "owned_by": "aichaind",
+                 "aichain": {"virtual": True, "template": True,
+                             "description": "Hard lock to one catalog model for the session (privacy filter still applies)"}})
+    for role, model_id in sorted((_roles or {}).items()):
+        if model_id:
+            data.append({"id": f"aichain/{model_id}", "object": "model", "created": created,
+                         "owned_by": "aichaind",
+                         "aichain": {"virtual": False, "role_default": role.replace("_brain", "")}})
+    return {"object": "list", "data": data}
+
+
+def _control_from_virtual_model(payload: dict) -> dict | None:
+    """Interpret the OpenAI `model` field as an aichain routing directive.
+    Explicit `_aichain_control` always wins; non-aichain model ids are left
+    to the normal pipeline untouched."""
+    model = str(payload.get("model", "") or "").strip()
+    if not model.startswith("aichain/"):
+        return None
+    target = model[len("aichain/"):]
+    base = {"mode": "auto", "model": "", "provider": "",
+            "persist_for_session": False, "routing_preference": "balanced",
+            "source": "virtual_model", "control_only": False,
+            "stripped_prompt": "", "confirmation": ""}
+    if model in VIRTUAL_MODELS:
+        base["routing_preference"] = VIRTUAL_MODELS[model]["routing_preference"]
+        return base
+    if target.startswith("lock:"):
+        locked = target[len("lock:"):].strip()
+        if locked:
+            m, p = _canonicalize_manual_target(locked, "")
+            base.update({"mode": "manual", "model": m, "provider": p,
+                         "persist_for_session": True})
+        return base
+    if target:  # aichain/<catalog_id> = one-shot pin
+        m, p = _canonicalize_manual_target(target, "")
+        base.update({"mode": "manual", "model": m, "provider": p,
+                     "persist_for_session": False})
+        return base
+    return base
+
+
 def _parse_routing_control(payload: dict) -> tuple[dict, str]:
     raw = payload.get("_aichain_control")
     if raw is None:
         legacy = payload.get("aichain_override")
         if legacy is None:
+            virtual = _control_from_virtual_model(payload)
+            if virtual is not None:
+                return virtual, ""
             return {}, ""
         if isinstance(legacy, str):
             model = str(legacy or "").strip()
@@ -2321,9 +2387,27 @@ def _restore_redactions(response, redaction_map: dict) -> None:
             message["content"] = _pii_redactor.de_redact(message["content"], redaction_map)
 
 
+_lingua_compressor = None  # set by main.py when compression config present
+
+
 def _maybe_compress_messages(session, messages: list[dict]) -> tuple[list[dict], dict]:
     if session:
         _update_session_summary_state(session, messages)
+
+    # OPTIMIZATIONS §2 insertion point 2: LLMLingua-2 first (off by default;
+    # inert without the optional dependency). Falls through to the summarizer.
+    if _lingua_compressor is not None and messages:
+        try:
+            messages, lingua_meta = _lingua_compressor.compress_messages(messages)
+            if lingua_meta.get("lingua_compressed"):
+                return messages, {"compressed": True,
+                                  "chars_saved": lingua_meta["chars_saved"],
+                                  "summary_used": False,
+                                  "verification_passed": True,
+                                  "artifact_guardrail_used": False,
+                                  "lingua": lingua_meta}
+        except Exception as e:
+            log.warning(f"lingua compressor error, using summarizer path: {e}")
 
     if not _summarizer or not messages:
         return messages, {"compressed": False, "chars_saved": 0, "summary_used": False, "verification_passed": True, "artifact_guardrail_used": False}
@@ -2778,11 +2862,12 @@ def start_server(
     input_redaction_enabled: bool = True,
     routing_preferences: dict | None = None,
     operator_metrics: OperatorMetrics = None,
+    lingua_compressor=None,
 ):
     global _auth_manager, _rate_limiter, _cascade_router, _audit_logger
     global _policy_engine, _controller, _session_store, _pii_redactor
     global _roles, _version, _balance_checker, _discovery_report
-    global _route_eval_collector, _summarizer, _injection_guard, _provider_access_layer, _local_profile_store, _input_redaction_enabled, _routing_preferences, _operator_metrics, _SERVER_START_TIME
+    global _route_eval_collector, _summarizer, _injection_guard, _provider_access_layer, _local_profile_store, _input_redaction_enabled, _routing_preferences, _operator_metrics, _SERVER_START_TIME, _lingua_compressor
 
     _auth_manager = auth_manager
     _rate_limiter = rate_limiter or TokenBucketRateLimiter()
@@ -2804,6 +2889,7 @@ def start_server(
     _input_redaction_enabled = bool(input_redaction_enabled)
     _routing_preferences = dict(routing_preferences or {})
     _operator_metrics = operator_metrics
+    _lingua_compressor = lingua_compressor
     _SERVER_START_TIME = time.time()
 
     server_address = ("127.0.0.1", port)

@@ -256,9 +256,14 @@ def merge_catalog_sources(
             intelligence_sources.append(("lmsys", _normalize_elo_to_intelligence(float(lmsys_match["elo"]))))
 
         if intelligence_sources:
-            weight_map = {"benchmark": 3, "artificial_analysis": 2, "lmsys": 1}
-            total_weight = sum(weight_map[source] for source, _ in intelligence_sources)
-            intelligence = int(sum(weight_map[source] * value for source, value in intelligence_sources) / total_weight)
+            # Median of available sources (METHODOLOGY §3, v1.2): robust to a
+            # single outlier source, unlike the previous 3/2/1 weighted mean.
+            values = sorted(value for _, value in intelligence_sources)
+            mid = len(values) // 2
+            if len(values) % 2:
+                intelligence = int(values[mid])
+            else:
+                intelligence = int(round((values[mid - 1] + values[mid]) / 2.0))
             intelligence_source = next(source for source in _FIELD_SOURCE_PRIORITY["intelligence"] if any(source == src for src, _ in intelligence_sources))
         else:
             intelligence = _heuristic_intelligence(model_id, context_length)

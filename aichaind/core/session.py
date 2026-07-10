@@ -205,6 +205,27 @@ class SessionStore:
             path = self._get_path(session.session_id)
             atomic_write(path, session.to_dict())
 
+    def spent_today_usd(self) -> float:
+        """Sum cost_usd across ALL sessions' provider runs stamped today
+        (UTC). Feeds pom.Budget.spent_today so the daily limit is a real
+        daily limit, not a per-session one. File-scan is O(sessions) but the
+        store is local and small; called once per routed request."""
+        today = datetime.now(timezone.utc).date().isoformat()
+        total = 0.0
+        with self._lock:
+            for path in self.session_dir.glob("*.json"):
+                data = safe_read_json(path)
+                if not data:
+                    continue
+                for run in data.get("provider_runs", []) or []:
+                    ts = str(run.get("timestamp", "") or "")
+                    if ts[:10] == today:
+                        try:
+                            total += float(run.get("cost_usd", 0.0) or 0.0)
+                        except (TypeError, ValueError):
+                            continue
+        return round(total, 6)
+
     def delete(self, session_id: str) -> bool:
         """Delete a session."""
         with self._lock:
