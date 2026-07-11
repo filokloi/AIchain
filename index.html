@@ -5,11 +5,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description"
-        content="AIchain — Professional AI model routing table and value optimizer for OpenClaw. Compare models, view scores, pricing, and get one-click integration.">
-    <meta name="robots" content="noindex, nofollow">
+        content="AIchain — open, local-first LLM router and live catalog of 300+ AI models: real intelligence scores, prices, speed and free paths, rebuilt every 12 hours. Routers optimize for providers; AIchain optimizes for you.">
+    <meta property="og:title" content="AIchain — Open LLM Router &amp; Live Model Catalog">
+    <meta property="og:description"
+        content="A public, auditable catalog of 300+ AI models crossed with your own subscriptions, quotas and hardware. Deterministic, local-first, free.">
+    <meta property="og:url" content="https://filokloi.github.io/AIchain/">
+    <meta property="og:type" content="website">
     <!-- Canonical URL for GitHub Pages -->
     <link rel="canonical" href="https://filokloi.github.io/AIchain/">
-    <title>AIchain — The Sovereign Global Value Maximizer</title>
+    <title>AIchain — Open LLM Router &amp; Live Model Catalog</title>
     <link rel="icon"
         href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⛓</text></svg>">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -1002,6 +1006,21 @@
 
         /* ── Responsive ── */
 
+        @media (prefers-reduced-motion: reduce) {
+            .manifesto-scroll { animation: none !important; }
+            .postulate { animation: none !important; }
+        }
+
+        @media (max-width: 640px) {
+            /* 9 kolona ne staje na telefon: ostavi Rank, Model, Intel, Cost, Value */
+            #routing-table table th:nth-child(3), #routing-table table td:nth-child(3),
+            #routing-table table th:nth-child(4), #routing-table table td:nth-child(4),
+            #routing-table table th:nth-child(6), #routing-table table td:nth-child(6),
+            #routing-table table th:nth-child(7), #routing-table table td:nth-child(7) {
+                display: none;
+            }
+        }
+
         @media (max-width: 768px) {
             .header-inner {
                 flex-direction: column;
@@ -1266,10 +1285,16 @@
                     <div class="logo-icon">⛓</div>
                     <div>
                         <div class="logo-text">AIchain</div>
-                        <div class="logo-subtitle">Sovereign Global Value Maximizer</div>
+                        <div class="logo-subtitle">Open LLM Routing Catalog — local-first, auditable, free</div>
                     </div>
                 </div>
-                <div style="display:flex;align-items:center;gap:14px;">
+                <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
+                    <a href="https://github.com/filokloi/AIchain/blob/main/MANIFEST.md" target="_blank" rel="noopener"
+                        style="color: var(--text-secondary); text-decoration: none; white-space: nowrap;">Manifest</a>
+                    <a href="https://github.com/filokloi/AIchain/blob/main/docs/METHODOLOGY.md" target="_blank" rel="noopener"
+                        style="color: var(--text-secondary); text-decoration: none; white-space: nowrap;">Methodology</a>
+                    <a href="https://github.com/filokloi/AIchain" target="_blank" rel="noopener"
+                        style="color: var(--text-secondary); text-decoration: none; white-space: nowrap;">GitHub</a>
                     <a href="https://filokloi.github.io/ai-chain/" target="_blank" rel="noopener"
                         style="color: var(--neon-accent); font-weight: bold; text-decoration: none; white-space: nowrap;">
                         💬 Chat &amp; Model Explorer →</a>
@@ -1285,14 +1310,15 @@
     <!-- ═══ HERO / MANIFESTO ═══ -->
     <section class="hero">
         <div class="container">
-            <div class="hero-pre-title">// manifesto v1.0 — the five postulates</div>
+            <div class="hero-pre-title">// the manifest — five principles</div>
             <h1 class="hero-title">
-                Maximum Intelligence.<br>
-                <span class="highlight">Zero Cost.</span>
+                Routers optimize for providers.<br>
+                <span class="highlight">AIchain optimizes for you.</span>
             </h1>
             <p class="hero-tagline">
-                We are the decentralized intelligence routing layer. We analyze every AI model
-                on a global scale — without bias, without discrimination. Only data decides.
+                A public catalog of every reachable model — real scores, prices, speed, free paths,
+                rebuilt every 12h — crossed on <em>your</em> machine with what you already have:
+                subscriptions, free tiers, local hardware. Maximum intelligence, minimum cost. Only data decides.
             </p>
 
             <div class="manifesto">
@@ -1301,118 +1327,122 @@
                     <div class="postulate" style="animation: fade-in-up 0.6s ease-out 0.1s both;">
                         <div class="postulate-num">I.</div>
                         <div>
-                            <div class="postulate-title">Data as Sovereign Capital</div>
+                            <div class="postulate-title">Your Interest Is the Objective</div>
                             <div class="postulate-body">
-                                We provide the "fuel" (user data) only if we receive the highest tier
-                                of intelligence in return.
+                                Not provider revenue, not ours — there is none. The router maximizes
+                                value for the person actually paying: you.
                             </div>
                         </div>
                     </div>
                     <div class="postulate" style="animation: fade-in-up 0.6s ease-out 0.2s both;">
                         <div class="postulate-num">II.</div>
                         <div>
-                            <div class="postulate-title">The Zero-Cost Mandate</div>
+                            <div class="postulate-title">Facts and Preferences Never Mix</div>
                             <div class="postulate-body">
-                                Our goal is Maximum Intelligence at Zero Cost.
+                                The catalog holds only verifiable facts, identical for everyone.
+                                Your preferences stay local. The router is where they meet.
                             </div>
                         </div>
                     </div>
                     <div class="postulate" style="animation: fade-in-up 0.6s ease-out 0.3s both;">
                         <div class="postulate-num">III.</div>
                         <div>
-                            <div class="postulate-title">Collective Routing Leverage</div>
+                            <div class="postulate-title">Local-First</div>
                             <div class="postulate-body">
-                                We unify routing logic to influence providers to compete for the community's traffic —
-                                rewarding quality, not marketing.
+                                Routing decisions, keys, history and your profile live on your machine.
+                                The cloud part of AIchain is a static file.
                             </div>
                         </div>
                     </div>
                     <div class="postulate" style="animation: fade-in-up 0.6s ease-out 0.4s both;">
                         <div class="postulate-num">IV.</div>
                         <div>
-                            <div class="postulate-title">Universal Meritocracy</div>
+                            <div class="postulate-title">Legitimate Free, Not Gray Free</div>
                             <div class="postulate-body">
-                                Our analysis spans the entire world without discrimination. We evaluate
-                                every model on a global scale.
+                                Every free path listed is one the provider actually offers. Economy
+                                through information — never through terms-of-service violations.
                             </div>
                         </div>
                     </div>
                     <div class="postulate" style="animation: fade-in-up 0.6s ease-out 0.5s both;">
                         <div class="postulate-num">V.</div>
                         <div>
-                            <div class="postulate-title">The Golden Quartet</div>
+                            <div class="postulate-title">Graceful Degradation</div>
                             <div class="postulate-body">
-                                Only four metrics determine a model's rank: Intelligence, Speed,
-                                Stability, and Cost (Target: $0).
+                                Providers fail, quotas burn out, feeds go stale — the chain continues.
+                                Seven scored dimensions, one auditable value score, no drama.
                             </div>
                         </div>
                     </div>
 
-                    <!-- Duplicated set of postulates for seamless infinite scroll -->
+                    <!-- Duplicated set of postulates for seamless infinite scroll (hidden from AT) -->
+                    <div aria-hidden="true">
                     <div class="postulate" style="animation: fade-in-up 0.6s ease-out 0.1s both;">
                         <div class="postulate-num">I.</div>
                         <div>
-                            <div class="postulate-title">Data as Sovereign Capital</div>
+                            <div class="postulate-title">Your Interest Is the Objective</div>
                             <div class="postulate-body">
-                                We provide the "fuel" (user data) only if we receive the highest tier
-                                of intelligence in return.
+                                Not provider revenue, not ours — there is none. The router maximizes
+                                value for the person actually paying: you.
                             </div>
                         </div>
                     </div>
                     <div class="postulate" style="animation: fade-in-up 0.6s ease-out 0.2s both;">
                         <div class="postulate-num">II.</div>
                         <div>
-                            <div class="postulate-title">The Zero-Cost Mandate</div>
+                            <div class="postulate-title">Facts and Preferences Never Mix</div>
                             <div class="postulate-body">
-                                Our goal is Maximum Intelligence at Zero Cost.
+                                The catalog holds only verifiable facts, identical for everyone.
+                                Your preferences stay local. The router is where they meet.
                             </div>
                         </div>
                     </div>
                     <div class="postulate" style="animation: fade-in-up 0.6s ease-out 0.3s both;">
                         <div class="postulate-num">III.</div>
                         <div>
-                            <div class="postulate-title">Collective Routing Leverage</div>
+                            <div class="postulate-title">Local-First</div>
                             <div class="postulate-body">
-                                We unify routing logic to influence providers to compete for the community's traffic —
-                                rewarding quality, not marketing.
+                                Routing decisions, keys, history and your profile live on your machine.
+                                The cloud part of AIchain is a static file.
                             </div>
                         </div>
                     </div>
                     <div class="postulate" style="animation: fade-in-up 0.6s ease-out 0.4s both;">
                         <div class="postulate-num">IV.</div>
                         <div>
-                            <div class="postulate-title">Universal Meritocracy</div>
+                            <div class="postulate-title">Legitimate Free, Not Gray Free</div>
                             <div class="postulate-body">
-                                Our analysis spans the entire world without discrimination. We evaluate
-                                every model on a global scale.
+                                Every free path listed is one the provider actually offers. Economy
+                                through information — never through terms-of-service violations.
                             </div>
                         </div>
                     </div>
                     <div class="postulate" style="animation: fade-in-up 0.6s ease-out 0.5s both;">
                         <div class="postulate-num">V.</div>
                         <div>
-                            <div class="postulate-title">The Golden Quartet</div>
+                            <div class="postulate-title">Graceful Degradation</div>
                             <div class="postulate-body">
-                                Only four metrics determine a model's rank: Intelligence, Speed,
-                                Stability, and Cost (Target: $0).
+                                Providers fail, quotas burn out, feeds go stale — the chain continues.
+                                Seven scored dimensions, one auditable value score, no drama.
                             </div>
                         </div>
                     </div>
+                    </div><!-- /aria-hidden duplicate -->
                 </div>
             </div>
 
             <!-- Data Sovereignty Callout -->
             <div class="sovereignty-callout">
-                <div class="callout-title">⚡ Data Sovereignty Postulate</div>
+                <div class="callout-title">⚡ Your Truth Stays Local</div>
                 <div class="callout-body">
-                    We provide the training data — <strong>you provide the intelligence for free.</strong><br>
-                    This system operates on a single principle: our user interactions are sovereign capital.
-                    In exchange for this fuel, we demand the highest tier of intelligence at <strong>zero cost</strong>.
-                    When the free models fail, the Heavy Hitter deploys — solves the task — and <strong>immediately
-                        reverts</strong>.
-                    No waste. No loyalty. Only meritocracy.
+                    The catalog is public and identical for everyone. <strong>Your</strong> subscriptions,
+                    unburned quotas, budget ceiling and privacy rules live in a local file that
+                    <strong>never leaves your machine</strong> — the one input no cloud router has,
+                    and the one that changes the answer. When free paths can't handle a task, a stronger
+                    model steps in, solves it, and <strong>control immediately reverts</strong>.
+                    No waste. No loyalty. Only value.
                 </div>
-                <div class="heavy-hitter-badge" id="heavyHitterBadge">⚔ HEAVY HITTER: Loading...</div>
+                <div class="heavy-hitter-badge" id="heavyHitterBadge">⚡ TOP MODEL: Loading...</div>
             </div>
 
             <!-- Live Promos (Free Kings) -->
@@ -1504,7 +1534,7 @@
                 <button class="filter-btn" data-filter="FREE_FRONTIER"
                     onclick="setFilter('FREE_FRONTIER')">Free</button>
                 <button class="filter-btn" data-filter="HEAVY_HITTER"
-                    onclick="setFilter('HEAVY_HITTER')">Rescue</button>
+                    onclick="setFilter('HEAVY_HITTER')">Paid</button>
                 <button class="filter-btn" data-filter="task:coding" onclick="setFilter('task:coding')">Coding</button>
                 <div style="flex-grow: 1;"></div>
                 <button class="filter-btn" style="border-color: var(--text-muted); color: var(--text-muted);"
@@ -1619,7 +1649,7 @@
     <!-- ═══ FOOTER ═══ -->
     <footer>
         <div class="container">
-            AIchain — The Sovereign Global Value Maximizer &middot;
+            AIchain — open, local-first LLM routing. Routers optimize for providers; AIchain optimizes for you. &middot;
             <a href="https://github.com/filokloi/AIchain" target="_blank" rel="noopener">GitHub</a> &middot;
             <a href="https://filokloi.github.io/AIchain/" target="_blank" rel="noopener"
                 style="color: var(--neon-accent); font-weight: bold;">LIVE HUB</a> &middot;
@@ -1951,7 +1981,7 @@
             const hh = routingData.heavy_hitter;
             if (hh && hh.model && hh.model !== 'N/A') {
                 document.getElementById('heavyHitterBadge').textContent =
-                    `⚔ HEAVY HITTER: ${hh.model} (Intel: ${hh.intelligence})`;
+                    `⚡ TOP MODEL: ${hh.model} (Intel: ${hh.intelligence})`;
             }
 
             const h = routingData.routing_hierarchy;
