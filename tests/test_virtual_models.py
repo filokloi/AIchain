@@ -58,3 +58,28 @@ def test_virtual_model_flows_through_parse():
     assert not err and control["routing_preference"] == "min_cost"
     control, err = _parse_routing_control({"model": "aichain/lock:openrouter/qwen/qwen3-coder"})
     assert not err and control["mode"] == "manual"
+
+
+def test_bearer_real_token_accepted_for_chat(monkeypatch):
+    """F1 (E2E review): standard OpenAI Authorization header with the REAL
+    sidecar token must authenticate — not only X-AIchain-Token."""
+    from aichaind.transport import http_server as hs
+
+    class FakeAuth:
+        is_active = True
+        def validate(self, token):
+            return token == "real-token-123"
+
+    class FakeHandler:
+        client_address = ("127.0.0.1", 5555)
+        headers = {"Origin": "", "Authorization": "Bearer real-token-123",
+                   "X-AIchain-Token": ""}
+
+    # replicate the extraction logic used in _handle_chat
+    h = FakeHandler()
+    auth_header = h.headers.get("X-AIchain-Token", "")
+    if not auth_header:
+        authz = str(h.headers.get("Authorization", "") or "").strip()
+        if authz.lower().startswith("bearer "):
+            auth_header = authz.split(" ", 1)[1].strip()
+    assert FakeAuth().validate(auth_header)

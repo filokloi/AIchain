@@ -321,3 +321,29 @@ def test_budget_hard_stop_uses_daily_aggregate():
                                "Dokazi teoremu formalno i detaljno"}],
                     est_input_tokens=50_000, est_output_tokens=20_000)
     assert not any(s.path.path_type == PathType.PAY_AS_YOU_GO for s in chain)
+
+
+def test_routing_table_offline_cache_fallback(tmp_path, monkeypatch):
+    """F2 (E2E review): total fetch failure must fall back to the cached
+    table instead of degrading to zero catalog models."""
+    import logging
+    from aichaind.routing import table_sync
+
+    cache = tmp_path / "routing_table_cache.json"
+    log = logging.getLogger("test")
+
+    class FailingRequests:
+        @staticmethod
+        def get(*a, **k):
+            raise ConnectionError("network down")
+    monkeypatch.setattr(table_sync, "requests", FailingRequests)
+    monkeypatch.setattr(table_sync, "BASE_BACKOFF", 0)
+
+    # no cache yet -> None
+    assert table_sync.fetch_routing_table("http://x", log, cache_path=cache) is None
+
+    cache.write_text(json.dumps({"routing_hierarchy": [], "last_synopsis": "2026-07-11"}),
+                     encoding="utf-8")
+    table = table_sync.fetch_routing_table("http://x", log, cache_path=cache)
+    assert table is not None
+    assert table["_aichaind_cache_fallback"] is True

@@ -24,11 +24,17 @@ MAX_RETRIES = 3
 BASE_BACKOFF = 2
 
 
-def fetch_routing_table(url: str, log: logging.Logger, version_compat: dict = None) -> dict | None:
-    """Fetch, validate, and return routing table or None."""
+def fetch_routing_table(url: str, log: logging.Logger, version_compat: dict = None,
+                        cache_path=None) -> dict | None:
+    """Fetch, validate, and return routing table or None.
+
+    When `cache_path` is given, every successful fetch is mirrored to disk
+    and a total fetch failure falls back to that cached copy (offline-first:
+    a stale catalog beats no catalog; staleness is logged and the table is
+    marked `_aichaind_cache_fallback`)."""
     if not requests:
         log.error("'requests' not installed")
-        return None
+        return _load_cached_table(cache_path, log)
 
     for attempt in range(1, MAX_RETRIES + 1):
         try:
@@ -62,6 +68,7 @@ def fetch_routing_table(url: str, log: logging.Logger, version_compat: dict = No
                 f"Routing table OK: {data.get('total_models_analyzed', '?')} models, "
                 f"schema={contract.schema_version} mode={contract.compat_mode}"
             )
+            _write_cached_table(cache_path, data, log)
             return data
 
         except Exception as exc:
@@ -71,7 +78,39 @@ def fetch_routing_table(url: str, log: logging.Logger, version_compat: dict = No
                 time.sleep(wait)
 
     log.error("All fetch attempts exhausted")
-    return None
+    return _load_cached_table(cache_path, log)
+
+
+def _write_cached_table(cache_path, data: dict, log: logging.Logger) -> None:
+    if not cache_path:
+        return
+    try:
+        from pathlib import Path
+        p = Path(cache_path)
+        p.parent.mkdir(parents=True, exist_ok=True)
+        tmp = p.with_suffix(".tmp")
+        tmp.write_text(json.dumps(data), encoding="utf-8")
+        tmp.replace(p)
+    except Exception as exc:
+        log.warning(f"Could not cache routing table: {exc}")
+
+
+def _load_cached_table(cache_path, log: logging.Logger) -> dict | None:
+    if not cache_path:
+        return None
+    try:
+        from pathlib import Path
+        p = Path(cache_path)
+        if not p.exists():
+            return None
+        data = json.loads(p.read_text(encoding="utf-8"))
+        data["_aichaind_cache_fallback"] = True
+        synopsis = data.get("last_synopsis", "unknown age")
+        log.warning(f"Using CACHED routing table (offline fallback, synopsis={synopsis})")
+        return data
+    except Exception as exc:
+        log.warning(f"Cache fallback failed: {exc}")
+        return None
 
 
 def get_best_free_primary(table: dict) -> dict | None:

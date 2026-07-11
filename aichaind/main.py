@@ -101,7 +101,8 @@ def resolve_roles(cfg: dict, log: logging.Logger) -> tuple[dict, dict]:
         log.warning("No routing_url configured — using default roles")
         return roles, {}
 
-    table = fetch_routing_table(url, log, cfg.get("version_compat"))
+    cache_path = get_paths(cfg)["data_dir"] / "routing_table_cache.json"
+    table = fetch_routing_table(url, log, cfg.get("version_compat"), cache_path=cache_path)
     if not table or "routing_hierarchy" not in table:
         log.warning("Routing table unavailable — using default roles")
         return roles, table or {}

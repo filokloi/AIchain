@@ -325,7 +325,14 @@ class AichainDHandler(BaseHTTPRequestHandler):
                 _audit_logger.record_auth_failure(f"origin_rejected: {origin}")
             return
 
+        # Accept both the sidecar's private header and the standard
+        # OpenAI-style Authorization: Bearer <token> (harness compatibility:
+        # most OpenAI clients can only send a bearer key).
         auth_header = self.headers.get("X-AIchain-Token", "")
+        if not auth_header:
+            authz = str(self.headers.get("Authorization", "") or "").strip()
+            if authz.lower().startswith("bearer "):
+                auth_header = authz.split(" ", 1)[1].strip()
         trusted_openclaw_provider_bridge = _is_trusted_openclaw_provider_bridge(self)
         if (
             _auth_manager
