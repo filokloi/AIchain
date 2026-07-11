@@ -451,6 +451,25 @@
             background: var(--bg-secondary);
         }
 
+        /* ── Scrollbars in theme ── */
+        * { scrollbar-width: thin; scrollbar-color: var(--border-color) transparent; }
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: var(--bg-secondary); }
+        ::-webkit-scrollbar-thumb { background: var(--border-color); }
+        ::-webkit-scrollbar-thumb:hover { background: var(--neon-green); }
+        ::-webkit-scrollbar-corner { background: var(--bg-secondary); }
+
+        /* ── Fit table without horizontal scroll on desktop ── */
+        .table-wrapper { scrollbar-gutter: stable; }
+        table { table-layout: fixed; }
+        thead th:nth-child(1) { width: 52px; }
+        thead th:nth-child(2) { width: auto; min-width: 150px; }
+        thead th:nth-child(3), thead th:nth-child(4) { width: 90px; }
+        thead th:nth-child(5), thead th:nth-child(6), thead th:nth-child(7) { width: 86px; }
+        thead th:nth-child(8) { width: 94px; }
+        thead th:nth-child(9) { width: 70px; }
+        tbody td:nth-child(2) { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
         table {
             width: 100%;
             border-collapse: collapse;
@@ -458,11 +477,14 @@
         }
 
         thead th {
-            padding: 14px 16px;
+            position: sticky;
+            top: 0;
+            z-index: 2;
+            padding: 12px 10px;
             text-align: left;
             font-weight: 700;
             font-size: 0.68rem;
-            letter-spacing: 2px;
+            letter-spacing: 1px;
             text-transform: uppercase;
             color: var(--text-muted);
             background: var(--bg-surface);
@@ -2328,7 +2350,7 @@
                         ${metricBar(stab)}
                     </td>
                     <td class="cost-cell ${cost <= 0 ? 'cost-free' : 'cost-paid'}">
-                        ${cost <= 0 ? '$0.00' : '$' + cost.toFixed(6)}
+                        ${cost <= 0 ? 'FREE' : '$' + (cost * 1e6 >= 100 ? (cost * 1e6).toFixed(0) : (cost * 1e6).toFixed(2)) + '/M'}
                     </td>
                     <td class="value-score-cell">${valueScore >= 100 ? valueScore.toFixed(0) : valueScore.toFixed(1)}</td>
                 </tr>`;
@@ -2482,6 +2504,20 @@
         }
         function updateStatus(text, status) {
             document.getElementById('statusText').textContent = text;
+
+            // ── Freshness badge: red if catalog older than 24h ──
+            try {
+                const gen = text.indexOf('LIVE') !== -1 && routingRawData && (routingRawData.generated_at || routingRawData.last_synopsis);
+                if (gen) {
+                    const ageH = (Date.now() - new Date(gen).getTime()) / 3.6e6;
+                    if (ageH > 24) {
+                        document.getElementById('statusText').textContent =
+                            'STALE DATA — ' + (ageH > 48 ? Math.round(ageH / 24) + 'd' : Math.round(ageH) + 'h') + ' old';
+                        document.getElementById('statusDot').classList.add('offline');
+                    }
+                }
+            } catch (e) { /* freshness is advisory */ }
+
             const dot = document.getElementById('statusDot');
             const normalized = String(status || '').toUpperCase();
             const online = normalized !== 'OFFLINE' && normalized !== 'FAILED' && normalized !== 'ERROR';
