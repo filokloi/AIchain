@@ -79,6 +79,8 @@ def catalog_model_from_entry(entry: dict) -> Optional[CatalogModel]:
     if not model_id:
         return None
     raw = entry.get("raw_metrics", {}) or {}
+    if float(raw.get("prompt_cost", 0.0) or 0.0) < 0 or float(raw.get("completion_cost", 0.0) or 0.0) < 0:
+        return None  # sentinel (-1 = variable pricing): cost cannot be estimated deterministically
     tm = entry.get("task_metadata", {}) or {}
     scores = dict(tm.get("quality_by_task", {}) or {})
     scores.update(tm.get("taxonomy_scores", {}) or {})
@@ -112,12 +114,15 @@ class PomRouter:
         self._profile = profile_from_truth(self._truth)
         self._catalog: dict[str, CatalogModel] = {}
         self._by_provider: dict[str, list[CatalogModel]] = {}
+        self._by_source: dict[str, list[CatalogModel]] = {}
         for entry in (routing_table or {}).get("routing_hierarchy", []) or []:
             cm = catalog_model_from_entry(entry)
             if cm is None:
                 continue
             self._catalog[cm.model_id] = cm
             self._by_provider.setdefault(cm.provider, []).append(cm)
+            for source in (entry.get("source_attribution", {}) or {}).get("catalog", []) or []:
+                self._by_source.setdefault(str(source).lower(), []).append(cm)
         self._paths = self._build_paths()
         self._quota_initial = {id(p): p.quota_remaining for p in self._paths
                                if p.path_type == PathType.FREE_QUOTA}
@@ -142,7 +147,17 @@ class PomRouter:
         if model_id:
             cm = self._catalog.get(model_id)
             return [cm] if cm else []
-        return self._by_provider.get(provider.lower(), [])
+        provider = provider.lower()
+        direct = self._by_provider.get(provider, [])
+        # An aggregator credential (e.g. one OpenRouter key) reaches every
+        # model that aggregator lists, regardless of the model's own family.
+        via_source = self._by_source.get(provider, [])
+        seen, merged = set(), []
+        for cm in direct + via_source:
+            if cm.model_id not in seen:
+                merged.append(cm)
+                seen.add(cm.model_id)
+        return merged
 
     def _build_paths(self) -> list[AccessPath]:
         assets = self._truth.get("assets", {}) or {}

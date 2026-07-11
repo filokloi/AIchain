@@ -347,3 +347,29 @@ def test_routing_table_offline_cache_fallback(tmp_path, monkeypatch):
     table = table_sync.fetch_routing_table("http://x", log, cache_path=cache)
     assert table is not None
     assert table["_aichaind_cache_fallback"] is True
+
+
+def test_aggregator_key_unlocks_sourced_models():
+    """Hermes E2E prep finding: one OpenRouter key must reach every model the
+    aggregator lists, not only entries whose provider field is 'openrouter'."""
+    table = {"routing_hierarchy": [
+        {**_entry("deepseek/deepseek-v4-flash", "Deepseek", {"general_chat": 88}),
+         "source_attribution": {"catalog": ["openrouter"]}},
+        {**_entry("acme/private", "acme", {"general_chat": 90}),
+         "source_attribution": {"catalog": ["bridge"]}},
+    ]}
+    truth = {"version": 1, "profile": {"mode": "balanced"},
+             "assets": {"api_keys": [{"provider": "openrouter", "key_ref": "env:K"}]}}
+    r = PomRouter(table, truth)
+    ids = {p.model.model_id for p in r._paths}
+    assert "deepseek/deepseek-v4-flash" in ids   # unlocked via aggregator source
+    assert "acme/private" not in ids             # different source, no credential
+
+
+def test_sentinel_variable_pricing_excluded():
+    """OpenRouter uses -1 for variable pricing; such entries must not enter
+    the POM catalog with a nonsense negative cost."""
+    from aichaind.routing.pom_bridge import catalog_model_from_entry
+    e = _entry("openrouter/auto", "openrouter", {"general_chat": 80},
+               prompt_cost=-1, completion_cost=-1)
+    assert catalog_model_from_entry(e) is None
