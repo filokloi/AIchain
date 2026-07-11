@@ -74,7 +74,10 @@ jobs:
         run: |
           git config user.name "AIchain Bot"
           git config user.email "aichain-bot@users.noreply.github.com"
-          git add ai_routing_table.json catalog_manifest.json artifacts/provider_access_runtime.json
+          # provider_access_runtime.json is a runtime artifact: gitignored on
+          # purpose and shipped via the upload-artifact step above. Explicitly
+          # git-adding an ignored path exits 1 and killed the commit step.
+          git add ai_routing_table.json catalog_manifest.json
           if ! git diff --cached --quiet; then
             git commit -m "chore: update global routing table [$(date -u +%Y-%m-%dT%H:%M:%SZ)]"
             git push
