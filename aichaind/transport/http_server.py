@@ -2699,6 +2699,11 @@ def _provider_runtime_failure_reason(response) -> str:
         return "runtime_auth_failed:leaked_api_key"
     if "permission_denied" in error_text or "unauthorized" in error_text or "forbidden" in error_text:
         return "runtime_auth_failed:permission_denied"
+    if ("invalid api key" in error_text or "api key not valid" in error_text
+            or "pass a valid api key" in error_text or "api_key_invalid" in error_text):
+        # e.g. a subscription entry in OpenClaw config whose key is app-only or
+        # stale: the provider must be demoted so routing stops selecting it.
+        return "runtime_auth_failed:invalid_api_key"
     return ""
 
 
@@ -2727,6 +2732,14 @@ def _should_retry_provider_error(response) -> bool:
         "429", "quota", "rate limit", "rate_limit", "too many requests",
         "must be verified", "unauthorized", "forbidden", "insufficient",
         "billing", "credits", "not found", "unavailable", "timeout", "timed out",
+        # credential/config-class permanent errors: THIS provider cannot serve,
+        # but the chain can — e.g. Google "Please pass a valid API key"
+        # (subscription detected in OpenClaw config but the key is app-only or
+        # stale). Live Hermes E2E 2026-07-15 hit exactly this and got a 502
+        # instead of failing over to an authenticated aggregator.
+        "invalid api key", "api key not valid", "pass a valid api key",
+        "invalid_argument", "401", "permission denied", "authentication",
+        "api_key_invalid", "expired",
     )
     return any(token in error_text for token in retryable_tokens)
 
