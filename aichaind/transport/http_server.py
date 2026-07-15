@@ -1393,6 +1393,18 @@ def _build_openai_stream_frames(payload: dict) -> list[str]:
                 "finish_reason": None,
             }],
         })
+    # Routing transparency for streaming clients: mirror the _aichaind block
+    # (routed model, effective cost, failover chain) into a dedicated frame
+    # so harnesses/chat UIs can show it without a second request.
+    if isinstance(payload.get("_aichaind"), dict):
+        frames.append({
+            "id": chunk_id,
+            "object": "chat.completion.chunk",
+            "created": created,
+            "model": model,
+            "choices": [{"index": 0, "delta": {}, "finish_reason": None}],
+            "_aichaind": payload["_aichaind"],
+        })
     frames.append({
         "id": chunk_id,
         "object": "chat.completion.chunk",

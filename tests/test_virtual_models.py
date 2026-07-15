@@ -83,3 +83,27 @@ def test_bearer_real_token_accepted_for_chat(monkeypatch):
         if authz.lower().startswith("bearer "):
             auth_header = authz.split(" ", 1)[1].strip()
     assert FakeAuth().validate(auth_header)
+
+
+def test_stream_frames_carry_aichaind_metadata():
+    """Chat-app streaming integration: the fake-stream frame sequence must
+    mirror the _aichaind routing block before [DONE]."""
+    import json
+    from aichaind.transport.http_server import _build_openai_stream_frames
+    payload = {"model": "aichain/auto", "choices": [{"message": {"content": "zdravo svete"},
+                                                     "finish_reason": "stop"}],
+               "_aichaind": {"routed_model": "deepseek/deepseek-v4-flash",
+                             "estimated_cost_usd": 7.7e-05, "failover_used": True}}
+    frames = _build_openai_stream_frames(payload)
+    parsed = []
+    for f in frames:
+        for line in str(f).splitlines():
+            line = line.strip()
+            if line.startswith("data:") and "[DONE]" not in line:
+                parsed.append(json.loads(line[5:].strip()))
+            elif line.startswith("{"):
+                parsed.append(f if isinstance(f, dict) else json.loads(line))
+                break
+    meta_frames = [p for p in parsed if isinstance(p, dict) and p.get("_aichaind")]
+    assert meta_frames, "no frame carries _aichaind"
+    assert meta_frames[0]["_aichaind"]["routed_model"] == "deepseek/deepseek-v4-flash"
