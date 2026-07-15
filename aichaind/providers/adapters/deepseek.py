@@ -69,6 +69,21 @@ class DeepSeekAdapter(ProviderAdapter):
             return CompletionResponse(model=request.model, content="", error="circuit breaker open", status="error")
 
         model_name = self.format_model_id(request.model)
+
+        # ── Legacy alias migration (retired 2026-07-24 15:59 UTC) ──
+        # deepseek-chat  -> deepseek-v4-flash, thinking DISABLED (alias was non-thinking;
+        #                   V4 default is thinking-on, which would silently raise cost/latency)
+        # deepseek-reasoner -> deepseek-v4-flash, thinking ENABLED (like-for-like mapping
+        #                   per DeepSeek change log; v4-pro is an upgrade, not a rename)
+        _LEGACY_ALIASES = {
+            "deepseek-chat": ("deepseek-v4-flash", "disabled"),
+            "deepseek-reasoner": ("deepseek-v4-flash", "enabled"),
+        }
+        thinking_override = None
+        if model_name in _LEGACY_ALIASES:
+            model_name, thinking_override = _LEGACY_ALIASES[model_name]
+            log.warning(f"DeepSeek legacy alias migrated at adapter boundary -> {model_name} (thinking={thinking_override})")
+
         payload = {
             "model": model_name,
             "messages": request.messages,
@@ -76,6 +91,8 @@ class DeepSeekAdapter(ProviderAdapter):
             "temperature": request.temperature,
             "stream": False,
         }
+        if thinking_override:
+            payload["thinking"] = {"type": thinking_override}
 
         start_t = time.time()
         try:

@@ -1,7 +1,7 @@
 # AIchain — Stanje projekta i kontekst za nastavak
 
 > Za Cowork / bilo koju buduću Claude sesiju. Pročitaj OVO prvo, zatim dokumente po potrebi.
-> Datum stanja: 2026-07-09. Vlasnik: filokloi. Jezik komunikacije sa vlasnikom: srpski (ekavica, latinica).
+> Datum stanja: 2026-07-15. Vlasnik: filokloi. Jezik komunikacije sa vlasnikom: srpski (ekavica, latinica).
 
 ## 1. Vizija (jedna rečenica)
 Ruteri optimizuju za provajdere — AIchain optimizuje za korisnika: lokalni, besplatni ruter koji ukršta
@@ -55,15 +55,15 @@ GitHub Pages dashboard. `pom.py` je nov modul — još NIJE povezan na postojeć
 ## 5. Roadmap — sledeći ograničeni zadaci (redosled po prioritetu)
 Svaki zadatak = jedna sesija, sa kriterijumom prihvatanja. Ne raditi više odjednom.
 
-1. **DeepSeek alias migracija** (HITNO, rok 24.7.2026): grep `deepseek-chat|deepseek-reasoner` po
-   repou, zameniti aktuelnim ID-jevima. Prihvatanje: nijedan legacy alias u routing tabelama.
+1. ~~DeepSeek alias migracija~~ ✅ (adapter mapira deepseek-chat→v4-flash/no-thinking,
+   deepseek-reasoner→v4-flash/thinking; JSON artefakti se samoispravljaju kad pipeline proradi).
 2. **Integracija pom.py u aichaind runtime:** postojeća routing logika poziva `build_chain()`;
    `user_truth.json` se učitava i validira šemom (jsonschema). Prihvatanje: sidecar odgovara na
    zahtev kroz novi pipeline; postojeći testovi + test_pom prolaze.
-3. **Klasifikator zadataka:** tier 1 deterministički (attachments/tool schema/code fence/dužina),
+3. ~~Klasifikator zadataka~~ ✅ (aichaind/routing/task_classifier.py, tier1+tier2, testovi prolaze). Bilo:** tier 1 deterministički (attachments/tool schema/code fence/dužina),
    tier 2 embedding centroidi (lokalni model, opciono). Izlaz `(task_type, difficulty)`.
    Prihvatanje: ≥85% tačnost na ručnom test setu od 50 primera (napraviti ga).
-4. **Metodologija ↔ arbitrator usklađivanje:** ili kod prati METHODOLOGY.md ili se dokument
+4. ~~Metodologija ↔ arbitrator~~ ✅ (METHODOLOGY §4 = stvarna SCORING_WEIGHTS formula). Bilo:** ili kod prati METHODOLOGY.md ili se dokument
    koriguje. Prihvatanje: svaki broj u manifestu izvodljiv iz dokumenta.
 5. **Cache-aware trošak + histereza u živom ruteru** (formula već u pom.py — samo povezati telemetriju).
 6. **LLMLingua-2 kompresija** (3 tačke ubacivanja iz OPTIMIZATIONS §2, off by default).
@@ -78,3 +78,8 @@ Svaki zadatak = jedna sesija, sa kriterijumom prihvatanja. Ne raditi više odjed
 - Ne dirati: API ključeve, config sa tajnama, SubvencijeRadar (odvojen projekat, izolovan namerno).
 - Srpsko tržište: bez Stripe-a; ako ikad zatreba naplata — Lemon Squeezy/Gumroad (ali v. MANIFEST:
   AIchain sam po sebi ostaje besplatan).
+
+## 7. Status dnevnik
+- 2026-07-15: ai_cycle re-enabled (bio disabled_inactivity); notify korak dobio issues:write;
+  sajt: scrollbar/tabela/freshness badge; chat: Clear all data. BLOKIRANO na: OPENROUTER_KEY
+  secret (vlasnik dodaje ručno) → potom re-run pipeline-a → svežina se vraća.
