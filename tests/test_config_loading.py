@@ -57,3 +57,21 @@ def test_load_config_uses_base_only_when_override_missing(monkeypatch, tmp_path:
 
     assert cfg['local_execution']['enabled'] is False
     assert cfg['_config_sources'] == [str(base)]
+
+
+def test_frozen_bundled_config_fallback(tmp_path, monkeypatch):
+    """Packaging (release.yml): a PyInstaller onefile binary must find the
+    bundled config/default.json via sys._MEIPASS."""
+    import sys
+    from aichaind.core.state_machine import _frozen_bundled_config
+
+    # not frozen -> no fallback
+    assert _frozen_bundled_config() is None
+
+    bundle = tmp_path / "config"
+    bundle.mkdir()
+    (bundle / "default.json").write_text("{}", encoding="utf-8")
+    monkeypatch.setattr(sys, "frozen", True, raising=False)
+    monkeypatch.setattr(sys, "_MEIPASS", str(tmp_path), raising=False)
+    found = _frozen_bundled_config()
+    assert found is not None and found.name == "default.json"

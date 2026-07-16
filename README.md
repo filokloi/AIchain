@@ -31,6 +31,14 @@ The target outcome is simple:
 
 ---
 
+## Quickstart
+
+**Windows:** `irm https://raw.githubusercontent.com/filokloi/AIchain/main/scripts/get-aichain.ps1 | iex`
+**Linux/macOS:** `curl -fsSL https://raw.githubusercontent.com/filokloi/AIchain/main/scripts/get-aichain.sh | bash`
+**No Python?** Grab a standalone binary from [Releases](https://github.com/filokloi/AIchain/releases/latest).
+Then point any OpenAI-compatible app at `http://127.0.0.1:8080/v1` with model `aichain/auto`.
+Full guide: **[docs/GETTING_STARTED.md](docs/GETTING_STARTED.md)**
+
 ## Current State
 
 Today the repository publishes two feed formats:

@@ -1,0 +1,49 @@
+name: "Release — standalone binaries"
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        include:
+          - os: windows-latest
+            artifact: aichaind-windows.exe
+            pyi_sep: ";"
+          - os: ubuntu-latest
+            artifact: aichaind-linux
+            pyi_sep: ":"
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install
+        run: |
+          pip install -e . pyinstaller
+      - name: Smoke tests
+        run: python -m pytest tests/test_pom.py tests/test_config_loading.py -q
+      - name: Build standalone binary
+        run: >-
+          pyinstaller --onefile --name ${{ matrix.artifact }}
+          --add-data "config${{ matrix.pyi_sep }}config"
+          --collect-submodules aichaind
+          aichaind/main.py
+      - name: Attach to release
+        uses: softprops/action-gh-release@v2
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: dist/${{ matrix.artifact }}*
+      - name: Upload artifact (manual runs)
+        if: "!startsWith(github.ref, 'refs/tags/')"
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact }}
+          path: dist/${{ matrix.artifact }}*

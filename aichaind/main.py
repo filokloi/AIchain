@@ -312,6 +312,25 @@ def _bootstrap_runtime_state(
         log.exception("Runtime bootstrap failed")
 
 
+def _print_connect_box(port: int, token_file) -> None:
+    """First-run friendliness: everything a person needs to connect any
+    OpenAI-compatible app, in one copy-paste box."""
+    try:
+        token = token_file.read_text(encoding="utf-8").strip()
+    except OSError:
+        token = f"<sadrzaj fajla {token_file}>"
+    print("\n" + "=" * 62)
+    print("  AIchain ruter RADI — poveži bilo koju aplikaciju:")
+    print("=" * 62)
+    print(f"  Base URL : http://127.0.0.1:{port}/v1")
+    print(f"  API key  : {token}")
+    print("  Model    : aichain/auto   (ili /economy /power /local)")
+    print("-" * 62)
+    print(f"  Token fajl: {token_file}")
+    print("  Zaustavljanje: Ctrl+C u ovom prozoru")
+    print("=" * 62 + "\n")
+
+
 def main():
     """Boot the aichaind sidecar daemon."""
     print(BANNER)
@@ -449,6 +468,7 @@ def main():
         operator_metrics=operator_metrics,
         lingua_compressor=lingua_compressor,
     )
+    _print_connect_box(port, paths["auth_token_file"])
 
     bootstrap_thread = threading.Thread(
         target=_bootstrap_runtime_state,

@@ -21,6 +21,7 @@ Circuit Breaker:
 import json
 import hashlib
 import os
+import sys
 import copy
 import shutil
 import tempfile
@@ -72,11 +73,24 @@ def _default_override_path() -> Path:
     return resolve_path("~/.openclaw/aichain/config.local.json")
 
 
+def _frozen_bundled_config() -> Path | None:
+    """Standalone binary (PyInstaller onefile): bundled data is unpacked to
+    sys._MEIPASS. Returns the bundled default config or None."""
+    if not getattr(sys, "frozen", False):
+        return None
+    bundled = Path(getattr(sys, "_MEIPASS", "")) / "config" / "default.json"
+    return bundled if bundled.exists() else None
+
+
 def load_config(config_path: Path = None) -> dict:
     """Load unified config file (JSON) plus optional user-local override."""
     if config_path is None:
         # Default: look in config/ relative to repo root
         config_path = Path(__file__).resolve().parent.parent.parent / "config" / "default.json"
+        if not config_path.exists():
+            bundled = _frozen_bundled_config()
+            if bundled is not None:
+                config_path = bundled
         if not config_path.exists():
             # Fallback: legacy bridge_config.json
             config_path = Path(__file__).resolve().parent.parent.parent / "ai-chain-skill" / "bridge_config.json"
