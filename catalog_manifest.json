@@ -2,8 +2,8 @@
   "schema_version": "5.0.0",
   "manifest_type": "aichain.catalog",
   "system_status": "OPERATIONAL",
-  "last_synopsis": "2026-07-18T02:52:09.265077+00:00",
-  "generated_at": "2026-07-18T02:52:09.589731+00:00",
+  "last_synopsis": "2026-07-18T13:26:14.326969+00:00",
+  "generated_at": "2026-07-18T13:26:14.684677+00:00",
   "planes": {
     "global": {
       "kind": "catalog",
@@ -44,7 +44,7 @@
     "scope": "GLOBAL_NON_DISCRIMINATORY",
     "philosophy": "Maximum Intelligence, Speed, and Stability at the Lowest Sustainable Cost.",
     "legacy_feed_version": "4.1-control-plane",
-    "feed_checksum": "d2918edd65990c40",
+    "feed_checksum": "302deefda2939fea",
     "total_models_analyzed": 341,
     "self_hostable_models": 63,
     "data_sources": {
@@ -72,10 +72,10 @@
         "fetched_records": 344,
         "accepted_records": 344,
         "coverage": 1.0,
-        "latency_ms": 89,
+        "latency_ms": 80,
         "issues": [],
         "warnings": [],
-        "snapshot_path": "/home/runner/work/AIchain/AIchain/artifacts/source_snapshots/20260718T025207Z/openrouter.json"
+        "snapshot_path": "/home/runner/work/AIchain/AIchain/artifacts/source_snapshots/20260718T132612Z/openrouter.json"
       },
       "lmsys": {
         "name": "lmsys",
@@ -84,7 +84,7 @@
         "fetched_records": 67,
         "accepted_records": 67,
         "coverage": 1.0,
-        "latency_ms": 66,
+        "latency_ms": 71,
         "issues": [
           "legacy JSON unavailable: 404 Client Error: Not Found for url: https://huggingface.co/spaces/lmarena-ai/arena-leaderboard/resolve/main/results/latest/elo_results_full.json"
         ],
@@ -92,7 +92,7 @@
           "pickle parse failed: No module named 'pandas'",
           "used MT-bench CSV surrogate because canonical Arena Elo sources were unavailable"
         ],
-        "snapshot_path": "/home/runner/work/AIchain/AIchain/artifacts/source_snapshots/20260718T025207Z/lmsys.json"
+        "snapshot_path": "/home/runner/work/AIchain/AIchain/artifacts/source_snapshots/20260718T132612Z/lmsys.json"
       },
       "artificial_analysis": {
         "name": "artificial_analysis",
@@ -101,10 +101,10 @@
         "fetched_records": 576,
         "accepted_records": 576,
         "coverage": 1.0,
-        "latency_ms": 281,
+        "latency_ms": 256,
         "issues": [],
         "warnings": [],
-        "snapshot_path": "/home/runner/work/AIchain/AIchain/artifacts/source_snapshots/20260718T025207Z/artificial_analysis.json"
+        "snapshot_path": "/home/runner/work/AIchain/AIchain/artifacts/source_snapshots/20260718T132612Z/artificial_analysis.json"
       }
     },
     "degradation_reasons": [],
@@ -1782,58 +1782,11 @@
         ]
       },
       {
-        "model": "google/gemma-4-31b-it",
-        "display_name": "Google: Gemma 4 31B",
-        "family_id": "google/gemma-4-31b-it",
-        "family": "Gemma",
-        "rank": 44,
-        "provider": "Google",
-        "tier": "HEAVY_HITTER",
-        "task_label": "LONG-CONTEXT",
-        "context_length": 262144,
-        "metrics": {
-          "intelligence": 95,
-          "speed": 52,
-          "stability": 86,
-          "availability": 85,
-          "context": 53,
-          "task_fit": 83,
-          "cost_efficiency": 100,
-          "cost": 3.9e-07
-        },
-        "hosting_modes": [
-          "cloud_api",
-          "self_hosted"
-        ],
-        "download_sources": [
-          "huggingface",
-          "ollama",
-          "lmstudio"
-        ],
-        "preferred_runtimes": [
-          "ollama",
-          "lmstudio",
-          "llamacpp"
-        ],
-        "quantizations_known": [
-          "BF16",
-          "Q3_K_M",
-          "Q4_K_M",
-          "Q5_K_M"
-        ],
-        "parameter_scale_billions": 31.0,
-        "hardware_profile_hint": "32gb_plus_recommended",
-        "self_hosting_notes": "Gemma family is well suited for compact self-hosted deployments and consumer hardware tiers.",
-        "benchmark_evidence_sources": [
-          "openrouter_catalog"
-        ]
-      },
-      {
         "model": "google/gemma-4-26b-a4b-it",
         "display_name": "Google: Gemma 4 26B A4B ",
         "family_id": "google/gemma-4-26b-a4b-it",
         "family": "Gemma",
-        "rank": 46,
+        "rank": 45,
         "provider": "Google",
         "tier": "HEAVY_HITTER",
         "task_label": "LONG-CONTEXT",
@@ -1880,7 +1833,7 @@
         "display_name": "DeepSeek: R1 0528",
         "family_id": "deepseek/deepseek-r1-0528",
         "family": "DeepSeek",
-        "rank": 53,
+        "rank": 52,
         "provider": "Deepseek",
         "tier": "HEAVY_HITTER",
         "task_label": "LONG-CONTEXT",
@@ -1920,6 +1873,53 @@
         "benchmark_evidence_sources": [
           "openrouter_catalog",
           "curated_benchmark_map"
+        ]
+      },
+      {
+        "model": "google/gemma-4-31b-it",
+        "display_name": "Google: Gemma 4 31B",
+        "family_id": "google/gemma-4-31b-it",
+        "family": "Gemma",
+        "rank": 56,
+        "provider": "Google",
+        "tier": "HEAVY_HITTER",
+        "task_label": "LONG-CONTEXT",
+        "context_length": 262144,
+        "metrics": {
+          "intelligence": 95,
+          "speed": 36,
+          "stability": 86,
+          "availability": 85,
+          "context": 53,
+          "task_fit": 83,
+          "cost_efficiency": 100,
+          "cost": 2.4e-07
+        },
+        "hosting_modes": [
+          "cloud_api",
+          "self_hosted"
+        ],
+        "download_sources": [
+          "huggingface",
+          "ollama",
+          "lmstudio"
+        ],
+        "preferred_runtimes": [
+          "ollama",
+          "lmstudio",
+          "llamacpp"
+        ],
+        "quantizations_known": [
+          "BF16",
+          "Q3_K_M",
+          "Q4_K_M",
+          "Q5_K_M"
+        ],
+        "parameter_scale_billions": 31.0,
+        "hardware_profile_hint": "32gb_plus_recommended",
+        "self_hosting_notes": "Gemma family is well suited for compact self-hosted deployments and consumer hardware tiers.",
+        "benchmark_evidence_sources": [
+          "openrouter_catalog"
         ]
       },
       {
@@ -3922,7 +3922,7 @@
         "display_name": "Qwen: Qwen3 14B",
         "family_id": "qwen/qwen3-14b",
         "family": "Qwen",
-        "rank": 324,
+        "rank": 326,
         "provider": "Qwen",
         "tier": "HEAVY_HITTER",
         "task_label": "LONG-CONTEXT",
@@ -3934,8 +3934,8 @@
           "availability": 93,
           "context": 44,
           "task_fit": 26,
-          "cost_efficiency": 100,
-          "cost": 1.8e-07
+          "cost_efficiency": 99,
+          "cost": 5.7e-07
         },
         "hosting_modes": [
           "cloud_api",
@@ -4439,7 +4439,7 @@
         "completion_cost": 1.5e-05,
         "average_cost": 9e-06,
         "aa_quality": 47.2,
-        "aa_speed": 63.92,
+        "aa_speed": 58.485,
         "lmsys_elo": null,
         "openrouter_speed_hint": 64000.0,
         "source_count": 2,
@@ -4731,7 +4731,7 @@
         "completion_cost": 8e-06,
         "average_cost": 4.9999999999999996e-06,
         "aa_quality": 19.4,
-        "aa_speed": 98.806,
+        "aa_speed": 98.429,
         "lmsys_elo": null,
         "openrouter_speed_hint": 32768.0,
         "source_count": 2,
@@ -4876,7 +4876,7 @@
         "completion_cost": 4.4e-06,
         "average_cost": 2.75e-06,
         "aa_quality": 25.6,
-        "aa_speed": 161.752,
+        "aa_speed": 159.415,
         "lmsys_elo": null,
         "openrouter_speed_hint": 100000.0,
         "source_count": 2,
@@ -5021,7 +5021,7 @@
         "completion_cost": 1e-05,
         "average_cost": 5.625e-06,
         "aa_quality": 25.8,
-        "aa_speed": 129.227,
+        "aa_speed": 128.355,
         "lmsys_elo": null,
         "openrouter_speed_hint": 65536.0,
         "source_count": 2,
@@ -5166,7 +5166,7 @@
         "completion_cost": 8e-05,
         "average_cost": 5e-05,
         "aa_quality": 32.5,
-        "aa_speed": 31.688,
+        "aa_speed": 29.143,
         "lmsys_elo": null,
         "openrouter_speed_hint": 100000.0,
         "source_count": 2,
@@ -7971,7 +7971,7 @@
         "completion_cost": 0.0,
         "average_cost": 0.0,
         "aa_quality": 41.2,
-        "aa_speed": 47.542,
+        "aa_speed": 47.452,
         "lmsys_elo": null,
         "openrouter_speed_hint": 262144.0,
         "source_count": 2,
@@ -8264,7 +8264,7 @@
         "completion_cost": 0.0,
         "average_cost": 0.0,
         "aa_quality": 19.8,
-        "aa_speed": 89.935,
+        "aa_speed": 98.97,
         "lmsys_elo": null,
         "openrouter_speed_hint": 64000.0,
         "source_count": 2,
@@ -8405,7 +8405,7 @@
         "completion_cost": 0.0,
         "average_cost": 0.0,
         "aa_quality": 18.0,
-        "aa_speed": 52.261,
+        "aa_speed": 53.794,
         "lmsys_elo": null,
         "openrouter_speed_hint": 262000.0,
         "source_count": 2,
@@ -8559,7 +8559,7 @@
         "completion_cost": 0.0,
         "average_cost": 0.0,
         "aa_quality": 25.4,
-        "aa_speed": 148.06,
+        "aa_speed": 148.731,
         "lmsys_elo": null,
         "openrouter_speed_hint": 262144.0,
         "source_count": 2,
@@ -8852,7 +8852,7 @@
         "completion_cost": 0.0,
         "average_cost": 0.0,
         "aa_quality": 13.7,
-        "aa_speed": 185.104,
+        "aa_speed": 187.02,
         "lmsys_elo": null,
         "openrouter_speed_hint": null,
         "source_count": 2,
@@ -9007,7 +9007,7 @@
         "completion_cost": 0.0,
         "average_cost": 0.0,
         "aa_quality": 14.9,
-        "aa_speed": 328.143,
+        "aa_speed": 330.447,
         "lmsys_elo": null,
         "openrouter_speed_hint": 65536.0,
         "source_count": 2,
@@ -9159,7 +9159,7 @@
         "completion_cost": 0.0,
         "average_cost": 0.0,
         "aa_quality": 14.2,
-        "aa_speed": 155.301,
+        "aa_speed": 167.408,
         "lmsys_elo": null,
         "openrouter_speed_hint": null,
         "source_count": 2,
@@ -10466,166 +10466,6 @@
       "rank": 43
     },
     {
-      "model": "google/gemma-4-31b-it",
-      "family_id": "google/gemma-4-31b-it",
-      "provider": "Google",
-      "display_name": "Google: Gemma 4 31B",
-      "source_attribution": {
-        "catalog": [
-          "openrouter"
-        ],
-        "intelligence": "heuristic",
-        "speed": "openrouter",
-        "pricing": "openrouter",
-        "context_length": "openrouter",
-        "merge_priority": {
-          "intelligence": [
-            "benchmark",
-            "artificial_analysis",
-            "lmsys",
-            "helper",
-            "heuristic"
-          ],
-          "speed": [
-            "artificial_analysis",
-            "openrouter",
-            "heuristic"
-          ],
-          "context_length": [
-            "openrouter",
-            "bridge"
-          ],
-          "pricing": [
-            "openrouter",
-            "bridge"
-          ]
-        }
-      },
-      "raw_metrics": {
-        "intelligence_base": 95,
-        "context_length": 262144,
-        "prompt_cost": 2.2e-07,
-        "completion_cost": 5.5e-07,
-        "average_cost": 3.85e-07,
-        "aa_quality": null,
-        "aa_speed": null,
-        "lmsys_elo": null,
-        "openrouter_speed_hint": 262144.0,
-        "source_count": 1,
-        "availability_hint": 85,
-        "stability_hint": 86
-      },
-      "task_metadata": {
-        "quality_by_task": {
-          "coding": 91,
-          "reasoning": 95,
-          "vision": 18,
-          "long_context": 100,
-          "extraction": 93,
-          "structured_output": 83,
-          "general_chat": 90,
-          "tool_agent_compatibility": 93
-        },
-        "taxonomy_scores": {
-          "chat_casual": 90,
-          "creative_writing": 91,
-          "knowledge": 92,
-          "legal_formal": 94,
-          "coding": 91,
-          "agentic_tool_use": 93,
-          "vision_ocr": 33,
-          "vision_reasoning": 41,
-          "math_logic": 95,
-          "translation_language": 91
-        },
-        "supported": [
-          "coding",
-          "extraction",
-          "general_chat",
-          "long_context",
-          "reasoning",
-          "structured_output",
-          "tool_agent_compatibility"
-        ],
-        "primary": [
-          "long_context",
-          "reasoning",
-          "extraction"
-        ],
-        "coverage_score": 82.88,
-        "confidence": 0.68,
-        "helper_enriched": false,
-        "provider_family": "Google"
-      },
-      "helper_metadata": {
-        "helper_tasks_applied": []
-      },
-      "self_hosting": {
-        "self_hostable": true,
-        "open_weight": true,
-        "family": "Gemma",
-        "hosting_modes": [
-          "cloud_api",
-          "self_hosted"
-        ],
-        "download_sources": [
-          "huggingface",
-          "ollama",
-          "lmstudio"
-        ],
-        "preferred_runtimes": [
-          "ollama",
-          "lmstudio",
-          "llamacpp"
-        ],
-        "quantizations_known": [
-          "BF16",
-          "Q3_K_M",
-          "Q4_K_M",
-          "Q5_K_M"
-        ],
-        "parameter_scale_billions": 31.0,
-        "hardware_profile_hint": "32gb_plus_recommended",
-        "self_hosting_notes": "Gemma family is well suited for compact self-hosted deployments and consumer hardware tiers.",
-        "benchmark_evidence_sources": [
-          "openrouter_catalog"
-        ]
-      },
-      "normalized_metrics": {
-        "intelligence": 95.0,
-        "speed": 52.04,
-        "stability": 86.0,
-        "availability": 85.0,
-        "context": 53.32,
-        "task_fit": 82.88,
-        "cost_efficiency": 99.6
-      },
-      "metrics": {
-        "intelligence": 95,
-        "speed": 52,
-        "stability": 86,
-        "availability": 85,
-        "context": 53,
-        "task_fit": 83,
-        "cost_efficiency": 100,
-        "cost": 3.9e-07
-      },
-      "tier": "HEAVY_HITTER",
-      "task_label": "LONG-CONTEXT",
-      "geopolitical_risk": "LOW",
-      "score_breakdown": {
-        "intelligence": 28.5,
-        "speed": 7.29,
-        "stability": 13.76,
-        "cost_efficiency": 17.93,
-        "availability": 8.5,
-        "context": 3.2,
-        "task_fit": 4.97
-      },
-      "value_score": 84.14,
-      "rank": 44
-    },
-    {
       "model": "openai/gpt-5-mini",
       "family_id": "openai/gpt-5-mini",
       "provider": "Openai",
@@ -10770,7 +10610,7 @@
         "task_fit": 4.86
       },
       "value_score": 84.06,
-      "rank": 45
+      "rank": 44
     },
     {
       "model": "google/gemma-4-26b-a4b-it",
@@ -10930,7 +10770,7 @@
         "task_fit": 4.97
       },
       "value_score": 84.03,
-      "rank": 46
+      "rank": 45
     },
     {
       "model": "openai/o4-mini-high",
@@ -11077,7 +10917,7 @@
         "task_fit": 5.04
       },
       "value_score": 84.03,
-      "rank": 47
+      "rank": 46
     },
     {
       "model": "mistralai/mistral-large-2407",
@@ -11223,7 +11063,7 @@
         "task_fit": 4.58
       },
       "value_score": 83.06,
-      "rank": 48
+      "rank": 47
     },
     {
       "model": "openai/o3-mini-high",
@@ -11370,7 +11210,7 @@
         "task_fit": 4.9
       },
       "value_score": 82.69,
-      "rank": 49
+      "rank": 48
     },
     {
       "model": "anthropic/claude-haiku-4.5",
@@ -11517,7 +11357,7 @@
         "task_fit": 4.86
       },
       "value_score": 82.63,
-      "rank": 50
+      "rank": 49
     },
     {
       "model": "nousresearch/hermes-4-70b",
@@ -11662,7 +11502,7 @@
         "task_fit": 4.69
       },
       "value_score": 82.46,
-      "rank": 51
+      "rank": 50
     },
     {
       "model": "openai/gpt-5.6-luna-pro",
@@ -11808,7 +11648,7 @@
         "task_fit": 4.64
       },
       "value_score": 82.36,
-      "rank": 52
+      "rank": 51
     },
     {
       "model": "deepseek/deepseek-r1-0528",
@@ -11967,7 +11807,7 @@
         "task_fit": 4.81
       },
       "value_score": 82.25,
-      "rank": 53
+      "rank": 52
     },
     {
       "model": "nousresearch/hermes-4-405b",
@@ -12112,7 +11952,7 @@
         "task_fit": 4.69
       },
       "value_score": 82.15,
-      "rank": 54
+      "rank": 53
     },
     {
       "model": "mistralai/mistral-large-2512",
@@ -12256,7 +12096,7 @@
         "task_fit": 4.36
       },
       "value_score": 82.11,
-      "rank": 55
+      "rank": 54
     },
     {
       "model": "openai/gpt-4.1-mini",
@@ -12403,6 +12243,166 @@
         "task_fit": 4.76
       },
       "value_score": 82.08,
+      "rank": 55
+    },
+    {
+      "model": "google/gemma-4-31b-it",
+      "family_id": "google/gemma-4-31b-it",
+      "provider": "Google",
+      "display_name": "Google: Gemma 4 31B",
+      "source_attribution": {
+        "catalog": [
+          "openrouter"
+        ],
+        "intelligence": "heuristic",
+        "speed": "openrouter",
+        "pricing": "openrouter",
+        "context_length": "openrouter",
+        "merge_priority": {
+          "intelligence": [
+            "benchmark",
+            "artificial_analysis",
+            "lmsys",
+            "helper",
+            "heuristic"
+          ],
+          "speed": [
+            "artificial_analysis",
+            "openrouter",
+            "heuristic"
+          ],
+          "context_length": [
+            "openrouter",
+            "bridge"
+          ],
+          "pricing": [
+            "openrouter",
+            "bridge"
+          ]
+        }
+      },
+      "raw_metrics": {
+        "intelligence_base": 95,
+        "context_length": 262144,
+        "prompt_cost": 1.2e-07,
+        "completion_cost": 3.7e-07,
+        "average_cost": 2.45e-07,
+        "aa_quality": null,
+        "aa_speed": null,
+        "lmsys_elo": null,
+        "openrouter_speed_hint": 16384.0,
+        "source_count": 1,
+        "availability_hint": 85,
+        "stability_hint": 86
+      },
+      "task_metadata": {
+        "quality_by_task": {
+          "coding": 91,
+          "reasoning": 95,
+          "vision": 18,
+          "long_context": 100,
+          "extraction": 93,
+          "structured_output": 83,
+          "general_chat": 90,
+          "tool_agent_compatibility": 93
+        },
+        "taxonomy_scores": {
+          "chat_casual": 90,
+          "creative_writing": 91,
+          "knowledge": 92,
+          "legal_formal": 94,
+          "coding": 91,
+          "agentic_tool_use": 93,
+          "vision_ocr": 33,
+          "vision_reasoning": 41,
+          "math_logic": 95,
+          "translation_language": 91
+        },
+        "supported": [
+          "coding",
+          "extraction",
+          "general_chat",
+          "long_context",
+          "reasoning",
+          "structured_output",
+          "tool_agent_compatibility"
+        ],
+        "primary": [
+          "long_context",
+          "reasoning",
+          "extraction"
+        ],
+        "coverage_score": 82.88,
+        "confidence": 0.68,
+        "helper_enriched": false,
+        "provider_family": "Google"
+      },
+      "helper_metadata": {
+        "helper_tasks_applied": []
+      },
+      "self_hosting": {
+        "self_hostable": true,
+        "open_weight": true,
+        "family": "Gemma",
+        "hosting_modes": [
+          "cloud_api",
+          "self_hosted"
+        ],
+        "download_sources": [
+          "huggingface",
+          "ollama",
+          "lmstudio"
+        ],
+        "preferred_runtimes": [
+          "ollama",
+          "lmstudio",
+          "llamacpp"
+        ],
+        "quantizations_known": [
+          "BF16",
+          "Q3_K_M",
+          "Q4_K_M",
+          "Q5_K_M"
+        ],
+        "parameter_scale_billions": 31.0,
+        "hardware_profile_hint": "32gb_plus_recommended",
+        "self_hosting_notes": "Gemma family is well suited for compact self-hosted deployments and consumer hardware tiers.",
+        "benchmark_evidence_sources": [
+          "openrouter_catalog"
+        ]
+      },
+      "normalized_metrics": {
+        "intelligence": 95.0,
+        "speed": 36.06,
+        "stability": 86.0,
+        "availability": 85.0,
+        "context": 53.32,
+        "task_fit": 82.88,
+        "cost_efficiency": 99.75
+      },
+      "metrics": {
+        "intelligence": 95,
+        "speed": 36,
+        "stability": 86,
+        "availability": 85,
+        "context": 53,
+        "task_fit": 83,
+        "cost_efficiency": 100,
+        "cost": 2.4e-07
+      },
+      "tier": "HEAVY_HITTER",
+      "task_label": "LONG-CONTEXT",
+      "geopolitical_risk": "LOW",
+      "score_breakdown": {
+        "intelligence": 28.5,
+        "speed": 5.05,
+        "stability": 13.76,
+        "cost_efficiency": 17.95,
+        "availability": 8.5,
+        "context": 3.2,
+        "task_fit": 4.97
+      },
+      "value_score": 81.93,
       "rank": 56
     },
     {
@@ -18430,7 +18430,7 @@
         "completion_cost": 1e-05,
         "average_cost": 5.625e-06,
         "aa_quality": 58.9,
-        "aa_speed": 65.519,
+        "aa_speed": 65.474,
         "lmsys_elo": null,
         "openrouter_speed_hint": 128000.0,
         "source_count": 2,
@@ -22522,7 +22522,7 @@
         "completion_cost": 8.7e-07,
         "average_cost": 6.525e-07,
         "aa_quality": 44.3,
-        "aa_speed": 60.592,
+        "aa_speed": 60.1,
         "lmsys_elo": null,
         "openrouter_speed_hint": 384000.0,
         "source_count": 2,
@@ -24551,7 +24551,7 @@
         "completion_cost": 1.96e-07,
         "average_cost": 1.47e-07,
         "aa_quality": 40.3,
-        "aa_speed": 98.14,
+        "aa_speed": 97.948,
         "lmsys_elo": null,
         "openrouter_speed_hint": null,
         "source_count": 2,
@@ -31161,6 +31161,147 @@
       "rank": 184
     },
     {
+      "model": "z-ai/glm-5.2",
+      "family_id": "z-ai/glm-5.2",
+      "provider": "Z Ai",
+      "display_name": "Z.ai: GLM 5.2",
+      "source_attribution": {
+        "catalog": [
+          "openrouter"
+        ],
+        "intelligence": "heuristic",
+        "speed": "openrouter",
+        "pricing": "openrouter",
+        "context_length": "openrouter",
+        "merge_priority": {
+          "intelligence": [
+            "benchmark",
+            "artificial_analysis",
+            "lmsys",
+            "helper",
+            "heuristic"
+          ],
+          "speed": [
+            "artificial_analysis",
+            "openrouter",
+            "heuristic"
+          ],
+          "context_length": [
+            "openrouter",
+            "bridge"
+          ],
+          "pricing": [
+            "openrouter",
+            "bridge"
+          ]
+        }
+      },
+      "raw_metrics": {
+        "intelligence_base": 68,
+        "context_length": 1048576,
+        "prompt_cost": 2.968e-07,
+        "completion_cost": 9.328e-07,
+        "average_cost": 6.148e-07,
+        "aa_quality": null,
+        "aa_speed": null,
+        "lmsys_elo": null,
+        "openrouter_speed_hint": 131072.0,
+        "source_count": 1,
+        "availability_hint": 75,
+        "stability_hint": 78
+      },
+      "task_metadata": {
+        "quality_by_task": {
+          "coding": 64,
+          "reasoning": 68,
+          "vision": 18,
+          "long_context": 100,
+          "extraction": 74,
+          "structured_output": 46,
+          "general_chat": 66,
+          "tool_agent_compatibility": 57
+        },
+        "taxonomy_scores": {
+          "chat_casual": 66,
+          "creative_writing": 66,
+          "knowledge": 67,
+          "legal_formal": 70,
+          "coding": 64,
+          "agentic_tool_use": 57,
+          "vision_ocr": 29,
+          "vision_reasoning": 33,
+          "math_logic": 68,
+          "translation_language": 68
+        },
+        "supported": [
+          "extraction",
+          "long_context"
+        ],
+        "primary": [
+          "long_context",
+          "extraction",
+          "reasoning"
+        ],
+        "coverage_score": 61.62,
+        "confidence": 0.68,
+        "helper_enriched": false,
+        "provider_family": "Z Ai"
+      },
+      "helper_metadata": {
+        "helper_tasks_applied": []
+      },
+      "self_hosting": {
+        "self_hostable": false,
+        "open_weight": false,
+        "family": null,
+        "hosting_modes": [
+          "cloud_api"
+        ],
+        "download_sources": [],
+        "preferred_runtimes": [],
+        "quantizations_known": [],
+        "parameter_scale_billions": null,
+        "hardware_profile_hint": null,
+        "self_hosting_notes": null,
+        "benchmark_evidence_sources": [
+          "openrouter_catalog"
+        ]
+      },
+      "normalized_metrics": {
+        "intelligence": 68.0,
+        "speed": 43.52,
+        "stability": 78.0,
+        "availability": 75.0,
+        "context": 71.09,
+        "task_fit": 61.62,
+        "cost_efficiency": 99.36
+      },
+      "metrics": {
+        "intelligence": 68,
+        "speed": 44,
+        "stability": 78,
+        "availability": 75,
+        "context": 71,
+        "task_fit": 62,
+        "cost_efficiency": 99,
+        "cost": 6.1e-07
+      },
+      "tier": "HEAVY_HITTER",
+      "task_label": "LONG-CONTEXT",
+      "geopolitical_risk": "LOW",
+      "score_breakdown": {
+        "intelligence": 20.4,
+        "speed": 6.09,
+        "stability": 12.48,
+        "cost_efficiency": 17.88,
+        "availability": 7.5,
+        "context": 4.27,
+        "task_fit": 3.7
+      },
+      "value_score": 72.25,
+      "rank": 185
+    },
+    {
       "model": "moonshotai/kimi-k2.5",
       "family_id": "moonshotai/kimi-k2.5",
       "provider": "Moonshotai",
@@ -31299,147 +31440,6 @@
         "task_fit": 3.7
       },
       "value_score": 72.24,
-      "rank": 185
-    },
-    {
-      "model": "z-ai/glm-5.2",
-      "family_id": "z-ai/glm-5.2",
-      "provider": "Z Ai",
-      "display_name": "Z.ai: GLM 5.2",
-      "source_attribution": {
-        "catalog": [
-          "openrouter"
-        ],
-        "intelligence": "heuristic",
-        "speed": "openrouter",
-        "pricing": "openrouter",
-        "context_length": "openrouter",
-        "merge_priority": {
-          "intelligence": [
-            "benchmark",
-            "artificial_analysis",
-            "lmsys",
-            "helper",
-            "heuristic"
-          ],
-          "speed": [
-            "artificial_analysis",
-            "openrouter",
-            "heuristic"
-          ],
-          "context_length": [
-            "openrouter",
-            "bridge"
-          ],
-          "pricing": [
-            "openrouter",
-            "bridge"
-          ]
-        }
-      },
-      "raw_metrics": {
-        "intelligence_base": 68,
-        "context_length": 1048576,
-        "prompt_cost": 4.158e-07,
-        "completion_cost": 1.3068e-06,
-        "average_cost": 8.612999999999999e-07,
-        "aa_quality": null,
-        "aa_speed": null,
-        "lmsys_elo": null,
-        "openrouter_speed_hint": 131072.0,
-        "source_count": 1,
-        "availability_hint": 75,
-        "stability_hint": 78
-      },
-      "task_metadata": {
-        "quality_by_task": {
-          "coding": 64,
-          "reasoning": 68,
-          "vision": 18,
-          "long_context": 100,
-          "extraction": 74,
-          "structured_output": 46,
-          "general_chat": 66,
-          "tool_agent_compatibility": 57
-        },
-        "taxonomy_scores": {
-          "chat_casual": 66,
-          "creative_writing": 66,
-          "knowledge": 67,
-          "legal_formal": 70,
-          "coding": 64,
-          "agentic_tool_use": 57,
-          "vision_ocr": 29,
-          "vision_reasoning": 33,
-          "math_logic": 68,
-          "translation_language": 68
-        },
-        "supported": [
-          "extraction",
-          "long_context"
-        ],
-        "primary": [
-          "long_context",
-          "extraction",
-          "reasoning"
-        ],
-        "coverage_score": 61.62,
-        "confidence": 0.68,
-        "helper_enriched": false,
-        "provider_family": "Z Ai"
-      },
-      "helper_metadata": {
-        "helper_tasks_applied": []
-      },
-      "self_hosting": {
-        "self_hostable": false,
-        "open_weight": false,
-        "family": null,
-        "hosting_modes": [
-          "cloud_api"
-        ],
-        "download_sources": [],
-        "preferred_runtimes": [],
-        "quantizations_known": [],
-        "parameter_scale_billions": null,
-        "hardware_profile_hint": null,
-        "self_hosting_notes": null,
-        "benchmark_evidence_sources": [
-          "openrouter_catalog"
-        ]
-      },
-      "normalized_metrics": {
-        "intelligence": 68.0,
-        "speed": 43.52,
-        "stability": 78.0,
-        "availability": 75.0,
-        "context": 71.09,
-        "task_fit": 61.62,
-        "cost_efficiency": 99.11
-      },
-      "metrics": {
-        "intelligence": 68,
-        "speed": 44,
-        "stability": 78,
-        "availability": 75,
-        "context": 71,
-        "task_fit": 62,
-        "cost_efficiency": 99,
-        "cost": 8.6e-07
-      },
-      "tier": "HEAVY_HITTER",
-      "task_label": "LONG-CONTEXT",
-      "geopolitical_risk": "LOW",
-      "score_breakdown": {
-        "intelligence": 20.4,
-        "speed": 6.09,
-        "stability": 12.48,
-        "cost_efficiency": 17.84,
-        "availability": 7.5,
-        "context": 4.27,
-        "task_fit": 3.7
-      },
-      "value_score": 72.2,
       "rank": 186
     },
     {
@@ -33654,7 +33654,7 @@
         "completion_cost": 1e-05,
         "average_cost": 6e-06,
         "aa_quality": 53.4,
-        "aa_speed": 78.077,
+        "aa_speed": 77.563,
         "lmsys_elo": null,
         "openrouter_speed_hint": 128000.0,
         "source_count": 2,
@@ -34219,7 +34219,7 @@
         "completion_cost": 4.4e-06,
         "average_cost": 2.75e-06,
         "aa_quality": 19.0,
-        "aa_speed": 221.18,
+        "aa_speed": 223.355,
         "lmsys_elo": null,
         "openrouter_speed_hint": 100000.0,
         "source_count": 2,
@@ -35774,7 +35774,7 @@
         "completion_cost": 2e-06,
         "average_cost": 1.2e-06,
         "aa_quality": 29.9,
-        "aa_speed": 62.071,
+        "aa_speed": 81.098,
         "lmsys_elo": 1316.6,
         "openrouter_speed_hint": null,
         "source_count": 3,
@@ -35841,7 +35841,7 @@
       },
       "normalized_metrics": {
         "intelligence": 58.0,
-        "speed": 35.0,
+        "speed": 35.01,
         "stability": 91.0,
         "availability": 93.0,
         "context": 44.43,
@@ -36057,7 +36057,7 @@
         "completion_cost": 5e-05,
         "average_cost": 3e-05,
         "aa_quality": 59.9,
-        "aa_speed": 60.151,
+        "aa_speed": 56.515,
         "lmsys_elo": null,
         "openrouter_speed_hint": 128000.0,
         "source_count": 2,
@@ -36199,7 +36199,7 @@
         "completion_cost": 3e-07,
         "average_cost": 2e-07,
         "aa_quality": 10.0,
-        "aa_speed": 89.259,
+        "aa_speed": 89.299,
         "lmsys_elo": null,
         "openrouter_speed_hint": 16384.0,
         "source_count": 2,
@@ -36636,7 +36636,7 @@
         "completion_cost": 8e-07,
         "average_cost": 5e-07,
         "aa_quality": 14.3,
-        "aa_speed": 115.865,
+        "aa_speed": 116.36,
         "lmsys_elo": null,
         "openrouter_speed_hint": 16384.0,
         "source_count": 2,
@@ -36791,7 +36791,7 @@
         "completion_cost": 1.82e-06,
         "average_cost": 1.1375e-06,
         "aa_quality": 19.6,
-        "aa_speed": 59.862,
+        "aa_speed": 59.93,
         "lmsys_elo": null,
         "openrouter_speed_hint": 8192.0,
         "source_count": 2,
@@ -37527,7 +37527,7 @@
         "completion_cost": 6e-06,
         "average_cost": 4e-06,
         "aa_quality": 53.8,
-        "aa_speed": 114.98,
+        "aa_speed": 76.639,
         "lmsys_elo": null,
         "openrouter_speed_hint": null,
         "source_count": 2,
@@ -37593,7 +37593,7 @@
       },
       "normalized_metrics": {
         "intelligence": 53.0,
-        "speed": 35.01,
+        "speed": 35.0,
         "stability": 91.0,
         "availability": 93.0,
         "context": 61.59,
@@ -38093,7 +38093,7 @@
         "completion_cost": 4.25e-06,
         "average_cost": 2.75e-06,
         "aa_quality": 50.6,
-        "aa_speed": 107.613,
+        "aa_speed": 110.195,
         "lmsys_elo": null,
         "openrouter_speed_hint": null,
         "source_count": 2,
@@ -39073,7 +39073,7 @@
         "completion_cost": 5.2e-07,
         "average_cost": 3.25e-07,
         "aa_quality": 14.4,
-        "aa_speed": 146.575,
+        "aa_speed": 143.908,
         "lmsys_elo": null,
         "openrouter_speed_hint": 8192.0,
         "source_count": 2,
@@ -39229,7 +39229,7 @@
         "completion_cost": 6e-06,
         "average_cost": 4e-06,
         "aa_quality": 15.9,
-        "aa_speed": 58.968,
+        "aa_speed": 60.551,
         "lmsys_elo": null,
         "openrouter_speed_hint": null,
         "source_count": 2,
@@ -39371,7 +39371,7 @@
         "completion_cost": 8e-07,
         "average_cost": 8e-07,
         "aa_quality": 9.9,
-        "aa_speed": 22.317,
+        "aa_speed": 20.846,
         "lmsys_elo": null,
         "openrouter_speed_hint": 8192.0,
         "source_count": 2,
@@ -39667,7 +39667,7 @@
         "completion_cost": 1.2e-05,
         "average_cost": 7e-06,
         "aa_quality": 46.5,
-        "aa_speed": 125.984,
+        "aa_speed": 124.69,
         "lmsys_elo": null,
         "openrouter_speed_hint": 65536.0,
         "source_count": 2,
@@ -39809,7 +39809,7 @@
         "completion_cost": 4.425e-06,
         "average_cost": 2.95e-06,
         "aa_quality": 46.0,
-        "aa_speed": 194.192,
+        "aa_speed": 198.187,
         "lmsys_elo": null,
         "openrouter_speed_hint": 65536.0,
         "source_count": 2,
@@ -39950,7 +39950,7 @@
         "completion_cost": 5.55e-07,
         "average_cost": 4.53e-07,
         "aa_quality": 14.7,
-        "aa_speed": 142.686,
+        "aa_speed": 143.167,
         "lmsys_elo": null,
         "openrouter_speed_hint": 128000.0,
         "source_count": 2,
@@ -40230,7 +40230,7 @@
         "completion_cost": 3.15e-06,
         "average_cost": 2.05e-06,
         "aa_quality": 51.1,
-        "aa_speed": 163.848,
+        "aa_speed": 165.296,
         "lmsys_elo": null,
         "openrouter_speed_hint": 202752.0,
         "source_count": 2,
@@ -40525,7 +40525,7 @@
         "completion_cost": 1.28e-06,
         "average_cost": 8e-07,
         "aa_quality": 39.0,
-        "aa_speed": 53.02,
+        "aa_speed": 52.993,
         "lmsys_elo": null,
         "openrouter_speed_hint": 65536.0,
         "source_count": 2,
@@ -40666,7 +40666,7 @@
         "completion_cost": 1.95e-06,
         "average_cost": 1.1375e-06,
         "aa_quality": 39.6,
-        "aa_speed": 53.033,
+        "aa_speed": 52.98,
         "lmsys_elo": null,
         "openrouter_speed_hint": 65536.0,
         "source_count": 2,
@@ -40807,7 +40807,7 @@
         "completion_cost": 3e-06,
         "average_cost": 1.75e-06,
         "aa_quality": 37.8,
-        "aa_speed": 188.392,
+        "aa_speed": 201.861,
         "lmsys_elo": null,
         "openrouter_speed_hint": 65535.0,
         "source_count": 2,
@@ -41103,7 +41103,7 @@
         "completion_cost": 2.5e-06,
         "average_cost": 1.8750000000000003e-06,
         "aa_quality": 37.0,
-        "aa_speed": 155.964,
+        "aa_speed": 155.273,
         "lmsys_elo": null,
         "openrouter_speed_hint": null,
         "source_count": 2,
@@ -41385,7 +41385,7 @@
         "completion_cost": 1.2e-06,
         "average_cost": 7.5e-07,
         "aa_quality": 44.4,
-        "aa_speed": 100.536,
+        "aa_speed": 91.676,
         "lmsys_elo": null,
         "openrouter_speed_hint": 512000.0,
         "source_count": 2,
@@ -41680,7 +41680,7 @@
         "completion_cost": 2.5e-06,
         "average_cost": 1.8750000000000003e-06,
         "aa_quality": 37.6,
-        "aa_speed": 113.231,
+        "aa_speed": 111.704,
         "lmsys_elo": null,
         "openrouter_speed_hint": null,
         "source_count": 2,
@@ -41959,7 +41959,7 @@
         "completion_cost": 7.5e-05,
         "average_cost": 4.4999999999999996e-05,
         "aa_quality": 55.7,
-        "aa_speed": 53.2,
+        "aa_speed": 54.119,
         "lmsys_elo": null,
         "openrouter_speed_hint": 32000.0,
         "source_count": 2,
@@ -42101,7 +42101,7 @@
         "completion_cost": 2e-06,
         "average_cost": 1.5e-06,
         "aa_quality": 39.8,
-        "aa_speed": 50.73,
+        "aa_speed": 53.338,
         "lmsys_elo": null,
         "openrouter_speed_hint": null,
         "source_count": 2,
@@ -42242,7 +42242,7 @@
         "completion_cost": 8.7e-07,
         "average_cost": 6.525e-07,
         "aa_quality": 42.2,
-        "aa_speed": 59.971,
+        "aa_speed": 62.96,
         "lmsys_elo": null,
         "openrouter_speed_hint": 131072.0,
         "source_count": 2,
@@ -42383,7 +42383,7 @@
         "completion_cost": 6.24e-06,
         "average_cost": 3.6400000000000003e-06,
         "aa_quality": 40.0,
-        "aa_speed": 35.681,
+        "aa_speed": 35.101,
         "lmsys_elo": null,
         "openrouter_speed_hint": 65536.0,
         "source_count": 2,
@@ -42665,7 +42665,7 @@
         "completion_cost": 1.5e-06,
         "average_cost": 1e-06,
         "aa_quality": 3.6,
-        "aa_speed": 142.278,
+        "aa_speed": 144.12,
         "lmsys_elo": 1299.2,
         "openrouter_speed_hint": 4096.0,
         "source_count": 3,
@@ -42805,7 +42805,7 @@
         "completion_cost": 2.7e-06,
         "average_cost": 1.575e-06,
         "aa_quality": 37.1,
-        "aa_speed": 53.907,
+        "aa_speed": 53.847,
         "lmsys_elo": null,
         "openrouter_speed_hint": 65536.0,
         "source_count": 2,
@@ -42946,7 +42946,7 @@
         "completion_cost": 4e-06,
         "average_cost": 2.475e-06,
         "aa_quality": 44.2,
-        "aa_speed": 39.648,
+        "aa_speed": 43.293,
         "lmsys_elo": null,
         "openrouter_speed_hint": null,
         "source_count": 2,
@@ -43228,7 +43228,7 @@
         "completion_cost": 8e-07,
         "average_cost": 5e-07,
         "aa_quality": 41.2,
-        "aa_speed": 47.542,
+        "aa_speed": 47.452,
         "lmsys_elo": null,
         "openrouter_speed_hint": 131072.0,
         "source_count": 2,
@@ -43369,7 +43369,7 @@
         "completion_cost": 1e-06,
         "average_cost": 6.249999999999999e-07,
         "aa_quality": 41.0,
-        "aa_speed": 142.045,
+        "aa_speed": 144.624,
         "lmsys_elo": null,
         "openrouter_speed_hint": 262144.0,
         "source_count": 2,
@@ -43510,7 +43510,7 @@
         "completion_cost": 2.8e-07,
         "average_cost": 2.1e-07,
         "aa_quality": 37.2,
-        "aa_speed": 65.993,
+        "aa_speed": 63.201,
         "lmsys_elo": null,
         "openrouter_speed_hint": 131072.0,
         "source_count": 2,
@@ -43651,7 +43651,7 @@
         "completion_cost": 4.4e-06,
         "average_cost": 2.7e-06,
         "aa_quality": 41.9,
-        "aa_speed": 44.149,
+        "aa_speed": 43.19,
         "lmsys_elo": null,
         "openrouter_speed_hint": 262144.0,
         "source_count": 2,
@@ -43792,7 +43792,7 @@
         "completion_cost": 8e-06,
         "average_cost": 4.9999999999999996e-06,
         "aa_quality": 30.4,
-        "aa_speed": 117.776,
+        "aa_speed": 132.509,
         "lmsys_elo": null,
         "openrouter_speed_hint": 100000.0,
         "source_count": 2,
@@ -43933,7 +43933,7 @@
         "completion_cost": 2.34e-06,
         "average_cost": 1.365e-06,
         "aa_quality": 33.7,
-        "aa_speed": 58.814,
+        "aa_speed": 60.026,
         "lmsys_elo": null,
         "openrouter_speed_hint": 65536.0,
         "source_count": 2,
@@ -44074,7 +44074,7 @@
         "completion_cost": 2.6e-06,
         "average_cost": 1.43e-06,
         "aa_quality": 33.8,
-        "aa_speed": 78.6,
+        "aa_speed": 78.202,
         "lmsys_elo": null,
         "openrouter_speed_hint": 81920.0,
         "source_count": 2,
@@ -44367,7 +44367,7 @@
         "completion_cost": 2.08e-06,
         "average_cost": 1.17e-06,
         "aa_quality": 32.3,
-        "aa_speed": 131.749,
+        "aa_speed": 128.122,
         "lmsys_elo": null,
         "openrouter_speed_hint": 65536.0,
         "source_count": 2,
@@ -44508,7 +44508,7 @@
         "completion_cost": 1e-06,
         "average_cost": 5.699999999999999e-07,
         "aa_quality": 31.6,
-        "aa_speed": 101.028,
+        "aa_speed": 101.003,
         "lmsys_elo": null,
         "openrouter_speed_hint": 262144.0,
         "source_count": 2,
@@ -44649,7 +44649,7 @@
         "completion_cost": 1e-06,
         "average_cost": 6.249999999999999e-07,
         "aa_quality": 38.1,
-        "aa_speed": 50.04,
+        "aa_speed": 51.039,
         "lmsys_elo": null,
         "openrouter_speed_hint": 131072.0,
         "source_count": 2,
@@ -44931,7 +44931,7 @@
         "completion_cost": 1e-06,
         "average_cost": 5.699999999999999e-07,
         "aa_quality": 29.3,
-        "aa_speed": 131.675,
+        "aa_speed": 137.024,
         "lmsys_elo": null,
         "openrouter_speed_hint": 262144.0,
         "source_count": 2,
@@ -45072,7 +45072,7 @@
         "completion_cost": 2.3e-06,
         "average_cost": 1.435e-06,
         "aa_quality": 35.4,
-        "aa_speed": 42.274,
+        "aa_speed": 42.666,
         "lmsys_elo": null,
         "openrouter_speed_hint": 100352.0,
         "source_count": 2,
@@ -45213,7 +45213,7 @@
         "completion_cost": 9e-07,
         "average_cost": 5.25e-07,
         "aa_quality": 33.7,
-        "aa_speed": 71.571,
+        "aa_speed": 71.639,
         "lmsys_elo": null,
         "openrouter_speed_hint": 196608.0,
         "source_count": 2,
@@ -45354,7 +45354,7 @@
         "completion_cost": 1.75e-06,
         "average_cost": 1.0749999999999999e-06,
         "aa_quality": 33.7,
-        "aa_speed": 111.281,
+        "aa_speed": 112.906,
         "lmsys_elo": null,
         "openrouter_speed_hint": 131072.0,
         "source_count": 2,
@@ -45636,7 +45636,7 @@
         "completion_cost": 2.5e-06,
         "average_cost": 1.55e-06,
         "aa_quality": 32.7,
-        "aa_speed": 129.954,
+        "aa_speed": 130.052,
         "lmsys_elo": null,
         "openrouter_speed_hint": 100352.0,
         "source_count": 2,
@@ -45918,7 +45918,7 @@
         "completion_cost": 3.9e-06,
         "average_cost": 2.34e-06,
         "aa_quality": 25.0,
-        "aa_speed": 46.351,
+        "aa_speed": 47.423,
         "lmsys_elo": null,
         "openrouter_speed_hint": 32768.0,
         "source_count": 2,
@@ -46072,7 +46072,7 @@
         "completion_cost": 1e-05,
         "average_cost": 6.25e-06,
         "aa_quality": 22.5,
-        "aa_speed": 188.443,
+        "aa_speed": 186.206,
         "lmsys_elo": null,
         "openrouter_speed_hint": 8192.0,
         "source_count": 2,
@@ -46213,7 +46213,7 @@
         "completion_cost": 1.2e-06,
         "average_cost": 7.5e-07,
         "aa_quality": 31.4,
-        "aa_speed": 71.386,
+        "aa_speed": 72.58,
         "lmsys_elo": null,
         "openrouter_speed_hint": 131072.0,
         "source_count": 2,
@@ -46354,7 +46354,7 @@
         "completion_cost": 6e-05,
         "average_cost": 4.5e-05,
         "aa_quality": 14.8,
-        "aa_speed": 82.21,
+        "aa_speed": 84.639,
         "lmsys_elo": 1359.2,
         "openrouter_speed_hint": 4096.0,
         "source_count": 3,
@@ -46494,7 +46494,7 @@
         "completion_cost": 6.25e-07,
         "average_cost": 3.5000000000000004e-07,
         "aa_quality": 30.6,
-        "aa_speed": 120.35,
+        "aa_speed": 124.729,
         "lmsys_elo": null,
         "openrouter_speed_hint": 65536.0,
         "source_count": 2,
@@ -46635,7 +46635,7 @@
         "completion_cost": 1.15e-06,
         "average_cost": 6.75e-07,
         "aa_quality": 30.3,
-        "aa_speed": 376.285,
+        "aa_speed": 381.295,
         "lmsys_elo": null,
         "openrouter_speed_hint": 256000.0,
         "source_count": 2,
@@ -46776,7 +46776,7 @@
         "completion_cost": 1e-06,
         "average_cost": 6.499999999999999e-07,
         "aa_quality": 18.0,
-        "aa_speed": 52.261,
+        "aa_speed": 53.794,
         "lmsys_elo": null,
         "openrouter_speed_hint": 65536.0,
         "source_count": 2,
@@ -47071,7 +47071,7 @@
         "completion_cost": 4.55e-07,
         "average_cost": 3.325e-07,
         "aa_quality": 25.4,
-        "aa_speed": 148.06,
+        "aa_speed": 148.731,
         "lmsys_elo": null,
         "openrouter_speed_hint": null,
         "source_count": 2,
@@ -47223,7 +47223,7 @@
         "completion_cost": 8e-07,
         "average_cost": 4.55e-07,
         "aa_quality": 21.1,
-        "aa_speed": 105.482,
+        "aa_speed": 105.606,
         "lmsys_elo": null,
         "openrouter_speed_hint": 262144.0,
         "source_count": 2,
@@ -47377,7 +47377,7 @@
         "completion_cost": 1.5e-07,
         "average_cost": 1.25e-07,
         "aa_quality": 21.4,
-        "aa_speed": 56.611,
+        "aa_speed": 56.547,
         "lmsys_elo": null,
         "openrouter_speed_hint": 262144.0,
         "source_count": 2,
@@ -47518,7 +47518,7 @@
         "completion_cost": 1.02e-06,
         "average_cost": 6.375e-07,
         "aa_quality": 28.3,
-        "aa_speed": 73.374,
+        "aa_speed": 72.93,
         "lmsys_elo": null,
         "openrouter_speed_hint": 131072.0,
         "source_count": 2,
@@ -47659,7 +47659,7 @@
         "completion_cost": 2e-06,
         "average_cost": 1.2499999999999999e-06,
         "aa_quality": 28.7,
-        "aa_speed": 54.162,
+        "aa_speed": 55.478,
         "lmsys_elo": null,
         "openrouter_speed_hint": 131072.0,
         "source_count": 2,
@@ -48082,7 +48082,7 @@
         "completion_cost": 2e-06,
         "average_cost": 1.2e-06,
         "aa_quality": 19.2,
-        "aa_speed": 63.568,
+        "aa_speed": 64.895,
         "lmsys_elo": null,
         "openrouter_speed_hint": null,
         "source_count": 2,
@@ -48787,7 +48787,7 @@
         "completion_cost": 7.5e-07,
         "average_cost": 5e-07,
         "aa_quality": 25.3,
-        "aa_speed": 1036.598,
+        "aa_speed": 1006.706,
         "lmsys_elo": null,
         "openrouter_speed_hint": 50000.0,
         "source_count": 2,
@@ -48928,7 +48928,7 @@
         "completion_cost": 2.5e-06,
         "average_cost": 1.55e-06,
         "aa_quality": 23.5,
-        "aa_speed": 36.235,
+        "aa_speed": 36.59,
         "lmsys_elo": null,
         "openrouter_speed_hint": 100352.0,
         "source_count": 2,
@@ -49069,7 +49069,7 @@
         "completion_cost": 6e-05,
         "average_cost": 3.7500000000000003e-05,
         "aa_quality": 23.4,
-        "aa_speed": 132.332,
+        "aa_speed": 131.815,
         "lmsys_elo": null,
         "openrouter_speed_hint": 100000.0,
         "source_count": 2,
@@ -49210,7 +49210,7 @@
         "completion_cost": 1.9e-06,
         "average_cost": 1.055e-06,
         "aa_quality": 14.3,
-        "aa_speed": 52.284,
+        "aa_speed": 51.374,
         "lmsys_elo": null,
         "openrouter_speed_hint": 32768.0,
         "source_count": 2,
@@ -49366,7 +49366,7 @@
         "completion_cost": 1.1e-06,
         "average_cost": 6e-07,
         "aa_quality": 13.7,
-        "aa_speed": 185.104,
+        "aa_speed": 187.02,
         "lmsys_elo": null,
         "openrouter_speed_hint": 262144.0,
         "source_count": 2,
@@ -49521,7 +49521,7 @@
         "completion_cost": 4.16e-07,
         "average_cost": 2.6e-07,
         "aa_quality": 11.1,
-        "aa_speed": 82.73,
+        "aa_speed": 80.119,
         "lmsys_elo": null,
         "openrouter_speed_hint": 32768.0,
         "source_count": 2,
@@ -49677,7 +49677,7 @@
         "completion_cost": 2.7e-07,
         "average_cost": 1.7000000000000001e-07,
         "aa_quality": 13.6,
-        "aa_speed": 100.129,
+        "aa_speed": 101.787,
         "lmsys_elo": null,
         "openrouter_speed_hint": 32768.0,
         "source_count": 2,
@@ -49832,7 +49832,7 @@
         "completion_cost": 2e-06,
         "average_cost": 1.2e-06,
         "aa_quality": 14.7,
-        "aa_speed": 77.109,
+        "aa_speed": 79.433,
         "lmsys_elo": null,
         "openrouter_speed_hint": null,
         "source_count": 2,
@@ -49973,7 +49973,7 @@
         "completion_cost": 5.2e-07,
         "average_cost": 3.25e-07,
         "aa_quality": 10.0,
-        "aa_speed": 122.715,
+        "aa_speed": 125.044,
         "lmsys_elo": null,
         "openrouter_speed_hint": 32768.0,
         "source_count": 2,
@@ -50129,7 +50129,7 @@
         "completion_cost": 2e-07,
         "average_cost": 2e-07,
         "aa_quality": 11.1,
-        "aa_speed": 62.892,
+        "aa_speed": 60.254,
         "lmsys_elo": null,
         "openrouter_speed_hint": null,
         "source_count": 2,
@@ -50270,7 +50270,7 @@
         "completion_cost": 1.25e-05,
         "average_cost": 7.5e-06,
         "aa_quality": 12.7,
-        "aa_speed": 54.81,
+        "aa_speed": 48.564,
         "lmsys_elo": null,
         "openrouter_speed_hint": 32000.0,
         "source_count": 2,
@@ -50411,7 +50411,7 @@
         "completion_cost": 2.8e-07,
         "average_cost": 1.8000000000000002e-07,
         "aa_quality": 11.5,
-        "aa_speed": 98.136,
+        "aa_speed": 96.795,
         "lmsys_elo": null,
         "openrouter_speed_hint": 16384.0,
         "source_count": 2,
@@ -50566,7 +50566,7 @@
         "completion_cost": 4.55e-07,
         "average_cost": 2.86e-07,
         "aa_quality": 8.4,
-        "aa_speed": 135.795,
+        "aa_speed": 142.009,
         "lmsys_elo": null,
         "openrouter_speed_hint": 32768.0,
         "source_count": 2,
@@ -50864,7 +50864,7 @@
         "completion_cost": 1.5e-07,
         "average_cost": 1.5e-07,
         "aa_quality": 9.0,
-        "aa_speed": 92.141,
+        "aa_speed": 110.021,
         "lmsys_elo": null,
         "openrouter_speed_hint": null,
         "source_count": 2,
@@ -51104,161 +51104,6 @@
       "rank": 323
     },
     {
-      "model": "qwen/qwen3-14b",
-      "family_id": "qwen/qwen3-14b",
-      "provider": "Qwen",
-      "display_name": "Qwen: Qwen3 14B",
-      "source_attribution": {
-        "catalog": [
-          "openrouter"
-        ],
-        "intelligence": "artificial_analysis",
-        "speed": "artificial_analysis",
-        "pricing": "openrouter",
-        "context_length": "openrouter",
-        "merge_priority": {
-          "intelligence": [
-            "benchmark",
-            "artificial_analysis",
-            "lmsys",
-            "helper",
-            "heuristic"
-          ],
-          "speed": [
-            "artificial_analysis",
-            "openrouter",
-            "heuristic"
-          ],
-          "context_length": [
-            "openrouter",
-            "bridge"
-          ],
-          "pricing": [
-            "openrouter",
-            "bridge"
-          ]
-        }
-      },
-      "raw_metrics": {
-        "intelligence_base": 10,
-        "context_length": 131702,
-        "prompt_cost": 1.2e-07,
-        "completion_cost": 2.4e-07,
-        "average_cost": 1.7999999999999997e-07,
-        "aa_quality": 10.4,
-        "aa_speed": 63.393,
-        "lmsys_elo": null,
-        "openrouter_speed_hint": 16384.0,
-        "source_count": 2,
-        "availability_hint": 93,
-        "stability_hint": 91
-      },
-      "task_metadata": {
-        "quality_by_task": {
-          "coding": 6,
-          "reasoning": 10,
-          "vision": 18,
-          "long_context": 100,
-          "extraction": 32,
-          "structured_output": 7,
-          "general_chat": 15,
-          "tool_agent_compatibility": 24
-        },
-        "taxonomy_scores": {
-          "chat_casual": 15,
-          "creative_writing": 14,
-          "knowledge": 13,
-          "legal_formal": 17,
-          "coding": 6,
-          "agentic_tool_use": 24,
-          "vision_ocr": 21,
-          "vision_reasoning": 16,
-          "math_logic": 10,
-          "translation_language": 20
-        },
-        "supported": [
-          "long_context"
-        ],
-        "primary": [
-          "long_context",
-          "extraction",
-          "tool_agent_compatibility"
-        ],
-        "coverage_score": 26.5,
-        "confidence": 0.68,
-        "helper_enriched": false,
-        "provider_family": "Qwen"
-      },
-      "helper_metadata": {
-        "helper_tasks_applied": []
-      },
-      "self_hosting": {
-        "self_hostable": true,
-        "open_weight": true,
-        "family": "Qwen",
-        "hosting_modes": [
-          "cloud_api",
-          "self_hosted"
-        ],
-        "download_sources": [
-          "huggingface",
-          "ollama",
-          "lmstudio"
-        ],
-        "preferred_runtimes": [
-          "ollama",
-          "lmstudio",
-          "vllm"
-        ],
-        "quantizations_known": [
-          "BF16",
-          "Q4_K_M",
-          "Q5_K_M",
-          "Q6_K"
-        ],
-        "parameter_scale_billions": 14.0,
-        "hardware_profile_hint": "24gb_memory_class_recommended",
-        "self_hosting_notes": "Open-weight Qwen family. Practical viability depends on quantization choice and local memory budget.",
-        "benchmark_evidence_sources": [
-          "openrouter_catalog",
-          "artificial_analysis"
-        ]
-      },
-      "normalized_metrics": {
-        "intelligence": 10.0,
-        "speed": 35.0,
-        "stability": 91.0,
-        "availability": 93.0,
-        "context": 44.49,
-        "task_fit": 26.5,
-        "cost_efficiency": 99.81
-      },
-      "metrics": {
-        "intelligence": 10,
-        "speed": 35,
-        "stability": 91,
-        "availability": 93,
-        "context": 44,
-        "task_fit": 26,
-        "cost_efficiency": 100,
-        "cost": 1.8e-07
-      },
-      "tier": "HEAVY_HITTER",
-      "task_label": "LONG-CONTEXT",
-      "geopolitical_risk": "HIGH",
-      "score_breakdown": {
-        "intelligence": 3.0,
-        "speed": 4.9,
-        "stability": 14.56,
-        "cost_efficiency": 17.97,
-        "availability": 9.3,
-        "context": 2.67,
-        "task_fit": 1.59
-      },
-      "value_score": 53.99,
-      "rank": 324
-    },
-    {
       "model": "mistralai/mistral-small-3.2-24b-instruct",
       "family_id": "mistralai/mistral-small-3.2-24b-instruct",
       "provider": "Mistralai",
@@ -51301,7 +51146,7 @@
         "completion_cost": 3e-07,
         "average_cost": 2e-07,
         "aa_quality": 10.6,
-        "aa_speed": 141.335,
+        "aa_speed": 146.206,
         "lmsys_elo": null,
         "openrouter_speed_hint": null,
         "source_count": 2,
@@ -51397,7 +51242,7 @@
         "task_fit": 1.59
       },
       "value_score": 53.98,
-      "rank": 325
+      "rank": 324
     },
     {
       "model": "perplexity/sonar-pro",
@@ -51538,6 +51383,161 @@
         "task_fit": 1.54
       },
       "value_score": 53.97,
+      "rank": 325
+    },
+    {
+      "model": "qwen/qwen3-14b",
+      "family_id": "qwen/qwen3-14b",
+      "provider": "Qwen",
+      "display_name": "Qwen: Qwen3 14B",
+      "source_attribution": {
+        "catalog": [
+          "openrouter"
+        ],
+        "intelligence": "artificial_analysis",
+        "speed": "artificial_analysis",
+        "pricing": "openrouter",
+        "context_length": "openrouter",
+        "merge_priority": {
+          "intelligence": [
+            "benchmark",
+            "artificial_analysis",
+            "lmsys",
+            "helper",
+            "heuristic"
+          ],
+          "speed": [
+            "artificial_analysis",
+            "openrouter",
+            "heuristic"
+          ],
+          "context_length": [
+            "openrouter",
+            "bridge"
+          ],
+          "pricing": [
+            "openrouter",
+            "bridge"
+          ]
+        }
+      },
+      "raw_metrics": {
+        "intelligence_base": 10,
+        "context_length": 131702,
+        "prompt_cost": 2.275e-07,
+        "completion_cost": 9.1e-07,
+        "average_cost": 5.6875e-07,
+        "aa_quality": 10.4,
+        "aa_speed": 64.815,
+        "lmsys_elo": null,
+        "openrouter_speed_hint": 8192.0,
+        "source_count": 2,
+        "availability_hint": 93,
+        "stability_hint": 91
+      },
+      "task_metadata": {
+        "quality_by_task": {
+          "coding": 6,
+          "reasoning": 10,
+          "vision": 18,
+          "long_context": 100,
+          "extraction": 32,
+          "structured_output": 7,
+          "general_chat": 15,
+          "tool_agent_compatibility": 24
+        },
+        "taxonomy_scores": {
+          "chat_casual": 15,
+          "creative_writing": 14,
+          "knowledge": 13,
+          "legal_formal": 17,
+          "coding": 6,
+          "agentic_tool_use": 24,
+          "vision_ocr": 21,
+          "vision_reasoning": 16,
+          "math_logic": 10,
+          "translation_language": 20
+        },
+        "supported": [
+          "long_context"
+        ],
+        "primary": [
+          "long_context",
+          "extraction",
+          "tool_agent_compatibility"
+        ],
+        "coverage_score": 26.5,
+        "confidence": 0.68,
+        "helper_enriched": false,
+        "provider_family": "Qwen"
+      },
+      "helper_metadata": {
+        "helper_tasks_applied": []
+      },
+      "self_hosting": {
+        "self_hostable": true,
+        "open_weight": true,
+        "family": "Qwen",
+        "hosting_modes": [
+          "cloud_api",
+          "self_hosted"
+        ],
+        "download_sources": [
+          "huggingface",
+          "ollama",
+          "lmstudio"
+        ],
+        "preferred_runtimes": [
+          "ollama",
+          "lmstudio",
+          "vllm"
+        ],
+        "quantizations_known": [
+          "BF16",
+          "Q4_K_M",
+          "Q5_K_M",
+          "Q6_K"
+        ],
+        "parameter_scale_billions": 14.0,
+        "hardware_profile_hint": "24gb_memory_class_recommended",
+        "self_hosting_notes": "Open-weight Qwen family. Practical viability depends on quantization choice and local memory budget.",
+        "benchmark_evidence_sources": [
+          "openrouter_catalog",
+          "artificial_analysis"
+        ]
+      },
+      "normalized_metrics": {
+        "intelligence": 10.0,
+        "speed": 35.0,
+        "stability": 91.0,
+        "availability": 93.0,
+        "context": 44.49,
+        "task_fit": 26.5,
+        "cost_efficiency": 99.41
+      },
+      "metrics": {
+        "intelligence": 10,
+        "speed": 35,
+        "stability": 91,
+        "availability": 93,
+        "context": 44,
+        "task_fit": 26,
+        "cost_efficiency": 99,
+        "cost": 5.7e-07
+      },
+      "tier": "HEAVY_HITTER",
+      "task_label": "LONG-CONTEXT",
+      "geopolitical_risk": "HIGH",
+      "score_breakdown": {
+        "intelligence": 3.0,
+        "speed": 4.9,
+        "stability": 14.56,
+        "cost_efficiency": 17.89,
+        "availability": 9.3,
+        "context": 2.67,
+        "task_fit": 1.59
+      },
+      "value_score": 53.91,
       "rank": 326
     },
     {
@@ -51583,7 +51583,7 @@
         "completion_cost": 8.5e-07,
         "average_cost": 4.9e-07,
         "aa_quality": 16.5,
-        "aa_speed": 84.088,
+        "aa_speed": 79.257,
         "lmsys_elo": null,
         "openrouter_speed_hint": 98304.0,
         "source_count": 2,
@@ -51724,7 +51724,7 @@
         "completion_cost": 3e-08,
         "average_cost": 2e-08,
         "aa_quality": 14.1,
-        "aa_speed": 161.073,
+        "aa_speed": 168.375,
         "lmsys_elo": null,
         "openrouter_speed_hint": 32768.0,
         "source_count": 2,
@@ -52006,7 +52006,7 @@
         "completion_cost": 2e-07,
         "average_cost": 1.25e-07,
         "aa_quality": 14.2,
-        "aa_speed": 155.301,
+        "aa_speed": 167.408,
         "lmsys_elo": null,
         "openrouter_speed_hint": 228000.0,
         "source_count": 2,
@@ -52158,7 +52158,7 @@
         "completion_cost": 4.55e-07,
         "average_cost": 2.86e-07,
         "aa_quality": 8.3,
-        "aa_speed": 61.211,
+        "aa_speed": 61.947,
         "lmsys_elo": null,
         "openrouter_speed_hint": 8192.0,
         "source_count": 2,
@@ -52314,7 +52314,7 @@
         "completion_cost": 2.4e-07,
         "average_cost": 1.5e-07,
         "aa_quality": 6.9,
-        "aa_speed": 146.865,
+        "aa_speed": 147.779,
         "lmsys_elo": null,
         "openrouter_speed_hint": 5120.0,
         "source_count": 2,
@@ -52737,7 +52737,7 @@
         "completion_cost": 1e-07,
         "average_cost": 1e-07,
         "aa_quality": 6.8,
-        "aa_speed": 177.397,
+        "aa_speed": 170.25,
         "lmsys_elo": null,
         "openrouter_speed_hint": null,
         "source_count": 2,
@@ -52878,7 +52878,7 @@
         "completion_cost": 1.4e-07,
         "average_cost": 8.750000000000001e-08,
         "aa_quality": 4.7,
-        "aa_speed": 249.143,
+        "aa_speed": 244.57,
         "lmsys_elo": null,
         "openrouter_speed_hint": 5120.0,
         "source_count": 2,
@@ -53019,7 +53019,7 @@
         "completion_cost": 1e-07,
         "average_cost": 7.5e-08,
         "aa_quality": 6.7,
-        "aa_speed": 126.665,
+        "aa_speed": 129.622,
         "lmsys_elo": null,
         "openrouter_speed_hint": 131072.0,
         "source_count": 2,
@@ -53160,7 +53160,7 @@
         "completion_cost": 8e-08,
         "average_cost": 6.5e-08,
         "aa_quality": 6.9,
-        "aa_speed": 144.861,
+        "aa_speed": 142.856,
         "lmsys_elo": null,
         "openrouter_speed_hint": 16384.0,
         "source_count": 2,
@@ -53301,7 +53301,7 @@
         "completion_cost": 2e-07,
         "average_cost": 1.5e-07,
         "aa_quality": 4.1,
-        "aa_speed": 94.665,
+        "aa_speed": 95.657,
         "lmsys_elo": null,
         "openrouter_speed_hint": 65536.0,
         "source_count": 2,
@@ -53442,7 +53442,7 @@
         "completion_cost": 1.4e-07,
         "average_cost": 1.05e-07,
         "aa_quality": 6.0,
-        "aa_speed": 46.374,
+        "aa_speed": 45.851,
         "lmsys_elo": null,
         "openrouter_speed_hint": 16384.0,
         "source_count": 2,
