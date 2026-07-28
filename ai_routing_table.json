@@ -3,9 +3,9 @@
   "scope": "GLOBAL_NON_DISCRIMINATORY",
   "version": "4.1-control-plane",
   "philosophy": "Maximum Intelligence, Speed, and Stability at the Lowest Sustainable Cost.",
-  "last_synopsis": "2026-07-28T02:53:31.100279+00:00",
+  "last_synopsis": "2026-07-28T14:21:38.770334+00:00",
   "data_sources": {
-    "openrouter": 341,
+    "openrouter": 339,
     "lmsys_arena": 67,
     "artificial_analysis": 586
   },
@@ -14,13 +14,13 @@
       "name": "openrouter",
       "status": "ok",
       "healthy": true,
-      "fetched_records": 341,
-      "accepted_records": 341,
+      "fetched_records": 339,
+      "accepted_records": 339,
       "coverage": 1.0,
-      "latency_ms": 82,
+      "latency_ms": 85,
       "issues": [],
       "warnings": [],
-      "snapshot_path": "/home/runner/work/AIchain/AIchain/artifacts/source_snapshots/20260728T025328Z/openrouter.json"
+      "snapshot_path": "/home/runner/work/AIchain/AIchain/artifacts/source_snapshots/20260728T142136Z/openrouter.json"
     },
     "lmsys": {
       "name": "lmsys",
@@ -29,7 +29,7 @@
       "fetched_records": 67,
       "accepted_records": 67,
       "coverage": 1.0,
-      "latency_ms": 83,
+      "latency_ms": 58,
       "issues": [
         "legacy JSON unavailable: 404 Client Error: Not Found for url: https://huggingface.co/spaces/lmarena-ai/arena-leaderboard/resolve/main/results/latest/elo_results_full.json"
       ],
@@ -37,7 +37,7 @@
         "pickle parse failed: No module named 'pandas'",
         "used MT-bench CSV surrogate because canonical Arena Elo sources were unavailable"
       ],
-      "snapshot_path": "/home/runner/work/AIchain/AIchain/artifacts/source_snapshots/20260728T025328Z/lmsys.json"
+      "snapshot_path": "/home/runner/work/AIchain/AIchain/artifacts/source_snapshots/20260728T142136Z/lmsys.json"
     },
     "artificial_analysis": {
       "name": "artificial_analysis",
@@ -46,10 +46,10 @@
       "fetched_records": 586,
       "accepted_records": 586,
       "coverage": 1.0,
-      "latency_ms": 677,
+      "latency_ms": 641,
       "issues": [],
       "warnings": [],
-      "snapshot_path": "/home/runner/work/AIchain/AIchain/artifacts/source_snapshots/20260728T025328Z/artificial_analysis.json"
+      "snapshot_path": "/home/runner/work/AIchain/AIchain/artifacts/source_snapshots/20260728T142136Z/artificial_analysis.json"
     }
   },
   "degradation_reasons": [],
@@ -538,12 +538,12 @@
     "helper_alias_resolutions": {},
     "helper_task_enrichments": {}
   },
-  "total_models_analyzed": 338,
+  "total_models_analyzed": 336,
   "live_promos": [],
   "tier_breakdown": {
     "OAUTH_BRIDGE": 8,
-    "FREE_FRONTIER": 22,
-    "HEAVY_HITTER": 308
+    "FREE_FRONTIER": 21,
+    "HEAVY_HITTER": 307
   },
   "heavy_hitter": {
     "model": "anthropic/claude-opus-4.6",
@@ -3491,147 +3491,6 @@
       "rank": 20
     },
     {
-      "model": "poolside/laguna-m.1:free",
-      "family_id": "poolside/laguna-m.1",
-      "provider": "Poolside",
-      "display_name": "Poolside: Laguna M.1 (free)",
-      "source_attribution": {
-        "catalog": [
-          "openrouter"
-        ],
-        "intelligence": "heuristic",
-        "speed": "openrouter",
-        "pricing": "openrouter",
-        "context_length": "openrouter",
-        "merge_priority": {
-          "intelligence": [
-            "benchmark",
-            "artificial_analysis",
-            "lmsys",
-            "helper",
-            "heuristic"
-          ],
-          "speed": [
-            "artificial_analysis",
-            "openrouter",
-            "heuristic"
-          ],
-          "context_length": [
-            "openrouter",
-            "bridge"
-          ],
-          "pricing": [
-            "openrouter",
-            "bridge"
-          ]
-        }
-      },
-      "raw_metrics": {
-        "intelligence_base": 68,
-        "context_length": 262144,
-        "prompt_cost": 0.0,
-        "completion_cost": 0.0,
-        "average_cost": 0.0,
-        "aa_quality": null,
-        "aa_speed": null,
-        "lmsys_elo": null,
-        "openrouter_speed_hint": 32768.0,
-        "source_count": 1,
-        "availability_hint": 75,
-        "stability_hint": 78
-      },
-      "task_metadata": {
-        "quality_by_task": {
-          "coding": 64,
-          "reasoning": 68,
-          "vision": 18,
-          "long_context": 100,
-          "extraction": 74,
-          "structured_output": 46,
-          "general_chat": 66,
-          "tool_agent_compatibility": 57
-        },
-        "taxonomy_scores": {
-          "chat_casual": 66,
-          "creative_writing": 66,
-          "knowledge": 67,
-          "legal_formal": 70,
-          "coding": 64,
-          "agentic_tool_use": 57,
-          "vision_ocr": 29,
-          "vision_reasoning": 33,
-          "math_logic": 68,
-          "translation_language": 68
-        },
-        "supported": [
-          "extraction",
-          "long_context"
-        ],
-        "primary": [
-          "long_context",
-          "extraction",
-          "reasoning"
-        ],
-        "coverage_score": 61.62,
-        "confidence": 0.68,
-        "helper_enriched": false,
-        "provider_family": "Poolside"
-      },
-      "helper_metadata": {
-        "helper_tasks_applied": []
-      },
-      "self_hosting": {
-        "self_hostable": false,
-        "open_weight": false,
-        "family": null,
-        "hosting_modes": [
-          "cloud_api"
-        ],
-        "download_sources": [],
-        "preferred_runtimes": [],
-        "quantizations_known": [],
-        "parameter_scale_billions": null,
-        "hardware_profile_hint": null,
-        "self_hosting_notes": null,
-        "benchmark_evidence_sources": [
-          "openrouter_catalog"
-        ]
-      },
-      "normalized_metrics": {
-        "intelligence": 68.0,
-        "speed": 37.13,
-        "stability": 78.0,
-        "availability": 75.0,
-        "context": 67.18,
-        "task_fit": 61.62,
-        "cost_efficiency": 100.0
-      },
-      "metrics": {
-        "intelligence": 68,
-        "speed": 37,
-        "stability": 78,
-        "availability": 75,
-        "context": 67,
-        "task_fit": 62,
-        "cost_efficiency": 100,
-        "cost": 0.0
-      },
-      "tier": "FREE_FRONTIER",
-      "task_label": "LONG-CONTEXT",
-      "geopolitical_risk": "LOW",
-      "score_breakdown": {
-        "intelligence": 20.4,
-        "speed": 5.2,
-        "stability": 12.48,
-        "cost_efficiency": 18.0,
-        "availability": 7.5,
-        "context": 4.03,
-        "task_fit": 3.7
-      },
-      "value_score": 71.29,
-      "rank": 21
-    },
-    {
       "model": "poolside/laguna-s-2.1:free",
       "family_id": "poolside/laguna-s-2.1",
       "provider": "Poolside",
@@ -3770,7 +3629,7 @@
         "task_fit": 3.7
       },
       "value_score": 71.29,
-      "rank": 22
+      "rank": 21
     },
     {
       "model": "poolside/laguna-xs-2.1:free",
@@ -3911,7 +3770,7 @@
         "task_fit": 3.7
       },
       "value_score": 71.29,
-      "rank": 23
+      "rank": 22
     },
     {
       "model": "nvidia/nemotron-3.5-content-safety:free",
@@ -4062,7 +3921,7 @@
         "task_fit": 3.7
       },
       "value_score": 70.31,
-      "rank": 24
+      "rank": 23
     },
     {
       "model": "nvidia/nemotron-3-ultra-550b-a55b:free",
@@ -4214,7 +4073,7 @@
         "task_fit": 2.57
       },
       "value_score": 63.48,
-      "rank": 25
+      "rank": 24
     },
     {
       "model": "cohere/north-mini-code:free",
@@ -4355,7 +4214,7 @@
         "task_fit": 2.04
       },
       "value_score": 60.19,
-      "rank": 26
+      "rank": 25
     },
     {
       "model": "openrouter/fusion",
@@ -4496,7 +4355,7 @@
         "task_fit": 1.69
       },
       "value_score": 59.18,
-      "rank": 27
+      "rank": 26
     },
     {
       "model": "nvidia/nemotron-3-super-120b-a12b:free",
@@ -4648,7 +4507,7 @@
         "task_fit": 2.13
       },
       "value_score": 58.14,
-      "rank": 28
+      "rank": 27
     },
     {
       "model": "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free",
@@ -4800,7 +4659,7 @@
         "task_fit": 1.82
       },
       "value_score": 54.51,
-      "rank": 29
+      "rank": 28
     },
     {
       "model": "nvidia/nemotron-3-nano-30b-a3b:free",
@@ -4952,7 +4811,7 @@
         "task_fit": 1.73
       },
       "value_score": 54.42,
-      "rank": 30
+      "rank": 29
     },
     {
       "model": "anthropic/claude-sonnet-4.6",
@@ -5099,7 +4958,7 @@
         "task_fit": 5.09
       },
       "value_score": 86.27,
-      "rank": 31
+      "rank": 30
     },
     {
       "model": "anthropic/claude-opus-4.6",
@@ -5246,7 +5105,7 @@
         "task_fit": 5.11
       },
       "value_score": 86.01,
-      "rank": 32
+      "rank": 31
     },
     {
       "model": "openai/gpt-5.3-codex",
@@ -5393,7 +5252,7 @@
         "task_fit": 5.09
       },
       "value_score": 85.56,
-      "rank": 33
+      "rank": 32
     },
     {
       "model": "minimax/minimax-01",
@@ -5537,7 +5396,7 @@
         "task_fit": 4.13
       },
       "value_score": 85.32,
-      "rank": 34
+      "rank": 33
     },
     {
       "model": "google/gemma-4-26b-a4b-it",
@@ -5578,9 +5437,9 @@
       "raw_metrics": {
         "intelligence_base": 95,
         "context_length": 262144,
-        "prompt_cost": 1.4e-07,
-        "completion_cost": 4.2e-07,
-        "average_cost": 2.8e-07,
+        "prompt_cost": 1.5e-07,
+        "completion_cost": 4.5e-07,
+        "average_cost": 3e-07,
         "aa_quality": null,
         "aa_speed": null,
         "lmsys_elo": null,
@@ -5672,7 +5531,7 @@
         "availability": 85.0,
         "context": 67.18,
         "task_fit": 82.88,
-        "cost_efficiency": 99.71
+        "cost_efficiency": 99.69
       },
       "metrics": {
         "intelligence": 95,
@@ -5682,7 +5541,7 @@
         "context": 67,
         "task_fit": 83,
         "cost_efficiency": 100,
-        "cost": 2.8e-07
+        "cost": 3e-07
       },
       "tier": "HEAVY_HITTER",
       "task_label": "LONG-CONTEXT",
@@ -5691,13 +5550,13 @@
         "intelligence": 28.5,
         "speed": 7.29,
         "stability": 13.76,
-        "cost_efficiency": 17.95,
+        "cost_efficiency": 17.94,
         "availability": 8.5,
         "context": 4.03,
         "task_fit": 4.97
       },
       "value_score": 84.99,
-      "rank": 35
+      "rank": 34
     },
     {
       "model": "google/gemma-4-31b-it",
@@ -5857,7 +5716,7 @@
         "task_fit": 4.97
       },
       "value_score": 84.99,
-      "rank": 36
+      "rank": 35
     },
     {
       "model": "openai/gpt-5-mini",
@@ -6004,7 +5863,7 @@
         "task_fit": 4.86
       },
       "value_score": 84.97,
-      "rank": 37
+      "rank": 36
     },
     {
       "model": "openai/o4-mini-high",
@@ -6151,7 +6010,7 @@
         "task_fit": 5.04
       },
       "value_score": 84.81,
-      "rank": 38
+      "rank": 37
     },
     {
       "model": "meta-llama/llama-guard-4-12b",
@@ -6310,7 +6169,7 @@
         "task_fit": 4.69
       },
       "value_score": 83.83,
-      "rank": 39
+      "rank": 38
     },
     {
       "model": "openai/gpt-5.6-luna-pro",
@@ -6456,7 +6315,7 @@
         "task_fit": 4.64
       },
       "value_score": 83.78,
-      "rank": 40
+      "rank": 39
     },
     {
       "model": "mistralai/mistral-large-2407",
@@ -6602,7 +6461,7 @@
         "task_fit": 4.58
       },
       "value_score": 83.76,
-      "rank": 41
+      "rank": 40
     },
     {
       "model": "openai/o3-mini-high",
@@ -6749,7 +6608,7 @@
         "task_fit": 4.9
       },
       "value_score": 83.47,
-      "rank": 42
+      "rank": 41
     },
     {
       "model": "anthropic/claude-haiku-4.5",
@@ -6896,7 +6755,7 @@
         "task_fit": 4.86
       },
       "value_score": 83.41,
-      "rank": 43
+      "rank": 42
     },
     {
       "model": "openai/gpt-5.6-terra-pro",
@@ -7042,7 +6901,7 @@
         "task_fit": 4.64
       },
       "value_score": 83.32,
-      "rank": 44
+      "rank": 43
     },
     {
       "model": "openai/gpt-5.1-codex-max",
@@ -7189,7 +7048,7 @@
         "task_fit": 5.04
       },
       "value_score": 83.27,
-      "rank": 45
+      "rank": 44
     },
     {
       "model": "openai/gpt-5.2-codex",
@@ -7336,7 +7195,7 @@
         "task_fit": 5.06
       },
       "value_score": 83.23,
-      "rank": 46
+      "rank": 45
     },
     {
       "model": "openai/gpt-4.1-mini",
@@ -7483,7 +7342,7 @@
         "task_fit": 4.76
       },
       "value_score": 83.19,
-      "rank": 47
+      "rank": 46
     },
     {
       "model": "nousresearch/hermes-4-70b",
@@ -7628,7 +7487,7 @@
         "task_fit": 4.69
       },
       "value_score": 83.16,
-      "rank": 48
+      "rank": 47
     },
     {
       "model": "deepseek/deepseek-r1-0528",
@@ -7787,7 +7646,7 @@
         "task_fit": 4.81
       },
       "value_score": 82.99,
-      "rank": 49
+      "rank": 48
     },
     {
       "model": "mistralai/mistral-large-2512",
@@ -7931,7 +7790,7 @@
         "task_fit": 4.36
       },
       "value_score": 82.94,
-      "rank": 50
+      "rank": 49
     },
     {
       "model": "nousresearch/hermes-4-405b",
@@ -8076,7 +7935,7 @@
         "task_fit": 4.69
       },
       "value_score": 82.84,
-      "rank": 51
+      "rank": 50
     },
     {
       "model": "qwen/qwen3-235b-a22b-2507",
@@ -8235,7 +8094,7 @@
         "task_fit": 4.69
       },
       "value_score": 82.46,
-      "rank": 52
+      "rank": 51
     },
     {
       "model": "qwen/qwen3-235b-a22b-thinking-2507",
@@ -8394,7 +8253,7 @@
         "task_fit": 4.72
       },
       "value_score": 82.39,
-      "rank": 53
+      "rank": 52
     },
     {
       "model": "qwen/qwen3-vl-235b-a22b-thinking",
@@ -8554,7 +8413,7 @@
         "task_fit": 5.16
       },
       "value_score": 82.2,
-      "rank": 54
+      "rank": 53
     },
     {
       "model": "qwen/qwen3-next-80b-a3b-thinking",
@@ -8713,7 +8572,7 @@
         "task_fit": 4.67
       },
       "value_score": 81.95,
-      "rank": 55
+      "rank": 54
     },
     {
       "model": "qwen/qwen-plus-2025-07-28:thinking",
@@ -8858,7 +8717,7 @@
         "task_fit": 4.55
       },
       "value_score": 81.92,
-      "rank": 56
+      "rank": 55
     },
     {
       "model": "meta-llama/llama-3.3-70b-instruct",
@@ -9018,7 +8877,7 @@
         "task_fit": 4.58
       },
       "value_score": 81.76,
-      "rank": 57
+      "rank": 56
     },
     {
       "model": "anthropic/claude-opus-4.7",
@@ -9164,7 +9023,7 @@
         "task_fit": 4.64
       },
       "value_score": 81.65,
-      "rank": 58
+      "rank": 57
     },
     {
       "model": "anthropic/claude-opus-4.8",
@@ -9310,7 +9169,7 @@
         "task_fit": 4.64
       },
       "value_score": 81.65,
-      "rank": 59
+      "rank": 58
     },
     {
       "model": "qwen/qwen3-30b-a3b-instruct-2507",
@@ -9469,7 +9328,7 @@
         "task_fit": 4.58
       },
       "value_score": 81.62,
-      "rank": 60
+      "rank": 59
     },
     {
       "model": "qwen/qwen-plus",
@@ -9614,7 +9473,7 @@
         "task_fit": 4.42
       },
       "value_score": 81.5,
-      "rank": 61
+      "rank": 60
     },
     {
       "model": "qwen/qwen2.5-vl-72b-instruct",
@@ -9774,7 +9633,7 @@
         "task_fit": 4.93
       },
       "value_score": 81.38,
-      "rank": 62
+      "rank": 61
     },
     {
       "model": "openai/gpt-5.6-sol-pro",
@@ -9920,7 +9779,7 @@
         "task_fit": 4.64
       },
       "value_score": 81.36,
-      "rank": 63
+      "rank": 62
     },
     {
       "model": "mistralai/mistral-medium-3-5",
@@ -10064,7 +9923,7 @@
         "task_fit": 4.25
       },
       "value_score": 81.31,
-      "rank": 64
+      "rank": 63
     },
     {
       "model": "deepseek/deepseek-chat",
@@ -10210,7 +10069,7 @@
         "task_fit": 4.61
       },
       "value_score": 81.29,
-      "rank": 65
+      "rank": 64
     },
     {
       "model": "cohere/command-r-plus-08-2024",
@@ -10356,7 +10215,7 @@
         "task_fit": 4.54
       },
       "value_score": 81.25,
-      "rank": 66
+      "rank": 65
     },
     {
       "model": "openai/gpt-5-nano",
@@ -10502,7 +10361,7 @@
         "task_fit": 4.42
       },
       "value_score": 81.1,
-      "rank": 67
+      "rank": 66
     },
     {
       "model": "anthropic/claude-sonnet-4.5",
@@ -10648,7 +10507,7 @@
         "task_fit": 4.65
       },
       "value_score": 81.07,
-      "rank": 68
+      "rank": 67
     },
     {
       "model": "mistralai/mistral-small-2603",
@@ -10792,7 +10651,7 @@
         "task_fit": 4.13
       },
       "value_score": 81.03,
-      "rank": 69
+      "rank": 68
     },
     {
       "model": "qwen/qwen3-vl-30b-a3b-thinking",
@@ -10952,7 +10811,7 @@
         "task_fit": 4.99
       },
       "value_score": 81.0,
-      "rank": 70
+      "rank": 69
     },
     {
       "model": "openai/gpt-5.4-nano",
@@ -11098,7 +10957,7 @@
         "task_fit": 4.42
       },
       "value_score": 81.0,
-      "rank": 71
+      "rank": 70
     },
     {
       "model": "google/gemini-2.5-pro-preview",
@@ -11245,7 +11104,7 @@
         "task_fit": 5.08
       },
       "value_score": 80.98,
-      "rank": 72
+      "rank": 71
     },
     {
       "model": "google/gemini-2.5-pro-preview-05-06",
@@ -11392,7 +11251,7 @@
         "task_fit": 5.08
       },
       "value_score": 80.98,
-      "rank": 73
+      "rank": 72
     },
     {
       "model": "google/gemini-3.1-pro-preview-customtools",
@@ -11539,7 +11398,7 @@
         "task_fit": 5.08
       },
       "value_score": 80.76,
-      "rank": 74
+      "rank": 73
     },
     {
       "model": "openai/gpt-5-image-mini",
@@ -11685,7 +11544,7 @@
         "task_fit": 4.42
       },
       "value_score": 80.73,
-      "rank": 75
+      "rank": 74
     },
     {
       "model": "qwen/qwen3-30b-a3b-thinking-2507",
@@ -11844,7 +11703,7 @@
         "task_fit": 4.67
       },
       "value_score": 80.56,
-      "rank": 76
+      "rank": 75
     },
     {
       "model": "meta-llama/llama-3.1-70b-instruct",
@@ -12004,7 +11863,7 @@
         "task_fit": 4.5
       },
       "value_score": 80.08,
-      "rank": 77
+      "rank": 76
     },
     {
       "model": "qwen/qwen3.5-plus-02-15",
@@ -12148,7 +12007,7 @@
         "task_fit": 4.25
       },
       "value_score": 80.02,
-      "rank": 78
+      "rank": 77
     },
     {
       "model": "qwen/qwen3.5-plus-20260420",
@@ -12292,7 +12151,7 @@
         "task_fit": 4.25
       },
       "value_score": 80.0,
-      "rank": 79
+      "rank": 78
     },
     {
       "model": "openai/gpt-4.1-nano",
@@ -12439,7 +12298,7 @@
         "task_fit": 4.4
       },
       "value_score": 79.97,
-      "rank": 80
+      "rank": 79
     },
     {
       "model": "qwen/qwen3-coder-plus",
@@ -12596,7 +12455,7 @@
         "task_fit": 4.37
       },
       "value_score": 79.96,
-      "rank": 81
+      "rank": 80
     },
     {
       "model": "google/gemini-2.5-flash-lite",
@@ -12743,7 +12602,7 @@
         "task_fit": 4.85
       },
       "value_score": 79.9,
-      "rank": 82
+      "rank": 81
     },
     {
       "model": "~anthropic/claude-sonnet-latest",
@@ -12889,7 +12748,7 @@
         "task_fit": 4.65
       },
       "value_score": 79.83,
-      "rank": 83
+      "rank": 82
     },
     {
       "model": "qwen/qwen-plus-2025-07-28",
@@ -13033,7 +12892,7 @@
         "task_fit": 4.25
       },
       "value_score": 79.82,
-      "rank": 84
+      "rank": 83
     },
     {
       "model": "anthropic/claude-opus-4.8-fast",
@@ -13179,7 +13038,7 @@
         "task_fit": 4.64
       },
       "value_score": 79.81,
-      "rank": 85
+      "rank": 84
     },
     {
       "model": "anthropic/claude-opus-5-fast",
@@ -13325,7 +13184,7 @@
         "task_fit": 4.64
       },
       "value_score": 79.81,
-      "rank": 86
+      "rank": 85
     },
     {
       "model": "google/gemini-3.1-flash-lite",
@@ -13472,7 +13331,7 @@
         "task_fit": 4.85
       },
       "value_score": 79.78,
-      "rank": 87
+      "rank": 86
     },
     {
       "model": "google/gemini-3.1-flash-lite-preview",
@@ -13619,7 +13478,7 @@
         "task_fit": 4.85
       },
       "value_score": 79.78,
-      "rank": 88
+      "rank": 87
     },
     {
       "model": "google/gemma-3-27b-it",
@@ -13780,7 +13639,7 @@
         "task_fit": 4.53
       },
       "value_score": 79.69,
-      "rank": 89
+      "rank": 88
     },
     {
       "model": "google/gemini-3.5-flash-lite",
@@ -13927,7 +13786,7 @@
         "task_fit": 4.85
       },
       "value_score": 79.69,
-      "rank": 90
+      "rank": 89
     },
     {
       "model": "openai/gpt-5",
@@ -14075,7 +13934,7 @@
         "task_fit": 4.35
       },
       "value_score": 79.64,
-      "rank": 91
+      "rank": 90
     },
     {
       "model": "mistralai/voxtral-small-24b-2507",
@@ -14219,7 +14078,7 @@
         "task_fit": 4.0
       },
       "value_score": 79.6,
-      "rank": 92
+      "rank": 91
     },
     {
       "model": "anthropic/claude-opus-4.5",
@@ -14365,7 +14224,7 @@
         "task_fit": 4.64
       },
       "value_score": 79.53,
-      "rank": 93
+      "rank": 92
     },
     {
       "model": "openai/gpt-4o-mini",
@@ -14512,7 +14371,7 @@
         "task_fit": 4.85
       },
       "value_score": 79.42,
-      "rank": 94
+      "rank": 93
     },
     {
       "model": "openai/gpt-4o-mini-2024-07-18",
@@ -14659,7 +14518,7 @@
         "task_fit": 4.85
       },
       "value_score": 79.42,
-      "rank": 95
+      "rank": 94
     },
     {
       "model": "~anthropic/claude-opus-latest",
@@ -14805,7 +14664,7 @@
         "task_fit": 4.64
       },
       "value_score": 79.37,
-      "rank": 96
+      "rank": 95
     },
     {
       "model": "qwen/qwen3-coder-flash",
@@ -14962,7 +14821,7 @@
         "task_fit": 4.25
       },
       "value_score": 79.19,
-      "rank": 97
+      "rank": 96
     },
     {
       "model": "qwen/qwen3.7-flash",
@@ -15106,7 +14965,7 @@
         "task_fit": 4.13
       },
       "value_score": 79.17,
-      "rank": 98
+      "rank": 97
     },
     {
       "model": "qwen/qwen3.5-flash-02-23",
@@ -15250,7 +15109,7 @@
         "task_fit": 4.13
       },
       "value_score": 79.15,
-      "rank": 99
+      "rank": 98
     },
     {
       "model": "qwen/qwen3.6-flash",
@@ -15394,7 +15253,7 @@
         "task_fit": 4.13
       },
       "value_score": 79.06,
-      "rank": 100
+      "rank": 99
     },
     {
       "model": "openai/gpt-5.1-codex-mini",
@@ -15540,7 +15399,7 @@
         "task_fit": 4.54
       },
       "value_score": 79.05,
-      "rank": 101
+      "rank": 100
     },
     {
       "model": "baidu/ernie-4.5-vl-424b-a47b",
@@ -15686,7 +15545,7 @@
         "task_fit": 5.12
       },
       "value_score": 78.98,
-      "rank": 102
+      "rank": 101
     },
     {
       "model": "sao10k/l3.3-euryale-70b",
@@ -15831,7 +15690,7 @@
         "task_fit": 4.67
       },
       "value_score": 78.81,
-      "rank": 103
+      "rank": 102
     },
     {
       "model": "sao10k/l3.1-euryale-70b",
@@ -15976,7 +15835,7 @@
         "task_fit": 4.67
       },
       "value_score": 78.79,
-      "rank": 104
+      "rank": 103
     },
     {
       "model": "openai/gpt-audio-mini",
@@ -16122,7 +15981,7 @@
         "task_fit": 4.42
       },
       "value_score": 78.78,
-      "rank": 105
+      "rank": 104
     },
     {
       "model": "amazon/nova-2-lite-v1",
@@ -16266,7 +16125,7 @@
         "task_fit": 4.13
       },
       "value_score": 78.64,
-      "rank": 106
+      "rank": 105
     },
     {
       "model": "~google/gemini-pro-latest",
@@ -16413,7 +16272,7 @@
         "task_fit": 5.08
       },
       "value_score": 78.48,
-      "rank": 107
+      "rank": 106
     },
     {
       "model": "google/gemini-3-pro-image",
@@ -16560,7 +16419,7 @@
         "task_fit": 5.08
       },
       "value_score": 78.46,
-      "rank": 108
+      "rank": 107
     },
     {
       "model": "~openai/gpt-mini-latest",
@@ -16706,7 +16565,7 @@
         "task_fit": 4.42
       },
       "value_score": 78.38,
-      "rank": 109
+      "rank": 108
     },
     {
       "model": "morph/morph-v3-large",
@@ -16850,7 +16709,7 @@
         "task_fit": 4.36
       },
       "value_score": 77.93,
-      "rank": 110
+      "rank": 109
     },
     {
       "model": "openai/gpt-5.6-luna",
@@ -16992,7 +16851,7 @@
         "task_fit": 3.98
       },
       "value_score": 77.72,
-      "rank": 111
+      "rank": 110
     },
     {
       "model": "kwaipilot/kat-coder-pro-v2.5",
@@ -17136,7 +16995,7 @@
         "task_fit": 4.48
       },
       "value_score": 77.52,
-      "rank": 112
+      "rank": 111
     },
     {
       "model": "google/gemini-3.1-flash-image",
@@ -17283,7 +17142,7 @@
         "task_fit": 4.85
       },
       "value_score": 77.33,
-      "rank": 113
+      "rank": 112
     },
     {
       "model": "cohere/command-r7b-12-2024",
@@ -17427,7 +17286,7 @@
         "task_fit": 4.0
       },
       "value_score": 77.28,
-      "rank": 114
+      "rank": 113
     },
     {
       "model": "openai/gpt-5.6-terra",
@@ -17569,7 +17428,7 @@
         "task_fit": 3.98
       },
       "value_score": 77.26,
-      "rank": 115
+      "rank": 114
     },
     {
       "model": "deepseek/deepseek-v4-pro",
@@ -17713,7 +17572,7 @@
         "task_fit": 3.8
       },
       "value_score": 77.12,
-      "rank": 116
+      "rank": 115
     },
     {
       "model": "mistralai/codestral-2508",
@@ -17855,7 +17714,7 @@
         "task_fit": 3.82
       },
       "value_score": 77.05,
-      "rank": 117
+      "rank": 116
     },
     {
       "model": "x-ai/grok-4.20-multi-agent",
@@ -17996,7 +17855,7 @@
         "task_fit": 3.52
       },
       "value_score": 77.01,
-      "rank": 118
+      "rank": 117
     },
     {
       "model": "qwen/qwen3-vl-8b-thinking",
@@ -18156,6 +18015,148 @@
         "task_fit": 4.63
       },
       "value_score": 77.0,
+      "rank": 118
+    },
+    {
+      "model": "openai/gpt-5.4-mini",
+      "family_id": "openai/gpt-5.4-mini",
+      "provider": "Openai",
+      "display_name": "OpenAI: GPT-5.4 Mini",
+      "source_attribution": {
+        "catalog": [
+          "openrouter"
+        ],
+        "intelligence": "heuristic",
+        "speed": "openrouter",
+        "pricing": "openrouter",
+        "context_length": "openrouter",
+        "merge_priority": {
+          "intelligence": [
+            "benchmark",
+            "artificial_analysis",
+            "lmsys",
+            "helper",
+            "heuristic"
+          ],
+          "speed": [
+            "artificial_analysis",
+            "openrouter",
+            "heuristic"
+          ],
+          "context_length": [
+            "openrouter",
+            "bridge"
+          ],
+          "pricing": [
+            "openrouter",
+            "bridge"
+          ]
+        }
+      },
+      "raw_metrics": {
+        "intelligence_base": 69,
+        "context_length": 400000,
+        "prompt_cost": 7.5e-07,
+        "completion_cost": 4.5e-06,
+        "average_cost": 2.6250000000000003e-06,
+        "aa_quality": null,
+        "aa_speed": null,
+        "lmsys_elo": null,
+        "openrouter_speed_hint": 128000.0,
+        "source_count": 1,
+        "availability_hint": 89,
+        "stability_hint": 96
+      },
+      "task_metadata": {
+        "quality_by_task": {
+          "coding": 65,
+          "reasoning": 69,
+          "vision": 18,
+          "long_context": 100,
+          "extraction": 75,
+          "structured_output": 65,
+          "general_chat": 67,
+          "tool_agent_compatibility": 78
+        },
+        "taxonomy_scores": {
+          "chat_casual": 67,
+          "creative_writing": 67,
+          "knowledge": 68,
+          "legal_formal": 71,
+          "coding": 65,
+          "agentic_tool_use": 78,
+          "vision_ocr": 29,
+          "vision_reasoning": 33,
+          "math_logic": 69,
+          "translation_language": 69
+        },
+        "supported": [
+          "extraction",
+          "long_context",
+          "tool_agent_compatibility"
+        ],
+        "primary": [
+          "long_context",
+          "tool_agent_compatibility",
+          "extraction"
+        ],
+        "coverage_score": 67.12,
+        "confidence": 0.68,
+        "helper_enriched": false,
+        "provider_family": "Openai"
+      },
+      "helper_metadata": {
+        "helper_tasks_applied": []
+      },
+      "self_hosting": {
+        "self_hostable": false,
+        "open_weight": false,
+        "family": null,
+        "hosting_modes": [
+          "cloud_api"
+        ],
+        "download_sources": [],
+        "preferred_runtimes": [],
+        "quantizations_known": [],
+        "parameter_scale_billions": null,
+        "hardware_profile_hint": null,
+        "self_hosting_notes": null,
+        "benchmark_evidence_sources": [
+          "openrouter_catalog"
+        ]
+      },
+      "normalized_metrics": {
+        "intelligence": 69.0,
+        "speed": 43.32,
+        "stability": 96.0,
+        "availability": 89.0,
+        "context": 74.0,
+        "task_fit": 67.12,
+        "cost_efficiency": 97.35
+      },
+      "metrics": {
+        "intelligence": 69,
+        "speed": 43,
+        "stability": 96,
+        "availability": 89,
+        "context": 74,
+        "task_fit": 67,
+        "cost_efficiency": 97,
+        "cost": 2.63e-06
+      },
+      "tier": "HEAVY_HITTER",
+      "task_label": "LONG-CONTEXT",
+      "geopolitical_risk": "LOW",
+      "score_breakdown": {
+        "intelligence": 20.7,
+        "speed": 6.06,
+        "stability": 15.36,
+        "cost_efficiency": 17.52,
+        "availability": 8.9,
+        "context": 4.44,
+        "task_fit": 4.03
+      },
+      "value_score": 76.97,
       "rank": 119
     },
     {
@@ -22086,148 +22087,6 @@
       "rank": 146
     },
     {
-      "model": "openai/gpt-5.4-mini",
-      "family_id": "openai/gpt-5.4-mini",
-      "provider": "Openai",
-      "display_name": "OpenAI: GPT-5.4 Mini",
-      "source_attribution": {
-        "catalog": [
-          "openrouter"
-        ],
-        "intelligence": "heuristic",
-        "speed": "openrouter",
-        "pricing": "openrouter",
-        "context_length": "openrouter",
-        "merge_priority": {
-          "intelligence": [
-            "benchmark",
-            "artificial_analysis",
-            "lmsys",
-            "helper",
-            "heuristic"
-          ],
-          "speed": [
-            "artificial_analysis",
-            "openrouter",
-            "heuristic"
-          ],
-          "context_length": [
-            "openrouter",
-            "bridge"
-          ],
-          "pricing": [
-            "openrouter",
-            "bridge"
-          ]
-        }
-      },
-      "raw_metrics": {
-        "intelligence_base": 69,
-        "context_length": 400000,
-        "prompt_cost": 7.5e-07,
-        "completion_cost": 4.5e-06,
-        "average_cost": 2.6250000000000003e-06,
-        "aa_quality": null,
-        "aa_speed": null,
-        "lmsys_elo": null,
-        "openrouter_speed_hint": 128000.0,
-        "source_count": 1,
-        "availability_hint": 85,
-        "stability_hint": 86
-      },
-      "task_metadata": {
-        "quality_by_task": {
-          "coding": 65,
-          "reasoning": 69,
-          "vision": 18,
-          "long_context": 100,
-          "extraction": 75,
-          "structured_output": 65,
-          "general_chat": 67,
-          "tool_agent_compatibility": 78
-        },
-        "taxonomy_scores": {
-          "chat_casual": 67,
-          "creative_writing": 67,
-          "knowledge": 68,
-          "legal_formal": 71,
-          "coding": 65,
-          "agentic_tool_use": 78,
-          "vision_ocr": 29,
-          "vision_reasoning": 33,
-          "math_logic": 69,
-          "translation_language": 69
-        },
-        "supported": [
-          "extraction",
-          "long_context",
-          "tool_agent_compatibility"
-        ],
-        "primary": [
-          "long_context",
-          "tool_agent_compatibility",
-          "extraction"
-        ],
-        "coverage_score": 67.12,
-        "confidence": 0.68,
-        "helper_enriched": false,
-        "provider_family": "Openai"
-      },
-      "helper_metadata": {
-        "helper_tasks_applied": []
-      },
-      "self_hosting": {
-        "self_hostable": false,
-        "open_weight": false,
-        "family": null,
-        "hosting_modes": [
-          "cloud_api"
-        ],
-        "download_sources": [],
-        "preferred_runtimes": [],
-        "quantizations_known": [],
-        "parameter_scale_billions": null,
-        "hardware_profile_hint": null,
-        "self_hosting_notes": null,
-        "benchmark_evidence_sources": [
-          "openrouter_catalog"
-        ]
-      },
-      "normalized_metrics": {
-        "intelligence": 69.0,
-        "speed": 43.32,
-        "stability": 86.0,
-        "availability": 85.0,
-        "context": 74.0,
-        "task_fit": 67.12,
-        "cost_efficiency": 97.35
-      },
-      "metrics": {
-        "intelligence": 69,
-        "speed": 43,
-        "stability": 86,
-        "availability": 85,
-        "context": 74,
-        "task_fit": 67,
-        "cost_efficiency": 97,
-        "cost": 2.63e-06
-      },
-      "tier": "HEAVY_HITTER",
-      "task_label": "LONG-CONTEXT",
-      "geopolitical_risk": "LOW",
-      "score_breakdown": {
-        "intelligence": 20.7,
-        "speed": 6.06,
-        "stability": 13.76,
-        "cost_efficiency": 17.52,
-        "availability": 8.5,
-        "context": 4.44,
-        "task_fit": 4.03
-      },
-      "value_score": 74.97,
-      "rank": 147
-    },
-    {
       "model": "z-ai/glm-4.7-flash",
       "family_id": "z-ai/glm-4.7-flash",
       "provider": "Z Ai",
@@ -22369,7 +22228,7 @@
         "task_fit": 4.13
       },
       "value_score": 74.89,
-      "rank": 148
+      "rank": 147
     },
     {
       "model": "openai/gpt-5.4-image-2",
@@ -22511,7 +22370,7 @@
         "task_fit": 3.98
       },
       "value_score": 74.82,
-      "rank": 149
+      "rank": 148
     },
     {
       "model": "tencent/hy3-preview",
@@ -22652,7 +22511,7 @@
         "task_fit": 3.7
       },
       "value_score": 74.76,
-      "rank": 150
+      "rank": 149
     },
     {
       "model": "~x-ai/grok-latest",
@@ -22793,7 +22652,7 @@
         "task_fit": 3.7
       },
       "value_score": 74.7,
-      "rank": 151
+      "rank": 150
     },
     {
       "model": "google/gemini-2.5-flash-image",
@@ -22940,7 +22799,7 @@
         "task_fit": 4.54
       },
       "value_score": 74.65,
-      "rank": 152
+      "rank": 151
     },
     {
       "model": "deepseek/deepseek-r1",
@@ -23096,7 +22955,7 @@
         "task_fit": 3.43
       },
       "value_score": 74.65,
-      "rank": 153
+      "rank": 152
     },
     {
       "model": "anthracite-org/magnum-v4-72b",
@@ -23239,7 +23098,7 @@
         "task_fit": 4.19
       },
       "value_score": 74.6,
-      "rank": 154
+      "rank": 153
     },
     {
       "model": "openai/o3-deep-research",
@@ -23384,7 +23243,7 @@
         "task_fit": 4.29
       },
       "value_score": 74.58,
-      "rank": 155
+      "rank": 154
     },
     {
       "model": "google/gemma-3n-e4b-it",
@@ -23539,7 +23398,7 @@
         "task_fit": 3.71
       },
       "value_score": 74.55,
-      "rank": 156
+      "rank": 155
     },
     {
       "model": "openai/gpt-5.4",
@@ -23681,7 +23540,7 @@
         "task_fit": 3.98
       },
       "value_score": 74.55,
-      "rank": 157
+      "rank": 156
     },
     {
       "model": "cohere/command-r-08-2024",
@@ -23822,7 +23681,7 @@
         "task_fit": 3.7
       },
       "value_score": 74.52,
-      "rank": 158
+      "rank": 157
     },
     {
       "model": "openai/gpt-4o-2024-08-06",
@@ -23965,7 +23824,7 @@
         "task_fit": 4.42
       },
       "value_score": 74.36,
-      "rank": 159
+      "rank": 158
     },
     {
       "model": "openai/gpt-4o-2024-11-20",
@@ -24108,7 +23967,7 @@
         "task_fit": 4.42
       },
       "value_score": 74.36,
-      "rank": 160
+      "rank": 159
     },
     {
       "model": "openai/gpt-chat-latest",
@@ -24250,7 +24109,7 @@
         "task_fit": 3.98
       },
       "value_score": 74.36,
-      "rank": 161
+      "rank": 160
     },
     {
       "model": "openai/gpt-5.4-pro",
@@ -24396,7 +24255,7 @@
         "task_fit": 4.64
       },
       "value_score": 74.26,
-      "rank": 162
+      "rank": 161
     },
     {
       "model": "openai/gpt-5.5-pro",
@@ -24542,7 +24401,7 @@
         "task_fit": 4.64
       },
       "value_score": 74.26,
-      "rank": 163
+      "rank": 162
     },
     {
       "model": "cognitivecomputations/dolphin-mistral-24b-venice-edition",
@@ -24686,7 +24545,7 @@
         "task_fit": 4.13
       },
       "value_score": 74.25,
-      "rank": 164
+      "rank": 163
     },
     {
       "model": "openai/gpt-5.1-codex",
@@ -24829,7 +24688,7 @@
         "task_fit": 4.1
       },
       "value_score": 74.23,
-      "rank": 165
+      "rank": 164
     },
     {
       "model": "thedrummer/skyfall-36b-v2",
@@ -24973,7 +24832,7 @@
         "task_fit": 4.05
       },
       "value_score": 74.1,
-      "rank": 166
+      "rank": 165
     },
     {
       "model": "openai/gpt-audio",
@@ -25115,7 +24974,7 @@
         "task_fit": 3.98
       },
       "value_score": 73.93,
-      "rank": 167
+      "rank": 166
     },
     {
       "model": "openai/gpt-5.2-pro",
@@ -25261,7 +25120,7 @@
         "task_fit": 4.64
       },
       "value_score": 73.91,
-      "rank": 168
+      "rank": 167
     },
     {
       "model": "writer/palmyra-x5",
@@ -25402,7 +25261,7 @@
         "task_fit": 3.7
       },
       "value_score": 73.75,
-      "rank": 169
+      "rank": 168
     },
     {
       "model": "qwen/qwen3-235b-a22b",
@@ -25558,7 +25417,7 @@
         "task_fit": 3.25
       },
       "value_score": 73.74,
-      "rank": 170
+      "rank": 169
     },
     {
       "model": "nex-agi/nex-n2-mini",
@@ -25699,7 +25558,7 @@
         "task_fit": 3.74
       },
       "value_score": 73.72,
-      "rank": 171
+      "rank": 170
     },
     {
       "model": "openai/gpt-5.2-chat",
@@ -25841,7 +25700,7 @@
         "task_fit": 3.98
       },
       "value_score": 73.67,
-      "rank": 172
+      "rank": 171
     },
     {
       "model": "openai/gpt-5.3-chat",
@@ -25983,7 +25842,7 @@
         "task_fit": 3.98
       },
       "value_score": 73.67,
-      "rank": 173
+      "rank": 172
     },
     {
       "model": "openai/gpt-3.5-turbo-0613",
@@ -26128,7 +25987,7 @@
         "task_fit": 3.83
       },
       "value_score": 73.62,
-      "rank": 174
+      "rank": 173
     },
     {
       "model": "poolside/laguna-s-2.1",
@@ -26269,7 +26128,7 @@
         "task_fit": 3.7
       },
       "value_score": 73.44,
-      "rank": 175
+      "rank": 174
     },
     {
       "model": "deepseek/deepseek-v3.2-exp",
@@ -26423,7 +26282,7 @@
         "task_fit": 3.7
       },
       "value_score": 73.33,
-      "rank": 176
+      "rank": 175
     },
     {
       "model": "perplexity/sonar-deep-research",
@@ -26565,7 +26424,7 @@
         "task_fit": 3.79
       },
       "value_score": 73.3,
-      "rank": 177
+      "rank": 176
     },
     {
       "model": "thedrummer/rocinante-12b",
@@ -26709,7 +26568,7 @@
         "task_fit": 4.01
       },
       "value_score": 73.27,
-      "rank": 178
+      "rank": 177
     },
     {
       "model": "~moonshotai/kimi-latest",
@@ -26850,7 +26709,7 @@
         "task_fit": 3.7
       },
       "value_score": 73.2,
-      "rank": 179
+      "rank": 178
     },
     {
       "model": "z-ai/glm-5.2",
@@ -26891,9 +26750,9 @@
       "raw_metrics": {
         "intelligence_base": 68,
         "context_length": 1048576,
-        "prompt_cost": 7.308e-07,
-        "completion_cost": 2.2968e-06,
-        "average_cost": 1.5138e-06,
+        "prompt_cost": 7.686e-07,
+        "completion_cost": 2.4156e-06,
+        "average_cost": 1.5921e-06,
         "aa_quality": null,
         "aa_speed": null,
         "lmsys_elo": null,
@@ -26966,7 +26825,7 @@
         "availability": 75.0,
         "context": 89.57,
         "task_fit": 61.62,
-        "cost_efficiency": 98.45
+        "cost_efficiency": 98.37
       },
       "metrics": {
         "intelligence": 68,
@@ -26976,7 +26835,7 @@
         "context": 90,
         "task_fit": 62,
         "cost_efficiency": 98,
-        "cost": 1.51e-06
+        "cost": 1.59e-06
       },
       "tier": "HEAVY_HITTER",
       "task_label": "LONG-CONTEXT",
@@ -26985,13 +26844,13 @@
         "intelligence": 20.4,
         "speed": 6.09,
         "stability": 12.48,
-        "cost_efficiency": 17.72,
+        "cost_efficiency": 17.71,
         "availability": 7.5,
         "context": 5.37,
         "task_fit": 3.7
       },
-      "value_score": 73.19,
-      "rank": 180
+      "value_score": 73.18,
+      "rank": 179
     },
     {
       "model": "moonshotai/kimi-k2.5",
@@ -27132,7 +26991,7 @@
         "task_fit": 3.7
       },
       "value_score": 73.07,
-      "rank": 181
+      "rank": 180
     },
     {
       "model": "anthropic/claude-opus-5",
@@ -27274,7 +27133,7 @@
         "task_fit": 3.7
       },
       "value_score": 73.06,
-      "rank": 182
+      "rank": 181
     },
     {
       "model": "google/gemma-3-4b-it",
@@ -27431,7 +27290,7 @@
         "task_fit": 3.98
       },
       "value_score": 73.03,
-      "rank": 183
+      "rank": 182
     },
     {
       "model": "~openai/gpt-latest",
@@ -27573,7 +27432,7 @@
         "task_fit": 3.98
       },
       "value_score": 73.02,
-      "rank": 184
+      "rank": 183
     },
     {
       "model": "deepseek/deepseek-chat-v3.1",
@@ -27714,7 +27573,7 @@
         "task_fit": 3.7
       },
       "value_score": 73.0,
-      "rank": 185
+      "rank": 184
     },
     {
       "model": "mistralai/mistral-nemo",
@@ -27855,7 +27714,7 @@
         "task_fit": 3.7
       },
       "value_score": 72.75,
-      "rank": 186
+      "rank": 185
     },
     {
       "model": "gryphe/mythomax-l2-13b",
@@ -27998,7 +27857,7 @@
         "task_fit": 3.8
       },
       "value_score": 72.74,
-      "rank": 187
+      "rank": 186
     },
     {
       "model": "meta-llama/llama-3.2-3b-instruct",
@@ -28154,7 +28013,7 @@
         "task_fit": 3.59
       },
       "value_score": 72.7,
-      "rank": 188
+      "rank": 187
     },
     {
       "model": "microsoft/wizardlm-2-8x22b",
@@ -28298,7 +28157,7 @@
         "task_fit": 4.01
       },
       "value_score": 72.66,
-      "rank": 189
+      "rank": 188
     },
     {
       "model": "minimax/minimax-m2-her",
@@ -28442,7 +28301,7 @@
         "task_fit": 4.01
       },
       "value_score": 72.64,
-      "rank": 190
+      "rank": 189
     },
     {
       "model": "bytedance-seed/seed-2.0-mini",
@@ -28583,7 +28442,7 @@
         "task_fit": 3.74
       },
       "value_score": 72.43,
-      "rank": 191
+      "rank": 190
     },
     {
       "model": "deepcogito/cogito-v2.1-671b",
@@ -28724,7 +28583,7 @@
         "task_fit": 3.52
       },
       "value_score": 72.18,
-      "rank": 192
+      "rank": 191
     },
     {
       "model": "anthropic/claude-sonnet-5",
@@ -28865,7 +28724,7 @@
         "task_fit": 3.56
       },
       "value_score": 72.18,
-      "rank": 193
+      "rank": 192
     },
     {
       "model": "google/gemma-2-27b-it",
@@ -29024,7 +28883,7 @@
         "task_fit": 3.76
       },
       "value_score": 72.17,
-      "rank": 194
+      "rank": 193
     },
     {
       "model": "openai/gpt-5.1-chat",
@@ -29166,7 +29025,7 @@
         "task_fit": 3.98
       },
       "value_score": 72.17,
-      "rank": 195
+      "rank": 194
     },
     {
       "model": "thedrummer/unslopnemo-12b",
@@ -29310,7 +29169,7 @@
         "task_fit": 3.82
       },
       "value_score": 72.12,
-      "rank": 196
+      "rank": 195
     },
     {
       "model": "undi95/remm-slerp-l2-13b",
@@ -29453,7 +29312,7 @@
         "task_fit": 3.77
       },
       "value_score": 72.04,
-      "rank": 197
+      "rank": 196
     },
     {
       "model": "relace/relace-apply-3",
@@ -29594,7 +29453,7 @@
         "task_fit": 3.7
       },
       "value_score": 71.91,
-      "rank": 198
+      "rank": 197
     },
     {
       "model": "qwen/qwen3-30b-a3b",
@@ -29750,7 +29609,7 @@
         "task_fit": 3.04
       },
       "value_score": 71.89,
-      "rank": 199
+      "rank": 198
     },
     {
       "model": "openai/gpt-4-turbo",
@@ -29892,7 +29751,7 @@
         "task_fit": 3.98
       },
       "value_score": 71.81,
-      "rank": 200
+      "rank": 199
     },
     {
       "model": "openai/gpt-4-turbo-preview",
@@ -30034,7 +29893,7 @@
         "task_fit": 3.98
       },
       "value_score": 71.81,
-      "rank": 201
+      "rank": 200
     },
     {
       "model": "relace/relace-search",
@@ -30175,7 +30034,7 @@
         "task_fit": 3.7
       },
       "value_score": 71.74,
-      "rank": 202
+      "rank": 201
     },
     {
       "model": "kwaipilot/kat-coder-air-v2.5",
@@ -30317,7 +30176,7 @@
         "task_fit": 3.82
       },
       "value_score": 71.73,
-      "rank": 203
+      "rank": 202
     },
     {
       "model": "openai/gpt-4o-2024-05-13",
@@ -30460,7 +30319,7 @@
         "task_fit": 4.42
       },
       "value_score": 71.63,
-      "rank": 204
+      "rank": 203
     },
     {
       "model": "z-ai/glm-5.1",
@@ -30601,7 +30460,7 @@
         "task_fit": 3.7
       },
       "value_score": 71.52,
-      "rank": 205
+      "rank": 204
     },
     {
       "model": "~anthropic/claude-fable-latest",
@@ -30743,7 +30602,7 @@
         "task_fit": 3.98
       },
       "value_score": 71.47,
-      "rank": 206
+      "rank": 205
     },
     {
       "model": "z-ai/glm-5v-turbo",
@@ -30884,7 +30743,7 @@
         "task_fit": 3.7
       },
       "value_score": 71.41,
-      "rank": 207
+      "rank": 206
     },
     {
       "model": "poolside/laguna-xs-2.1",
@@ -31025,148 +30884,7 @@
         "task_fit": 3.7
       },
       "value_score": 71.27,
-      "rank": 208
-    },
-    {
-      "model": "poolside/laguna-m.1",
-      "family_id": "poolside/laguna-m.1",
-      "provider": "Poolside",
-      "display_name": "Poolside: Laguna M.1",
-      "source_attribution": {
-        "catalog": [
-          "openrouter"
-        ],
-        "intelligence": "heuristic",
-        "speed": "openrouter",
-        "pricing": "openrouter",
-        "context_length": "openrouter",
-        "merge_priority": {
-          "intelligence": [
-            "benchmark",
-            "artificial_analysis",
-            "lmsys",
-            "helper",
-            "heuristic"
-          ],
-          "speed": [
-            "artificial_analysis",
-            "openrouter",
-            "heuristic"
-          ],
-          "context_length": [
-            "openrouter",
-            "bridge"
-          ],
-          "pricing": [
-            "openrouter",
-            "bridge"
-          ]
-        }
-      },
-      "raw_metrics": {
-        "intelligence_base": 68,
-        "context_length": 262144,
-        "prompt_cost": 2e-07,
-        "completion_cost": 4e-07,
-        "average_cost": 3e-07,
-        "aa_quality": null,
-        "aa_speed": null,
-        "lmsys_elo": null,
-        "openrouter_speed_hint": 32768.0,
-        "source_count": 1,
-        "availability_hint": 75,
-        "stability_hint": 78
-      },
-      "task_metadata": {
-        "quality_by_task": {
-          "coding": 64,
-          "reasoning": 68,
-          "vision": 18,
-          "long_context": 100,
-          "extraction": 74,
-          "structured_output": 46,
-          "general_chat": 66,
-          "tool_agent_compatibility": 57
-        },
-        "taxonomy_scores": {
-          "chat_casual": 66,
-          "creative_writing": 66,
-          "knowledge": 67,
-          "legal_formal": 70,
-          "coding": 64,
-          "agentic_tool_use": 57,
-          "vision_ocr": 29,
-          "vision_reasoning": 33,
-          "math_logic": 68,
-          "translation_language": 68
-        },
-        "supported": [
-          "extraction",
-          "long_context"
-        ],
-        "primary": [
-          "long_context",
-          "extraction",
-          "reasoning"
-        ],
-        "coverage_score": 61.62,
-        "confidence": 0.68,
-        "helper_enriched": false,
-        "provider_family": "Poolside"
-      },
-      "helper_metadata": {
-        "helper_tasks_applied": []
-      },
-      "self_hosting": {
-        "self_hostable": false,
-        "open_weight": false,
-        "family": null,
-        "hosting_modes": [
-          "cloud_api"
-        ],
-        "download_sources": [],
-        "preferred_runtimes": [],
-        "quantizations_known": [],
-        "parameter_scale_billions": null,
-        "hardware_profile_hint": null,
-        "self_hosting_notes": null,
-        "benchmark_evidence_sources": [
-          "openrouter_catalog"
-        ]
-      },
-      "normalized_metrics": {
-        "intelligence": 68.0,
-        "speed": 37.13,
-        "stability": 78.0,
-        "availability": 75.0,
-        "context": 67.18,
-        "task_fit": 61.62,
-        "cost_efficiency": 99.69
-      },
-      "metrics": {
-        "intelligence": 68,
-        "speed": 37,
-        "stability": 78,
-        "availability": 75,
-        "context": 67,
-        "task_fit": 62,
-        "cost_efficiency": 100,
-        "cost": 3e-07
-      },
-      "tier": "HEAVY_HITTER",
-      "task_label": "LONG-CONTEXT",
-      "geopolitical_risk": "LOW",
-      "score_breakdown": {
-        "intelligence": 20.4,
-        "speed": 5.2,
-        "stability": 12.48,
-        "cost_efficiency": 17.94,
-        "availability": 7.5,
-        "context": 4.03,
-        "task_fit": 3.7
-      },
-      "value_score": 71.23,
-      "rank": 209
+      "rank": 207
     },
     {
       "model": "mistralai/mistral-small-3.1-24b-instruct",
@@ -31308,7 +31026,7 @@
         "task_fit": 2.98
       },
       "value_score": 71.17,
-      "rank": 210
+      "rank": 208
     },
     {
       "model": "bytedance-seed/seed-1.6",
@@ -31449,7 +31167,7 @@
         "task_fit": 3.7
       },
       "value_score": 71.08,
-      "rank": 211
+      "rank": 209
     },
     {
       "model": "anthropic/claude-fable-5",
@@ -31591,7 +31309,7 @@
         "task_fit": 3.65
       },
       "value_score": 70.88,
-      "rank": 212
+      "rank": 210
     },
     {
       "model": "aion-labs/aion-3.0-mini",
@@ -31732,7 +31450,7 @@
         "task_fit": 3.74
       },
       "value_score": 70.77,
-      "rank": 213
+      "rank": 211
     },
     {
       "model": "nousresearch/hermes-3-llama-3.1-70b",
@@ -31873,7 +31591,7 @@
         "task_fit": 3.74
       },
       "value_score": 70.69,
-      "rank": 214
+      "rank": 212
     },
     {
       "model": "sakana/fugu-ultra",
@@ -32014,7 +31732,7 @@
         "task_fit": 3.7
       },
       "value_score": 70.68,
-      "rank": 215
+      "rank": 213
     },
     {
       "model": "nousresearch/hermes-3-llama-3.1-405b",
@@ -32155,7 +31873,7 @@
         "task_fit": 3.74
       },
       "value_score": 70.64,
-      "rank": 216
+      "rank": 214
     },
     {
       "model": "mistralai/mistral-medium-3",
@@ -32297,7 +32015,7 @@
         "task_fit": 3.34
       },
       "value_score": 70.63,
-      "rank": 217
+      "rank": 215
     },
     {
       "model": "z-ai/glm-4.6v",
@@ -32438,7 +32156,7 @@
         "task_fit": 3.7
       },
       "value_score": 70.5,
-      "rank": 218
+      "rank": 216
     },
     {
       "model": "meta-llama/llama-4-maverick",
@@ -32593,7 +32311,7 @@
         "task_fit": 3.09
       },
       "value_score": 70.43,
-      "rank": 219
+      "rank": 217
     },
     {
       "model": "aion-labs/aion-2.0",
@@ -32734,7 +32452,7 @@
         "task_fit": 3.7
       },
       "value_score": 70.39,
-      "rank": 220
+      "rank": 218
     },
     {
       "model": "google/gemini-3.6-flash",
@@ -32876,7 +32594,7 @@
         "task_fit": 3.76
       },
       "value_score": 70.1,
-      "rank": 221
+      "rank": 219
     },
     {
       "model": "google/gemini-3-flash-preview",
@@ -33018,7 +32736,7 @@
         "task_fit": 3.29
       },
       "value_score": 69.99,
-      "rank": 222
+      "rank": 220
     },
     {
       "model": "google/gemini-3.5-flash",
@@ -33160,7 +32878,7 @@
         "task_fit": 3.76
       },
       "value_score": 69.97,
-      "rank": 223
+      "rank": 221
     },
     {
       "model": "x-ai/grok-4.20",
@@ -33301,7 +33019,7 @@
         "task_fit": 2.57
       },
       "value_score": 69.87,
-      "rank": 224
+      "rank": 222
     },
     {
       "model": "aion-labs/aion-3.0",
@@ -33442,7 +33160,7 @@
         "task_fit": 3.7
       },
       "value_score": 69.81,
-      "rank": 225
+      "rank": 223
     },
     {
       "model": "x-ai/grok-4.5",
@@ -33583,7 +33301,7 @@
         "task_fit": 3.16
       },
       "value_score": 69.76,
-      "rank": 226
+      "rank": 224
     },
     {
       "model": "meta/muse-spark-1.1",
@@ -33724,7 +33442,7 @@
         "task_fit": 3.04
       },
       "value_score": 69.4,
-      "rank": 227
+      "rank": 225
     },
     {
       "model": "meta-llama/llama-4-scout",
@@ -33879,7 +33597,7 @@
         "task_fit": 2.93
       },
       "value_score": 69.35,
-      "rank": 228
+      "rank": 226
     },
     {
       "model": "x-ai/grok-4.3",
@@ -34020,7 +33738,7 @@
         "task_fit": 2.57
       },
       "value_score": 69.2,
-      "rank": 229
+      "rank": 227
     },
     {
       "model": "morph/morph-v3-fast",
@@ -34161,7 +33879,7 @@
         "task_fit": 3.65
       },
       "value_score": 69.13,
-      "rank": 230
+      "rank": 228
     },
     {
       "model": "qwen/qwen-2.5-7b-instruct",
@@ -34301,7 +34019,7 @@
         "task_fit": 3.2
       },
       "value_score": 68.75,
-      "rank": 231
+      "rank": 229
     },
     {
       "model": "moonshotai/kimi-k3",
@@ -34442,7 +34160,7 @@
         "task_fit": 3.3
       },
       "value_score": 68.73,
-      "rank": 232
+      "rank": 230
     },
     {
       "model": "z-ai/glm-4.5v",
@@ -34583,7 +34301,7 @@
         "task_fit": 3.58
       },
       "value_score": 68.66,
-      "rank": 233
+      "rank": 231
     },
     {
       "model": "x-ai/grok-build-0.1",
@@ -34724,7 +34442,7 @@
         "task_fit": 2.65
       },
       "value_score": 68.62,
-      "rank": 234
+      "rank": 232
     },
     {
       "model": "bytedance/ui-tars-1.5-7b",
@@ -34865,7 +34583,7 @@
         "task_fit": 3.52
       },
       "value_score": 68.61,
-      "rank": 235
+      "rank": 233
     },
     {
       "model": "sao10k/l3-lunaris-8b",
@@ -35007,7 +34725,7 @@
         "task_fit": 3.42
       },
       "value_score": 68.6,
-      "rank": 236
+      "rank": 234
     },
     {
       "model": "qwen/qwen3.6-max-preview",
@@ -35148,7 +34866,7 @@
         "task_fit": 2.68
       },
       "value_score": 68.59,
-      "rank": 237
+      "rank": 235
     },
     {
       "model": "qwen/qwen-2.5-72b-instruct",
@@ -35288,7 +35006,7 @@
         "task_fit": 3.2
       },
       "value_score": 68.55,
-      "rank": 238
+      "rank": 236
     },
     {
       "model": "google/gemini-3.1-pro-preview",
@@ -35430,7 +35148,7 @@
         "task_fit": 3.61
       },
       "value_score": 68.34,
-      "rank": 239
+      "rank": 237
     },
     {
       "model": "aion-labs/aion-rp-llama-3.1-8b",
@@ -35570,7 +35288,7 @@
         "task_fit": 3.43
       },
       "value_score": 68.28,
-      "rank": 240
+      "rank": 238
     },
     {
       "model": "qwen/qwen3.7-max",
@@ -35711,7 +35429,7 @@
         "task_fit": 2.9
       },
       "value_score": 68.25,
-      "rank": 241
+      "rank": 239
     },
     {
       "model": "mistralai/mistral-large",
@@ -35853,7 +35571,7 @@
         "task_fit": 3.11
       },
       "value_score": 68.09,
-      "rank": 242
+      "rank": 240
     },
     {
       "model": "moonshotai/kimi-k2.6",
@@ -35994,7 +35712,7 @@
         "task_fit": 2.83
       },
       "value_score": 68.02,
-      "rank": 243
+      "rank": 241
     },
     {
       "model": "meta-llama/llama-3.2-1b-instruct",
@@ -36149,7 +35867,7 @@
         "task_fit": 3.19
       },
       "value_score": 67.96,
-      "rank": 244
+      "rank": 242
     },
     {
       "model": "openai/gpt-3.5-turbo-instruct",
@@ -36287,7 +36005,7 @@
         "task_fit": 3.18
       },
       "value_score": 67.92,
-      "rank": 245
+      "rank": 243
     },
     {
       "model": "openai/gpt-3.5-turbo-16k",
@@ -36425,7 +36143,7 @@
         "task_fit": 3.44
       },
       "value_score": 67.82,
-      "rank": 246
+      "rank": 244
     },
     {
       "model": "perceptron/perceptron-mk1",
@@ -36565,7 +36283,7 @@
         "task_fit": 3.39
       },
       "value_score": 67.73,
-      "rank": 247
+      "rank": 245
     },
     {
       "model": "openai/gpt-3.5-turbo",
@@ -36705,7 +36423,7 @@
         "task_fit": 2.56
       },
       "value_score": 67.56,
-      "rank": 248
+      "rank": 246
     },
     {
       "model": "deepseek/deepseek-r1-distill-llama-70b",
@@ -36859,7 +36577,7 @@
         "task_fit": 2.44
       },
       "value_score": 66.9,
-      "rank": 249
+      "rank": 247
     },
     {
       "model": "qwen/qwen3.5-27b",
@@ -37000,7 +36718,7 @@
         "task_fit": 2.42
       },
       "value_score": 66.73,
-      "rank": 250
+      "rank": 248
     },
     {
       "model": "z-ai/glm-5",
@@ -37141,7 +36859,7 @@
         "task_fit": 3.09
       },
       "value_score": 66.34,
-      "rank": 251
+      "rank": 249
     },
     {
       "model": "qwen/qwen3.7-plus",
@@ -37282,7 +37000,7 @@
         "task_fit": 2.65
       },
       "value_score": 66.29,
-      "rank": 252
+      "rank": 250
     },
     {
       "model": "qwen/qwen3.6-plus",
@@ -37423,7 +37141,7 @@
         "task_fit": 2.65
       },
       "value_score": 66.22,
-      "rank": 253
+      "rank": 251
     },
     {
       "model": "deepseek/deepseek-v3.2",
@@ -37577,7 +37295,7 @@
         "task_fit": 2.39
       },
       "value_score": 66.05,
-      "rank": 254
+      "rank": 252
     },
     {
       "model": "rekaai/reka-edge",
@@ -37715,7 +37433,7 @@
         "task_fit": 3.16
       },
       "value_score": 66.0,
-      "rank": 255
+      "rank": 253
     },
     {
       "model": "minimax/minimax-m2.7",
@@ -37856,7 +37574,7 @@
         "task_fit": 2.6
       },
       "value_score": 65.94,
-      "rank": 256
+      "rank": 254
     },
     {
       "model": "qwen/qwen3-max-thinking",
@@ -38010,7 +37728,7 @@
         "task_fit": 2.44
       },
       "value_score": 65.88,
-      "rank": 257
+      "rank": 255
     },
     {
       "model": "meituan/longcat-2.0",
@@ -38151,7 +37869,7 @@
         "task_fit": 2.42
       },
       "value_score": 65.82,
-      "rank": 258
+      "rank": 256
     },
     {
       "model": "minimax/minimax-m3",
@@ -38292,7 +38010,7 @@
         "task_fit": 2.83
       },
       "value_score": 65.75,
-      "rank": 259
+      "rank": 257
     },
     {
       "model": "z-ai/glm-5-turbo",
@@ -38433,7 +38151,7 @@
         "task_fit": 2.6
       },
       "value_score": 65.57,
-      "rank": 260
+      "rank": 258
     },
     {
       "model": "qwen/qwen3.5-35b-a3b",
@@ -38574,7 +38292,7 @@
         "task_fit": 2.29
       },
       "value_score": 65.45,
-      "rank": 261
+      "rank": 259
     },
     {
       "model": "deepseek/deepseek-v3.1-terminus",
@@ -38728,7 +38446,7 @@
         "task_fit": 2.31
       },
       "value_score": 65.31,
-      "rank": 262
+      "rank": 260
     },
     {
       "model": "xiaomi/mimo-v2.5-pro",
@@ -38869,7 +38587,7 @@
         "task_fit": 2.75
       },
       "value_score": 65.09,
-      "rank": 263
+      "rank": 261
     },
     {
       "model": "anthropic/claude-opus-4",
@@ -39011,7 +38729,7 @@
         "task_fit": 3.51
       },
       "value_score": 64.81,
-      "rank": 264
+      "rank": 262
     },
     {
       "model": "moonshotai/kimi-k2",
@@ -39152,7 +38870,7 @@
         "task_fit": 2.5
       },
       "value_score": 64.35,
-      "rank": 265
+      "rank": 263
     },
     {
       "model": "minimax/minimax-m2.5",
@@ -39293,7 +39011,7 @@
         "task_fit": 2.42
       },
       "value_score": 64.28,
-      "rank": 266
+      "rank": 264
     },
     {
       "model": "qwen/qwen3.6-27b",
@@ -39434,7 +39152,7 @@
         "task_fit": 2.57
       },
       "value_score": 64.25,
-      "rank": 267
+      "rank": 265
     },
     {
       "model": "mancer/weaver",
@@ -39572,7 +39290,7 @@
         "task_fit": 2.9
       },
       "value_score": 64.21,
-      "rank": 268
+      "rank": 266
     },
     {
       "model": "z-ai/glm-4.7",
@@ -39713,7 +39431,7 @@
         "task_fit": 2.42
       },
       "value_score": 64.18,
-      "rank": 269
+      "rank": 267
     },
     {
       "model": "thinkingmachines/inkling",
@@ -39854,7 +39572,7 @@
         "task_fit": 2.77
       },
       "value_score": 64.16,
-      "rank": 270
+      "rank": 268
     },
     {
       "model": "moonshotai/kimi-k2-thinking",
@@ -39995,7 +39713,7 @@
         "task_fit": 2.48
       },
       "value_score": 64.09,
-      "rank": 271
+      "rank": 269
     },
     {
       "model": "qwen/qwen3-max",
@@ -40149,7 +39867,7 @@
         "task_fit": 2.13
       },
       "value_score": 63.77,
-      "rank": 272
+      "rank": 270
     },
     {
       "model": "minimax/minimax-m2.1",
@@ -40290,7 +40008,7 @@
         "task_fit": 2.35
       },
       "value_score": 63.56,
-      "rank": 273
+      "rank": 271
     },
     {
       "model": "xiaomi/mimo-v2.5",
@@ -40431,7 +40149,7 @@
         "task_fit": 2.57
       },
       "value_score": 63.49,
-      "rank": 274
+      "rank": 272
     },
     {
       "model": "tencent/hy3",
@@ -40572,7 +40290,7 @@
         "task_fit": 2.72
       },
       "value_score": 63.47,
-      "rank": 275
+      "rank": 273
     },
     {
       "model": "nex-agi/nex-n2-pro",
@@ -40713,7 +40431,7 @@
         "task_fit": 2.72
       },
       "value_score": 63.42,
-      "rank": 276
+      "rank": 274
     },
     {
       "model": "moonshotai/kimi-k2.7-code",
@@ -40854,7 +40572,7 @@
         "task_fit": 2.84
       },
       "value_score": 63.27,
-      "rank": 277
+      "rank": 275
     },
     {
       "model": "openai/o3",
@@ -40995,7 +40713,7 @@
         "task_fit": 2.69
       },
       "value_score": 63.01,
-      "rank": 278
+      "rank": 276
     },
     {
       "model": "openai/gpt-4",
@@ -41135,7 +40853,7 @@
         "task_fit": 2.79
       },
       "value_score": 62.88,
-      "rank": 279
+      "rank": 277
     },
     {
       "model": "qwen/qwen3.5-397b-a17b",
@@ -41276,7 +40994,159 @@
         "task_fit": 2.42
       },
       "value_score": 62.86,
-      "rank": 280
+      "rank": 278
+    },
+    {
+      "model": "nvidia/nemotron-3-ultra-550b-a55b",
+      "family_id": "nvidia/nemotron-3-ultra-550b-a55b",
+      "provider": "Nvidia",
+      "display_name": "NVIDIA: Nemotron 3 Ultra",
+      "source_attribution": {
+        "catalog": [
+          "openrouter"
+        ],
+        "intelligence": "artificial_analysis",
+        "speed": "artificial_analysis",
+        "pricing": "openrouter",
+        "context_length": "openrouter",
+        "merge_priority": {
+          "intelligence": [
+            "benchmark",
+            "artificial_analysis",
+            "lmsys",
+            "helper",
+            "heuristic"
+          ],
+          "speed": [
+            "artificial_analysis",
+            "openrouter",
+            "heuristic"
+          ],
+          "context_length": [
+            "openrouter",
+            "bridge"
+          ],
+          "pricing": [
+            "openrouter",
+            "bridge"
+          ]
+        }
+      },
+      "raw_metrics": {
+        "intelligence_base": 37,
+        "context_length": 512288,
+        "prompt_cost": 5e-07,
+        "completion_cost": 2.2e-06,
+        "average_cost": 1.35e-06,
+        "aa_quality": 37.8,
+        "aa_speed": 219.223,
+        "lmsys_elo": null,
+        "openrouter_speed_hint": 16384.0,
+        "source_count": 2,
+        "availability_hint": 83,
+        "stability_hint": 83
+      },
+      "task_metadata": {
+        "quality_by_task": {
+          "coding": 33,
+          "reasoning": 37,
+          "vision": 18,
+          "long_context": 100,
+          "extraction": 52,
+          "structured_output": 25,
+          "general_chat": 39,
+          "tool_agent_compatibility": 39
+        },
+        "taxonomy_scores": {
+          "chat_casual": 39,
+          "creative_writing": 39,
+          "knowledge": 38,
+          "legal_formal": 42,
+          "coding": 33,
+          "agentic_tool_use": 39,
+          "vision_ocr": 25,
+          "vision_reasoning": 24,
+          "math_logic": 37,
+          "translation_language": 43
+        },
+        "supported": [
+          "long_context"
+        ],
+        "primary": [
+          "long_context",
+          "extraction",
+          "general_chat"
+        ],
+        "coverage_score": 42.88,
+        "confidence": 0.68,
+        "helper_enriched": false,
+        "provider_family": "Nvidia"
+      },
+      "helper_metadata": {
+        "helper_tasks_applied": []
+      },
+      "self_hosting": {
+        "self_hostable": true,
+        "open_weight": true,
+        "family": "Nemotron",
+        "hosting_modes": [
+          "cloud_api",
+          "self_hosted"
+        ],
+        "download_sources": [
+          "huggingface"
+        ],
+        "preferred_runtimes": [
+          "vllm",
+          "tensorrt-llm"
+        ],
+        "quantizations_known": [
+          "BF16",
+          "Q2_K",
+          "Q3_K_S",
+          "Q3_K_M"
+        ],
+        "parameter_scale_billions": 550.0,
+        "hardware_profile_hint": "server_class_80gb_plus_or_multi_gpu",
+        "self_hosting_notes": "Nemotron class models are generally self-hostable on workstation or server-class hardware, not consumer laptops.",
+        "benchmark_evidence_sources": [
+          "openrouter_catalog",
+          "artificial_analysis"
+        ]
+      },
+      "normalized_metrics": {
+        "intelligence": 37.0,
+        "speed": 35.01,
+        "stability": 83.0,
+        "availability": 83.0,
+        "context": 78.0,
+        "task_fit": 42.88,
+        "cost_efficiency": 98.62
+      },
+      "metrics": {
+        "intelligence": 37,
+        "speed": 35,
+        "stability": 83,
+        "availability": 83,
+        "context": 78,
+        "task_fit": 43,
+        "cost_efficiency": 99,
+        "cost": 1.35e-06
+      },
+      "tier": "HEAVY_HITTER",
+      "task_label": "LONG-CONTEXT",
+      "geopolitical_risk": "LOW",
+      "score_breakdown": {
+        "intelligence": 11.1,
+        "speed": 4.9,
+        "stability": 13.28,
+        "cost_efficiency": 17.75,
+        "availability": 8.3,
+        "context": 4.68,
+        "task_fit": 2.57
+      },
+      "value_score": 62.58,
+      "rank": 279
     },
     {
       "model": "minimax/minimax-m2",
@@ -41417,7 +41287,7 @@
         "task_fit": 2.24
       },
       "value_score": 62.58,
-      "rank": 281
+      "rank": 280
     },
     {
       "model": "qwen/qwen3.5-122b-a10b",
@@ -41558,7 +41428,7 @@
         "task_fit": 2.39
       },
       "value_score": 62.57,
-      "rank": 282
+      "rank": 281
     },
     {
       "model": "z-ai/glm-4.6",
@@ -41699,159 +41569,7 @@
         "task_fit": 2.24
       },
       "value_score": 62.46,
-      "rank": 283
-    },
-    {
-      "model": "nvidia/nemotron-3-ultra-550b-a55b",
-      "family_id": "nvidia/nemotron-3-ultra-550b-a55b",
-      "provider": "Nvidia",
-      "display_name": "NVIDIA: Nemotron 3 Ultra",
-      "source_attribution": {
-        "catalog": [
-          "openrouter"
-        ],
-        "intelligence": "artificial_analysis",
-        "speed": "artificial_analysis",
-        "pricing": "openrouter",
-        "context_length": "openrouter",
-        "merge_priority": {
-          "intelligence": [
-            "benchmark",
-            "artificial_analysis",
-            "lmsys",
-            "helper",
-            "heuristic"
-          ],
-          "speed": [
-            "artificial_analysis",
-            "openrouter",
-            "heuristic"
-          ],
-          "context_length": [
-            "openrouter",
-            "bridge"
-          ],
-          "pricing": [
-            "openrouter",
-            "bridge"
-          ]
-        }
-      },
-      "raw_metrics": {
-        "intelligence_base": 37,
-        "context_length": 512288,
-        "prompt_cost": 6e-07,
-        "completion_cost": 3.6e-06,
-        "average_cost": 2.1e-06,
-        "aa_quality": 37.8,
-        "aa_speed": 219.223,
-        "lmsys_elo": null,
-        "openrouter_speed_hint": null,
-        "source_count": 2,
-        "availability_hint": 83,
-        "stability_hint": 83
-      },
-      "task_metadata": {
-        "quality_by_task": {
-          "coding": 33,
-          "reasoning": 37,
-          "vision": 18,
-          "long_context": 100,
-          "extraction": 52,
-          "structured_output": 25,
-          "general_chat": 39,
-          "tool_agent_compatibility": 39
-        },
-        "taxonomy_scores": {
-          "chat_casual": 39,
-          "creative_writing": 39,
-          "knowledge": 38,
-          "legal_formal": 42,
-          "coding": 33,
-          "agentic_tool_use": 39,
-          "vision_ocr": 25,
-          "vision_reasoning": 24,
-          "math_logic": 37,
-          "translation_language": 43
-        },
-        "supported": [
-          "long_context"
-        ],
-        "primary": [
-          "long_context",
-          "extraction",
-          "general_chat"
-        ],
-        "coverage_score": 42.88,
-        "confidence": 0.68,
-        "helper_enriched": false,
-        "provider_family": "Nvidia"
-      },
-      "helper_metadata": {
-        "helper_tasks_applied": []
-      },
-      "self_hosting": {
-        "self_hostable": true,
-        "open_weight": true,
-        "family": "Nemotron",
-        "hosting_modes": [
-          "cloud_api",
-          "self_hosted"
-        ],
-        "download_sources": [
-          "huggingface"
-        ],
-        "preferred_runtimes": [
-          "vllm",
-          "tensorrt-llm"
-        ],
-        "quantizations_known": [
-          "BF16",
-          "Q2_K",
-          "Q3_K_S",
-          "Q3_K_M"
-        ],
-        "parameter_scale_billions": 550.0,
-        "hardware_profile_hint": "server_class_80gb_plus_or_multi_gpu",
-        "self_hosting_notes": "Nemotron class models are generally self-hostable on workstation or server-class hardware, not consumer laptops.",
-        "benchmark_evidence_sources": [
-          "openrouter_catalog",
-          "artificial_analysis"
-        ]
-      },
-      "normalized_metrics": {
-        "intelligence": 37.0,
-        "speed": 35.01,
-        "stability": 83.0,
-        "availability": 83.0,
-        "context": 78.0,
-        "task_fit": 42.88,
-        "cost_efficiency": 97.86
-      },
-      "metrics": {
-        "intelligence": 37,
-        "speed": 35,
-        "stability": 83,
-        "availability": 83,
-        "context": 78,
-        "task_fit": 43,
-        "cost_efficiency": 98,
-        "cost": 2.1e-06
-      },
-      "tier": "HEAVY_HITTER",
-      "task_label": "LONG-CONTEXT",
-      "geopolitical_risk": "LOW",
-      "score_breakdown": {
-        "intelligence": 11.1,
-        "speed": 4.9,
-        "stability": 13.28,
-        "cost_efficiency": 17.61,
-        "availability": 8.3,
-        "context": 4.68,
-        "task_fit": 2.57
-      },
-      "value_score": 62.45,
-      "rank": 284
+      "rank": 282
     },
     {
       "model": "qwen/qwen3.6-35b-a3b",
@@ -41992,7 +41710,7 @@
         "task_fit": 2.35
       },
       "value_score": 62.33,
-      "rank": 285
+      "rank": 283
     },
     {
       "model": "inclusionai/ling-2.6-1t",
@@ -42133,7 +41851,7 @@
         "task_fit": 2.17
       },
       "value_score": 62.2,
-      "rank": 286
+      "rank": 284
     },
     {
       "model": "qwen/qwen3-coder",
@@ -42287,7 +42005,7 @@
         "task_fit": 1.99
       },
       "value_score": 61.84,
-      "rank": 287
+      "rank": 285
     },
     {
       "model": "moonshotai/kimi-k2-0905",
@@ -42428,7 +42146,7 @@
         "task_fit": 2.06
       },
       "value_score": 60.97,
-      "rank": 288
+      "rank": 286
     },
     {
       "model": "kwaipilot/kat-coder-pro-v2",
@@ -42569,7 +42287,7 @@
         "task_fit": 2.54
       },
       "value_score": 60.81,
-      "rank": 289
+      "rank": 287
     },
     {
       "model": "qwen/qwen3-vl-235b-a22b-instruct",
@@ -42725,7 +42443,7 @@
         "task_fit": 2.17
       },
       "value_score": 60.74,
-      "rank": 290
+      "rank": 288
     },
     {
       "model": "openai/o1",
@@ -42866,7 +42584,7 @@
         "task_fit": 2.44
       },
       "value_score": 60.31,
-      "rank": 291
+      "rank": 289
     },
     {
       "model": "minimax/minimax-m1",
@@ -43007,7 +42725,7 @@
         "task_fit": 1.84
       },
       "value_score": 60.28,
-      "rank": 292
+      "rank": 290
     },
     {
       "model": "deepseek/deepseek-chat-v3-0324",
@@ -43148,7 +42866,7 @@
         "task_fit": 1.77
       },
       "value_score": 60.26,
-      "rank": 293
+      "rank": 291
     },
     {
       "model": "qwen/qwen3-coder-30b-a3b-instruct",
@@ -43303,7 +43021,7 @@
         "task_fit": 1.81
       },
       "value_score": 60.25,
-      "rank": 294
+      "rank": 292
     },
     {
       "model": "cohere/command-a",
@@ -43444,7 +43162,7 @@
         "task_fit": 2.02
       },
       "value_score": 59.98,
-      "rank": 295
+      "rank": 293
     },
     {
       "model": "inclusionai/ring-2.6-1t",
@@ -43585,7 +43303,7 @@
         "task_fit": 2.31
       },
       "value_score": 59.76,
-      "rank": 296
+      "rank": 294
     },
     {
       "model": "stepfun/step-3.7-flash",
@@ -43726,7 +43444,7 @@
         "task_fit": 2.31
       },
       "value_score": 59.7,
-      "rank": 297
+      "rank": 295
     },
     {
       "model": "mistralai/mistral-medium-3.1",
@@ -43867,7 +43585,7 @@
         "task_fit": 1.73
       },
       "value_score": 59.61,
-      "rank": 298
+      "rank": 296
     },
     {
       "model": "qwen/qwen3-vl-30b-a3b-instruct",
@@ -44023,7 +43741,7 @@
         "task_fit": 2.02
       },
       "value_score": 59.53,
-      "rank": 299
+      "rank": 297
     },
     {
       "model": "nvidia/nemotron-3-super-120b-a12b",
@@ -44175,7 +43893,7 @@
         "task_fit": 2.13
       },
       "value_score": 59.39,
-      "rank": 300
+      "rank": 298
     },
     {
       "model": "qwen/qwen3-vl-32b-instruct",
@@ -44331,161 +44049,7 @@
         "task_fit": 2.05
       },
       "value_score": 59.21,
-      "rank": 301
-    },
-    {
-      "model": "qwen/qwen3-coder-next",
-      "family_id": "qwen/qwen3-coder-next",
-      "provider": "Qwen",
-      "display_name": "Qwen: Qwen3 Coder Next",
-      "source_attribution": {
-        "catalog": [
-          "openrouter"
-        ],
-        "intelligence": "artificial_analysis",
-        "speed": "artificial_analysis",
-        "pricing": "openrouter",
-        "context_length": "openrouter",
-        "merge_priority": {
-          "intelligence": [
-            "benchmark",
-            "artificial_analysis",
-            "lmsys",
-            "helper",
-            "heuristic"
-          ],
-          "speed": [
-            "artificial_analysis",
-            "openrouter",
-            "heuristic"
-          ],
-          "context_length": [
-            "openrouter",
-            "bridge"
-          ],
-          "pricing": [
-            "openrouter",
-            "bridge"
-          ]
-        }
-      },
-      "raw_metrics": {
-        "intelligence_base": 21,
-        "context_length": 262144,
-        "prompt_cost": 1.1e-07,
-        "completion_cost": 8e-07,
-        "average_cost": 4.55e-07,
-        "aa_quality": 21.1,
-        "aa_speed": 143.767,
-        "lmsys_elo": null,
-        "openrouter_speed_hint": 262144.0,
-        "source_count": 2,
-        "availability_hint": 93,
-        "stability_hint": 91
-      },
-      "task_metadata": {
-        "quality_by_task": {
-          "coding": 33,
-          "reasoning": 21,
-          "vision": 18,
-          "long_context": 100,
-          "extraction": 40,
-          "structured_output": 14,
-          "general_chat": 24,
-          "tool_agent_compatibility": 30
-        },
-        "taxonomy_scores": {
-          "chat_casual": 24,
-          "creative_writing": 24,
-          "knowledge": 23,
-          "legal_formal": 27,
-          "coding": 33,
-          "agentic_tool_use": 30,
-          "vision_ocr": 22,
-          "vision_reasoning": 19,
-          "math_logic": 21,
-          "translation_language": 29
-        },
-        "supported": [
-          "long_context"
-        ],
-        "primary": [
-          "long_context",
-          "extraction",
-          "coding"
-        ],
-        "coverage_score": 35.0,
-        "confidence": 0.68,
-        "helper_enriched": false,
-        "provider_family": "Qwen"
-      },
-      "helper_metadata": {
-        "helper_tasks_applied": []
-      },
-      "self_hosting": {
-        "self_hostable": true,
-        "open_weight": true,
-        "family": "Qwen",
-        "hosting_modes": [
-          "cloud_api",
-          "self_hosted"
-        ],
-        "download_sources": [
-          "huggingface",
-          "ollama",
-          "lmstudio"
-        ],
-        "preferred_runtimes": [
-          "ollama",
-          "lmstudio",
-          "vllm"
-        ],
-        "quantizations_known": [
-          "BF16",
-          "Q4_K_M",
-          "Q5_K_M"
-        ],
-        "parameter_scale_billions": null,
-        "hardware_profile_hint": null,
-        "self_hosting_notes": "Open-weight Qwen family. Practical viability depends on quantization choice and local memory budget.",
-        "benchmark_evidence_sources": [
-          "openrouter_catalog",
-          "artificial_analysis"
-        ]
-      },
-      "normalized_metrics": {
-        "intelligence": 21.0,
-        "speed": 35.01,
-        "stability": 91.0,
-        "availability": 93.0,
-        "context": 67.18,
-        "task_fit": 35.0,
-        "cost_efficiency": 99.53
-      },
-      "metrics": {
-        "intelligence": 21,
-        "speed": 35,
-        "stability": 91,
-        "availability": 93,
-        "context": 67,
-        "task_fit": 35,
-        "cost_efficiency": 100,
-        "cost": 4.5e-07
-      },
-      "tier": "HEAVY_HITTER",
-      "task_label": "LONG-CONTEXT",
-      "geopolitical_risk": "HIGH",
-      "score_breakdown": {
-        "intelligence": 6.3,
-        "speed": 4.9,
-        "stability": 14.56,
-        "cost_efficiency": 17.92,
-        "availability": 9.3,
-        "context": 4.03,
-        "task_fit": 2.1
-      },
-      "value_score": 59.11,
-      "rank": 302
+      "rank": 299
     },
     {
       "model": "mistralai/mistral-small-3.2-24b-instruct",
@@ -44626,7 +44190,161 @@
         "task_fit": 1.59
       },
       "value_score": 59.1,
-      "rank": 303
+      "rank": 300
+    },
+    {
+      "model": "qwen/qwen3-coder-next",
+      "family_id": "qwen/qwen3-coder-next",
+      "provider": "Qwen",
+      "display_name": "Qwen: Qwen3 Coder Next",
+      "source_attribution": {
+        "catalog": [
+          "openrouter"
+        ],
+        "intelligence": "artificial_analysis",
+        "speed": "artificial_analysis",
+        "pricing": "openrouter",
+        "context_length": "openrouter",
+        "merge_priority": {
+          "intelligence": [
+            "benchmark",
+            "artificial_analysis",
+            "lmsys",
+            "helper",
+            "heuristic"
+          ],
+          "speed": [
+            "artificial_analysis",
+            "openrouter",
+            "heuristic"
+          ],
+          "context_length": [
+            "openrouter",
+            "bridge"
+          ],
+          "pricing": [
+            "openrouter",
+            "bridge"
+          ]
+        }
+      },
+      "raw_metrics": {
+        "intelligence_base": 21,
+        "context_length": 262144,
+        "prompt_cost": 1.8e-07,
+        "completion_cost": 9e-07,
+        "average_cost": 5.4e-07,
+        "aa_quality": 21.1,
+        "aa_speed": 143.767,
+        "lmsys_elo": null,
+        "openrouter_speed_hint": 64000.0,
+        "source_count": 2,
+        "availability_hint": 93,
+        "stability_hint": 91
+      },
+      "task_metadata": {
+        "quality_by_task": {
+          "coding": 33,
+          "reasoning": 21,
+          "vision": 18,
+          "long_context": 100,
+          "extraction": 40,
+          "structured_output": 14,
+          "general_chat": 24,
+          "tool_agent_compatibility": 30
+        },
+        "taxonomy_scores": {
+          "chat_casual": 24,
+          "creative_writing": 24,
+          "knowledge": 23,
+          "legal_formal": 27,
+          "coding": 33,
+          "agentic_tool_use": 30,
+          "vision_ocr": 22,
+          "vision_reasoning": 19,
+          "math_logic": 21,
+          "translation_language": 29
+        },
+        "supported": [
+          "long_context"
+        ],
+        "primary": [
+          "long_context",
+          "extraction",
+          "coding"
+        ],
+        "coverage_score": 35.0,
+        "confidence": 0.68,
+        "helper_enriched": false,
+        "provider_family": "Qwen"
+      },
+      "helper_metadata": {
+        "helper_tasks_applied": []
+      },
+      "self_hosting": {
+        "self_hostable": true,
+        "open_weight": true,
+        "family": "Qwen",
+        "hosting_modes": [
+          "cloud_api",
+          "self_hosted"
+        ],
+        "download_sources": [
+          "huggingface",
+          "ollama",
+          "lmstudio"
+        ],
+        "preferred_runtimes": [
+          "ollama",
+          "lmstudio",
+          "vllm"
+        ],
+        "quantizations_known": [
+          "BF16",
+          "Q4_K_M",
+          "Q5_K_M"
+        ],
+        "parameter_scale_billions": null,
+        "hardware_profile_hint": null,
+        "self_hosting_notes": "Open-weight Qwen family. Practical viability depends on quantization choice and local memory budget.",
+        "benchmark_evidence_sources": [
+          "openrouter_catalog",
+          "artificial_analysis"
+        ]
+      },
+      "normalized_metrics": {
+        "intelligence": 21.0,
+        "speed": 35.01,
+        "stability": 91.0,
+        "availability": 93.0,
+        "context": 67.18,
+        "task_fit": 35.0,
+        "cost_efficiency": 99.44
+      },
+      "metrics": {
+        "intelligence": 21,
+        "speed": 35,
+        "stability": 91,
+        "availability": 93,
+        "context": 67,
+        "task_fit": 35,
+        "cost_efficiency": 99,
+        "cost": 5.4e-07
+      },
+      "tier": "HEAVY_HITTER",
+      "task_label": "LONG-CONTEXT",
+      "geopolitical_risk": "HIGH",
+      "score_breakdown": {
+        "intelligence": 6.3,
+        "speed": 4.9,
+        "stability": 14.56,
+        "cost_efficiency": 17.9,
+        "availability": 9.3,
+        "context": 4.03,
+        "task_fit": 2.1
+      },
+      "value_score": 59.09,
+      "rank": 301
     },
     {
       "model": "qwen/qwen3.5-9b",
@@ -44767,7 +44485,7 @@
         "task_fit": 1.98
       },
       "value_score": 59.05,
-      "rank": 304
+      "rank": 302
     },
     {
       "model": "z-ai/glm-4.5",
@@ -44908,7 +44626,7 @@
         "task_fit": 1.92
       },
       "value_score": 58.98,
-      "rank": 305
+      "rank": 303
     },
     {
       "model": "qwen/qwen3-vl-8b-instruct",
@@ -45065,7 +44783,7 @@
         "task_fit": 1.95
       },
       "value_score": 58.87,
-      "rank": 306
+      "rank": 304
     },
     {
       "model": "qwen/qwen3-32b",
@@ -45220,7 +44938,7 @@
         "task_fit": 1.62
       },
       "value_score": 58.79,
-      "rank": 307
+      "rank": 305
     },
     {
       "model": "stepfun/step-3.5-flash",
@@ -45361,7 +45079,7 @@
         "task_fit": 2.17
       },
       "value_score": 58.45,
-      "rank": 308
+      "rank": 306
     },
     {
       "model": "qwen/qwen3-14b",
@@ -45516,7 +45234,7 @@
         "task_fit": 1.59
       },
       "value_score": 58.38,
-      "rank": 309
+      "rank": 307
     },
     {
       "model": "anthropic/claude-3-haiku",
@@ -45657,7 +45375,7 @@
         "task_fit": 1.63
       },
       "value_score": 58.38,
-      "rank": 310
+      "rank": 308
     },
     {
       "model": "mistralai/devstral-2512",
@@ -45798,7 +45516,7 @@
         "task_fit": 2.04
       },
       "value_score": 58.31,
-      "rank": 311
+      "rank": 309
     },
     {
       "model": "z-ai/glm-4.5-air",
@@ -45939,7 +45657,7 @@
         "task_fit": 1.81
       },
       "value_score": 58.13,
-      "rank": 312
+      "rank": 310
     },
     {
       "model": "qwen/qwen3-8b",
@@ -46095,7 +45813,7 @@
         "task_fit": 1.51
       },
       "value_score": 57.76,
-      "rank": 313
+      "rank": 311
     },
     {
       "model": "perplexity/sonar-reasoning-pro",
@@ -46236,7 +45954,7 @@
         "task_fit": 1.93
       },
       "value_score": 57.75,
-      "rank": 314
+      "rank": 312
     },
     {
       "model": "amazon/nova-pro-v1",
@@ -46377,7 +46095,7 @@
         "task_fit": 1.48
       },
       "value_score": 57.63,
-      "rank": 315
+      "rank": 313
     },
     {
       "model": "amazon/nova-lite-v1",
@@ -46518,7 +46236,7 @@
         "task_fit": 1.43
       },
       "value_score": 57.63,
-      "rank": 316
+      "rank": 314
     },
     {
       "model": "upstage/solar-pro-3",
@@ -46659,7 +46377,7 @@
         "task_fit": 1.73
       },
       "value_score": 57.46,
-      "rank": 317
+      "rank": 315
     },
     {
       "model": "qwen/qwen3-next-80b-a3b-instruct",
@@ -46814,7 +46532,7 @@
         "task_fit": 1.69
       },
       "value_score": 56.27,
-      "rank": 318
+      "rank": 316
     },
     {
       "model": "inception/mercury-2",
@@ -46955,7 +46673,7 @@
         "task_fit": 1.98
       },
       "value_score": 56.0,
-      "rank": 319
+      "rank": 317
     },
     {
       "model": "arcee-ai/trinity-large-thinking",
@@ -47096,7 +46814,7 @@
         "task_fit": 1.96
       },
       "value_score": 55.78,
-      "rank": 320
+      "rank": 318
     },
     {
       "model": "amazon/nova-premier-v1",
@@ -47237,7 +46955,7 @@
         "task_fit": 1.67
       },
       "value_score": 55.78,
-      "rank": 321
+      "rank": 319
     },
     {
       "model": "mistralai/ministral-14b-2512",
@@ -47378,7 +47096,7 @@
         "task_fit": 1.62
       },
       "value_score": 55.67,
-      "rank": 322
+      "rank": 320
     },
     {
       "model": "mistralai/ministral-8b-2512",
@@ -47519,7 +47237,7 @@
         "task_fit": 1.54
       },
       "value_score": 55.01,
-      "rank": 323
+      "rank": 321
     },
     {
       "model": "perplexity/sonar",
@@ -47660,7 +47378,7 @@
         "task_fit": 1.54
       },
       "value_score": 54.85,
-      "rank": 324
+      "rank": 322
     },
     {
       "model": "perplexity/sonar-pro",
@@ -47801,7 +47519,7 @@
         "task_fit": 1.54
       },
       "value_score": 54.74,
-      "rank": 325
+      "rank": 323
     },
     {
       "model": "mistralai/mistral-small-24b-instruct-2501",
@@ -47942,7 +47660,7 @@
         "task_fit": 1.12
       },
       "value_score": 54.67,
-      "rank": 326
+      "rank": 324
     },
     {
       "model": "mistralai/mistral-saba",
@@ -48083,7 +47801,7 @@
         "task_fit": 1.12
       },
       "value_score": 54.61,
-      "rank": 327
+      "rank": 325
     },
     {
       "model": "inclusionai/ling-2.6-flash",
@@ -48224,7 +47942,7 @@
         "task_fit": 1.73
       },
       "value_score": 54.44,
-      "rank": 328
+      "rank": 326
     },
     {
       "model": "nvidia/nemotron-3-nano-30b-a3b",
@@ -48376,7 +48094,7 @@
         "task_fit": 1.73
       },
       "value_score": 54.42,
-      "rank": 329
+      "rank": 327
     },
     {
       "model": "mistralai/mixtral-8x22b-instruct",
@@ -48517,7 +48235,7 @@
         "task_fit": 1.25
       },
       "value_score": 54.16,
-      "rank": 330
+      "rank": 328
     },
     {
       "model": "ibm-granite/granite-4.0-h-micro",
@@ -48658,7 +48376,7 @@
         "task_fit": 1.3
       },
       "value_score": 53.51,
-      "rank": 331
+      "rank": 329
     },
     {
       "model": "mistralai/ministral-3b-2512",
@@ -48799,7 +48517,7 @@
         "task_fit": 1.43
       },
       "value_score": 53.33,
-      "rank": 332
+      "rank": 330
     },
     {
       "model": "allenai/olmo-3-32b-think",
@@ -48940,7 +48658,7 @@
         "task_fit": 1.33
       },
       "value_score": 53.21,
-      "rank": 333
+      "rank": 331
     },
     {
       "model": "amazon/nova-micro-v1",
@@ -49081,7 +48799,7 @@
         "task_fit": 1.37
       },
       "value_score": 52.37,
-      "rank": 334
+      "rank": 332
     },
     {
       "model": "ibm-granite/granite-4.1-8b",
@@ -49222,7 +48940,7 @@
         "task_fit": 1.55
       },
       "value_score": 51.18,
-      "rank": 335
+      "rank": 333
     },
     {
       "model": "rekaai/reka-flash-3",
@@ -49363,7 +49081,7 @@
         "task_fit": 1.25
       },
       "value_score": 48.79,
-      "rank": 336
+      "rank": 334
     },
     {
       "model": "microsoft/phi-4",
@@ -49502,7 +49220,7 @@
         "task_fit": 0.94
       },
       "value_score": 46.94,
-      "rank": 337
+      "rank": 335
     },
     {
       "model": "openai/o1-pro",
@@ -49643,7 +49361,7 @@
         "task_fit": 2.25
       },
       "value_score": 45.64,
-      "rank": 338
+      "rank": 336
     }
   ],
   "canonical_public_artifact": {
