@@ -3,11 +3,11 @@
   "scope": "GLOBAL_NON_DISCRIMINATORY",
   "version": "4.1-control-plane",
   "philosophy": "Maximum Intelligence, Speed, and Stability at the Lowest Sustainable Cost.",
-  "last_synopsis": "2026-10-22T04:06:02.602324+00:00",
+  "last_synopsis": "2026-10-22T16:55:24.824565+00:00",
   "data_sources": {
     "openrouter": 468,
     "lmsys_arena": 67,
-    "artificial_analysis": 706
+    "artificial_analysis": 707
   },
   "source_health": {
     "openrouter": {
@@ -17,10 +17,10 @@
       "fetched_records": 468,
       "accepted_records": 468,
       "coverage": 1.0,
-      "latency_ms": 306,
+      "latency_ms": 316,
       "issues": [],
       "warnings": [],
-      "snapshot_path": "/home/runner/work/AIchain/AIchain/artifacts/source_snapshots/20261022T040559Z/openrouter.json"
+      "snapshot_path": "/home/runner/work/AIchain/AIchain/artifacts/source_snapshots/20261022T165521Z/openrouter.json"
     },
     "lmsys": {
       "name": "lmsys",
@@ -29,7 +29,7 @@
       "fetched_records": 67,
       "accepted_records": 67,
       "coverage": 1.0,
-      "latency_ms": 101,
+      "latency_ms": 217,
       "issues": [
         "legacy JSON unavailable: 404 Client Error: Not Found for url: https://huggingface.co/spaces/lmarena-ai/arena-leaderboard/resolve/main/results/latest/elo_results_full.json"
       ],
@@ -37,19 +37,19 @@
         "pickle parse failed: No module named 'pandas'",
         "used MT-bench CSV surrogate because canonical Arena Elo sources were unavailable"
       ],
-      "snapshot_path": "/home/runner/work/AIchain/AIchain/artifacts/source_snapshots/20261022T040559Z/lmsys.json"
+      "snapshot_path": "/home/runner/work/AIchain/AIchain/artifacts/source_snapshots/20261022T165521Z/lmsys.json"
     },
     "artificial_analysis": {
       "name": "artificial_analysis",
       "status": "ok",
       "healthy": true,
-      "fetched_records": 706,
-      "accepted_records": 706,
+      "fetched_records": 707,
+      "accepted_records": 707,
       "coverage": 1.0,
-      "latency_ms": 186,
+      "latency_ms": 404,
       "issues": [],
       "warnings": [],
-      "snapshot_path": "/home/runner/work/AIchain/AIchain/artifacts/source_snapshots/20261022T040559Z/artificial_analysis.json"
+      "snapshot_path": "/home/runner/work/AIchain/AIchain/artifacts/source_snapshots/20261022T165521Z/artificial_analysis.json"
     }
   },
   "degradation_reasons": [],
@@ -598,8 +598,8 @@
   "live_promos": [],
   "tier_breakdown": {
     "OAUTH_BRIDGE": 8,
-    "FREE_FRONTIER": 28,
-    "HEAVY_HITTER": 429
+    "FREE_FRONTIER": 27,
+    "HEAVY_HITTER": 430
   },
   "heavy_hitter": {
     "model": "deepseek/deepseek-r1-0528",
@@ -4226,147 +4226,6 @@
       "rank": 25
     },
     {
-      "model": "minimax/minimax-m3.1-flash:free",
-      "family_id": "minimax/minimax-m3.1-flash",
-      "provider": "Minimax",
-      "display_name": "MiniMax: MiniMax M3.1 Flash (free)",
-      "source_attribution": {
-        "catalog": [
-          "openrouter"
-        ],
-        "intelligence": "artificial_analysis",
-        "speed": "artificial_analysis",
-        "pricing": "openrouter",
-        "context_length": "openrouter",
-        "merge_priority": {
-          "intelligence": [
-            "benchmark",
-            "artificial_analysis",
-            "lmsys",
-            "helper",
-            "heuristic"
-          ],
-          "speed": [
-            "artificial_analysis",
-            "openrouter",
-            "heuristic"
-          ],
-          "context_length": [
-            "openrouter",
-            "bridge"
-          ],
-          "pricing": [
-            "openrouter",
-            "bridge"
-          ]
-        }
-      },
-      "raw_metrics": {
-        "intelligence_base": 42,
-        "context_length": 1000000,
-        "prompt_cost": 0.0,
-        "completion_cost": 0.0,
-        "average_cost": 0.0,
-        "aa_quality": 42.7,
-        "aa_speed": 81.133,
-        "lmsys_elo": null,
-        "openrouter_speed_hint": 524288.0,
-        "source_count": 2,
-        "availability_hint": 83,
-        "stability_hint": 83
-      },
-      "task_metadata": {
-        "quality_by_task": {
-          "coding": 38,
-          "reasoning": 42,
-          "vision": 18,
-          "long_context": 100,
-          "extraction": 55,
-          "structured_output": 29,
-          "general_chat": 43,
-          "tool_agent_compatibility": 42
-        },
-        "taxonomy_scores": {
-          "chat_casual": 43,
-          "creative_writing": 43,
-          "knowledge": 43,
-          "legal_formal": 46,
-          "coding": 38,
-          "agentic_tool_use": 42,
-          "vision_ocr": 25,
-          "vision_reasoning": 25,
-          "math_logic": 42,
-          "translation_language": 47
-        },
-        "supported": [
-          "long_context"
-        ],
-        "primary": [
-          "long_context",
-          "extraction",
-          "general_chat"
-        ],
-        "coverage_score": 45.88,
-        "confidence": 0.68,
-        "helper_enriched": false,
-        "provider_family": "Minimax"
-      },
-      "helper_metadata": {
-        "helper_tasks_applied": []
-      },
-      "self_hosting": {
-        "self_hostable": false,
-        "open_weight": false,
-        "family": null,
-        "hosting_modes": [
-          "cloud_api"
-        ],
-        "download_sources": [],
-        "preferred_runtimes": [],
-        "quantizations_known": [],
-        "parameter_scale_billions": null,
-        "hardware_profile_hint": null,
-        "self_hosting_notes": null,
-        "benchmark_evidence_sources": [
-          "openrouter_catalog",
-          "artificial_analysis"
-        ]
-      },
-      "normalized_metrics": {
-        "intelligence": 42.0,
-        "speed": 35.0,
-        "stability": 83.0,
-        "availability": 83.0,
-        "context": 88.8,
-        "task_fit": 45.88,
-        "cost_efficiency": 100.0
-      },
-      "metrics": {
-        "intelligence": 42,
-        "speed": 35,
-        "stability": 83,
-        "availability": 83,
-        "context": 89,
-        "task_fit": 46,
-        "cost_efficiency": 100,
-        "cost": 0.0
-      },
-      "tier": "FREE_FRONTIER",
-      "task_label": "LONG-CONTEXT",
-      "geopolitical_risk": "LOW",
-      "score_breakdown": {
-        "intelligence": 12.6,
-        "speed": 4.9,
-        "stability": 13.28,
-        "cost_efficiency": 18.0,
-        "availability": 8.3,
-        "context": 5.33,
-        "task_fit": 2.75
-      },
-      "value_score": 65.16,
-      "rank": 26
-    },
-    {
       "model": "nvidia/nemotron-3.5-super-vl:free",
       "family_id": "nvidia/nemotron-3.5-super-vl",
       "provider": "Nvidia",
@@ -4409,7 +4268,7 @@
         "completion_cost": 0.0,
         "average_cost": 0.0,
         "aa_quality": 26.5,
-        "aa_speed": 428.228,
+        "aa_speed": 431.397,
         "lmsys_elo": null,
         "openrouter_speed_hint": 131072.0,
         "source_count": 2,
@@ -4516,7 +4375,7 @@
         "task_fit": 2.61
       },
       "value_score": 60.22,
-      "rank": 27
+      "rank": 26
     },
     {
       "model": "thinkingmachines/inkling-small:free",
@@ -4561,7 +4420,148 @@
         "completion_cost": 0.0,
         "average_cost": 0.0,
         "aa_quality": 25.7,
-        "aa_speed": 203.57,
+        "aa_speed": 218.052,
+        "lmsys_elo": null,
+        "openrouter_speed_hint": 262144.0,
+        "source_count": 2,
+        "availability_hint": 83,
+        "stability_hint": 83
+      },
+      "task_metadata": {
+        "quality_by_task": {
+          "coding": 21,
+          "reasoning": 37,
+          "vision": 18,
+          "long_context": 100,
+          "extraction": 43,
+          "structured_output": 17,
+          "general_chat": 28,
+          "tool_agent_compatibility": 32
+        },
+        "taxonomy_scores": {
+          "chat_casual": 28,
+          "creative_writing": 29,
+          "knowledge": 32,
+          "legal_formal": 39,
+          "coding": 21,
+          "agentic_tool_use": 32,
+          "vision_ocr": 23,
+          "vision_reasoning": 24,
+          "math_logic": 37,
+          "translation_language": 32
+        },
+        "supported": [
+          "long_context"
+        ],
+        "primary": [
+          "long_context",
+          "extraction",
+          "reasoning"
+        ],
+        "coverage_score": 37.0,
+        "confidence": 0.68,
+        "helper_enriched": false,
+        "provider_family": "Thinkingmachines"
+      },
+      "helper_metadata": {
+        "helper_tasks_applied": []
+      },
+      "self_hosting": {
+        "self_hostable": false,
+        "open_weight": false,
+        "family": null,
+        "hosting_modes": [
+          "cloud_api"
+        ],
+        "download_sources": [],
+        "preferred_runtimes": [],
+        "quantizations_known": [],
+        "parameter_scale_billions": null,
+        "hardware_profile_hint": null,
+        "self_hosting_notes": null,
+        "benchmark_evidence_sources": [
+          "openrouter_catalog",
+          "artificial_analysis"
+        ]
+      },
+      "normalized_metrics": {
+        "intelligence": 25.0,
+        "speed": 35.01,
+        "stability": 83.0,
+        "availability": 83.0,
+        "context": 89.57,
+        "task_fit": 37.0,
+        "cost_efficiency": 100.0
+      },
+      "metrics": {
+        "intelligence": 25,
+        "speed": 35,
+        "stability": 83,
+        "availability": 83,
+        "context": 90,
+        "task_fit": 37,
+        "cost_efficiency": 100,
+        "cost": 0.0
+      },
+      "tier": "FREE_FRONTIER",
+      "task_label": "LONG-CONTEXT",
+      "geopolitical_risk": "LOW",
+      "score_breakdown": {
+        "intelligence": 7.5,
+        "speed": 4.9,
+        "stability": 13.28,
+        "cost_efficiency": 18.0,
+        "availability": 8.3,
+        "context": 5.37,
+        "task_fit": 2.22
+      },
+      "value_score": 59.57,
+      "rank": 27
+    },
+    {
+      "model": "thinkingmachines/inkling:free",
+      "family_id": "thinkingmachines/inkling",
+      "provider": "Thinkingmachines",
+      "display_name": "Thinking Machines: Inkling (free)",
+      "source_attribution": {
+        "catalog": [
+          "openrouter"
+        ],
+        "intelligence": "artificial_analysis",
+        "speed": "artificial_analysis",
+        "pricing": "openrouter",
+        "context_length": "openrouter",
+        "merge_priority": {
+          "intelligence": [
+            "benchmark",
+            "artificial_analysis",
+            "lmsys",
+            "helper",
+            "heuristic"
+          ],
+          "speed": [
+            "artificial_analysis",
+            "openrouter",
+            "heuristic"
+          ],
+          "context_length": [
+            "openrouter",
+            "bridge"
+          ],
+          "pricing": [
+            "openrouter",
+            "bridge"
+          ]
+        }
+      },
+      "raw_metrics": {
+        "intelligence_base": 25,
+        "context_length": 1048576,
+        "prompt_cost": 0.0,
+        "completion_cost": 0.0,
+        "average_cost": 0.0,
+        "aa_quality": 25.0,
+        "aa_speed": 194.738,
         "lmsys_elo": null,
         "openrouter_speed_hint": 262144.0,
         "source_count": 2,
@@ -4660,147 +4660,6 @@
       "rank": 28
     },
     {
-      "model": "thinkingmachines/inkling:free",
-      "family_id": "thinkingmachines/inkling",
-      "provider": "Thinkingmachines",
-      "display_name": "Thinking Machines: Inkling (free)",
-      "source_attribution": {
-        "catalog": [
-          "openrouter"
-        ],
-        "intelligence": "artificial_analysis",
-        "speed": "artificial_analysis",
-        "pricing": "openrouter",
-        "context_length": "openrouter",
-        "merge_priority": {
-          "intelligence": [
-            "benchmark",
-            "artificial_analysis",
-            "lmsys",
-            "helper",
-            "heuristic"
-          ],
-          "speed": [
-            "artificial_analysis",
-            "openrouter",
-            "heuristic"
-          ],
-          "context_length": [
-            "openrouter",
-            "bridge"
-          ],
-          "pricing": [
-            "openrouter",
-            "bridge"
-          ]
-        }
-      },
-      "raw_metrics": {
-        "intelligence_base": 25,
-        "context_length": 1048576,
-        "prompt_cost": 0.0,
-        "completion_cost": 0.0,
-        "average_cost": 0.0,
-        "aa_quality": 25.0,
-        "aa_speed": 193.924,
-        "lmsys_elo": null,
-        "openrouter_speed_hint": 262144.0,
-        "source_count": 2,
-        "availability_hint": 83,
-        "stability_hint": 83
-      },
-      "task_metadata": {
-        "quality_by_task": {
-          "coding": 21,
-          "reasoning": 37,
-          "vision": 18,
-          "long_context": 100,
-          "extraction": 43,
-          "structured_output": 17,
-          "general_chat": 28,
-          "tool_agent_compatibility": 32
-        },
-        "taxonomy_scores": {
-          "chat_casual": 28,
-          "creative_writing": 29,
-          "knowledge": 32,
-          "legal_formal": 39,
-          "coding": 21,
-          "agentic_tool_use": 32,
-          "vision_ocr": 23,
-          "vision_reasoning": 24,
-          "math_logic": 37,
-          "translation_language": 32
-        },
-        "supported": [
-          "long_context"
-        ],
-        "primary": [
-          "long_context",
-          "extraction",
-          "reasoning"
-        ],
-        "coverage_score": 37.0,
-        "confidence": 0.68,
-        "helper_enriched": false,
-        "provider_family": "Thinkingmachines"
-      },
-      "helper_metadata": {
-        "helper_tasks_applied": []
-      },
-      "self_hosting": {
-        "self_hostable": false,
-        "open_weight": false,
-        "family": null,
-        "hosting_modes": [
-          "cloud_api"
-        ],
-        "download_sources": [],
-        "preferred_runtimes": [],
-        "quantizations_known": [],
-        "parameter_scale_billions": null,
-        "hardware_profile_hint": null,
-        "self_hosting_notes": null,
-        "benchmark_evidence_sources": [
-          "openrouter_catalog",
-          "artificial_analysis"
-        ]
-      },
-      "normalized_metrics": {
-        "intelligence": 25.0,
-        "speed": 35.01,
-        "stability": 83.0,
-        "availability": 83.0,
-        "context": 89.57,
-        "task_fit": 37.0,
-        "cost_efficiency": 100.0
-      },
-      "metrics": {
-        "intelligence": 25,
-        "speed": 35,
-        "stability": 83,
-        "availability": 83,
-        "context": 90,
-        "task_fit": 37,
-        "cost_efficiency": 100,
-        "cost": 0.0
-      },
-      "tier": "FREE_FRONTIER",
-      "task_label": "LONG-CONTEXT",
-      "geopolitical_risk": "LOW",
-      "score_breakdown": {
-        "intelligence": 7.5,
-        "speed": 4.9,
-        "stability": 13.28,
-        "cost_efficiency": 18.0,
-        "availability": 8.3,
-        "context": 5.37,
-        "task_fit": 2.22
-      },
-      "value_score": 59.57,
-      "rank": 29
-    },
-    {
       "model": "nvidia/nemotron-3-ultra-550b-a55b:free",
       "family_id": "nvidia/nemotron-3-ultra-550b-a55b",
       "provider": "Nvidia",
@@ -4843,7 +4702,7 @@
         "completion_cost": 0.0,
         "average_cost": 0.0,
         "aa_quality": 22.9,
-        "aa_speed": 159.597,
+        "aa_speed": 154.555,
         "lmsys_elo": null,
         "openrouter_speed_hint": 65536.0,
         "source_count": 2,
@@ -4950,7 +4809,7 @@
         "task_fit": 2.02
       },
       "value_score": 58.43,
-      "rank": 30
+      "rank": 29
     },
     {
       "model": "openrouter/fusion",
@@ -5091,7 +4950,7 @@
         "task_fit": 1.54
       },
       "value_score": 57.83,
-      "rank": 31
+      "rank": 30
     },
     {
       "model": "nvidia/nemotron-3-super-120b-a12b:free",
@@ -5243,7 +5102,7 @@
         "task_fit": 1.67
       },
       "value_score": 57.56,
-      "rank": 32
+      "rank": 31
     },
     {
       "model": "cohere/north-mini-code:free",
@@ -5288,7 +5147,7 @@
         "completion_cost": 0.0,
         "average_cost": 0.0,
         "aa_quality": 9.9,
-        "aa_speed": 62.466,
+        "aa_speed": 57.906,
         "lmsys_elo": null,
         "openrouter_speed_hint": 64000.0,
         "source_count": 2,
@@ -5384,7 +5243,7 @@
         "task_fit": 1.67
       },
       "value_score": 56.81,
-      "rank": 33
+      "rank": 32
     },
     {
       "model": "nvidia/nemotron-3.5-lightning:free",
@@ -5429,7 +5288,7 @@
         "completion_cost": 0.0,
         "average_cost": 0.0,
         "aa_quality": 12.9,
-        "aa_speed": 293.788,
+        "aa_speed": 289.415,
         "lmsys_elo": null,
         "openrouter_speed_hint": 65536.0,
         "source_count": 2,
@@ -5535,7 +5394,7 @@
         "task_fit": 1.67
       },
       "value_score": 55.07,
-      "rank": 34
+      "rank": 33
     },
     {
       "model": "liquid/lfm-2.5-2.6b:free",
@@ -5676,7 +5535,7 @@
         "task_fit": 1.4
       },
       "value_score": 53.94,
-      "rank": 35
+      "rank": 34
     },
     {
       "model": "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free",
@@ -5721,7 +5580,7 @@
         "completion_cost": 0.0,
         "average_cost": 0.0,
         "aa_quality": 10.3,
-        "aa_speed": 232.169,
+        "aa_speed": 233.703,
         "lmsys_elo": null,
         "openrouter_speed_hint": 65536.0,
         "source_count": 2,
@@ -5828,7 +5687,7 @@
         "task_fit": 1.68
       },
       "value_score": 53.17,
-      "rank": 36
+      "rank": 35
     },
     {
       "model": "anthropic/claude-sonnet-4.6:batch",
@@ -5975,7 +5834,7 @@
         "task_fit": 5.09
       },
       "value_score": 86.44,
-      "rank": 37
+      "rank": 36
     },
     {
       "model": "anthropic/claude-sonnet-4.6",
@@ -6122,7 +5981,7 @@
         "task_fit": 5.09
       },
       "value_score": 85.71,
-      "rank": 38
+      "rank": 37
     },
     {
       "model": "openai/gpt-5.3-codex",
@@ -6269,7 +6128,7 @@
         "task_fit": 5.09
       },
       "value_score": 85.0,
-      "rank": 39
+      "rank": 38
     },
     {
       "model": "openai/gpt-5-mini:batch",
@@ -6416,7 +6275,7 @@
         "task_fit": 4.86
       },
       "value_score": 84.52,
-      "rank": 40
+      "rank": 39
     },
     {
       "model": "openai/gpt-5-mini",
@@ -6563,7 +6422,7 @@
         "task_fit": 4.86
       },
       "value_score": 84.41,
-      "rank": 41
+      "rank": 40
     },
     {
       "model": "openai/o4-mini-high",
@@ -6710,7 +6569,7 @@
         "task_fit": 5.04
       },
       "value_score": 84.39,
-      "rank": 42
+      "rank": 41
     },
     {
       "model": "google/gemma-4-26b-a4b-it",
@@ -6751,9 +6610,9 @@
       "raw_metrics": {
         "intelligence_base": 95,
         "context_length": 262144,
-        "prompt_cost": 7.65e-08,
-        "completion_cost": 2.55e-07,
-        "average_cost": 1.6575e-07,
+        "prompt_cost": 9e-08,
+        "completion_cost": 3e-07,
+        "average_cost": 1.9499999999999999e-07,
         "aa_quality": null,
         "aa_speed": null,
         "lmsys_elo": null,
@@ -6845,7 +6704,7 @@
         "availability": 85.0,
         "context": 67.18,
         "task_fit": 82.88,
-        "cost_efficiency": 99.83
+        "cost_efficiency": 99.8
       },
       "metrics": {
         "intelligence": 95,
@@ -6855,7 +6714,7 @@
         "context": 67,
         "task_fit": 83,
         "cost_efficiency": 100,
-        "cost": 1.7e-07
+        "cost": 1.9e-07
       },
       "tier": "HEAVY_HITTER",
       "task_label": "LONG-CONTEXT",
@@ -6864,13 +6723,13 @@
         "intelligence": 28.5,
         "speed": 6.09,
         "stability": 13.76,
-        "cost_efficiency": 17.97,
+        "cost_efficiency": 17.96,
         "availability": 8.5,
         "context": 4.03,
         "task_fit": 4.97
       },
       "value_score": 83.75,
-      "rank": 43
+      "rank": 42
     },
     {
       "model": "openai/gpt-6-luna-pro:batch",
@@ -7016,7 +6875,7 @@
         "task_fit": 4.64
       },
       "value_score": 83.51,
-      "rank": 44
+      "rank": 43
     },
     {
       "model": "openai/gpt-6-luna-pro",
@@ -7162,7 +7021,7 @@
         "task_fit": 4.64
       },
       "value_score": 83.48,
-      "rank": 45
+      "rank": 44
     },
     {
       "model": "openai/gpt-5.6-luna-pro:batch",
@@ -7308,7 +7167,7 @@
         "task_fit": 4.64
       },
       "value_score": 83.47,
-      "rank": 46
+      "rank": 45
     },
     {
       "model": "openai/gpt-5.6-luna-pro",
@@ -7454,7 +7313,7 @@
         "task_fit": 4.64
       },
       "value_score": 83.41,
-      "rank": 47
+      "rank": 46
     },
     {
       "model": "anthropic/claude-haiku-4.5:batch",
@@ -7601,7 +7460,7 @@
         "task_fit": 4.86
       },
       "value_score": 83.39,
-      "rank": 48
+      "rank": 47
     },
     {
       "model": "openai/gpt-4.1-mini:batch",
@@ -7748,7 +7607,7 @@
         "task_fit": 4.76
       },
       "value_score": 83.14,
-      "rank": 49
+      "rank": 48
     },
     {
       "model": "anthropic/claude-haiku-4.5",
@@ -7895,7 +7754,7 @@
         "task_fit": 4.86
       },
       "value_score": 83.13,
-      "rank": 50
+      "rank": 49
     },
     {
       "model": "xiaomi/mimo-v2.5-pro",
@@ -8039,7 +7898,7 @@
         "task_fit": 4.36
       },
       "value_score": 83.09,
-      "rank": 51
+      "rank": 50
     },
     {
       "model": "openai/o3-mini-high",
@@ -8186,7 +8045,7 @@
         "task_fit": 4.9
       },
       "value_score": 83.05,
-      "rank": 52
+      "rank": 51
     },
     {
       "model": "openai/gpt-4.1-mini",
@@ -8333,7 +8192,7 @@
         "task_fit": 4.76
       },
       "value_score": 83.05,
-      "rank": 53
+      "rank": 52
     },
     {
       "model": "openai/gpt-6-sol-pro:batch",
@@ -8479,7 +8338,7 @@
         "task_fit": 4.64
       },
       "value_score": 82.99,
-      "rank": 54
+      "rank": 53
     },
     {
       "model": "openai/gpt-6.1-sol-pro:batch",
@@ -8625,7 +8484,7 @@
         "task_fit": 4.64
       },
       "value_score": 82.99,
-      "rank": 55
+      "rank": 54
     },
     {
       "model": "openai/gpt-5.6-terra-pro:batch",
@@ -8771,7 +8630,7 @@
         "task_fit": 4.64
       },
       "value_score": 82.91,
-      "rank": 56
+      "rank": 55
     },
     {
       "model": "deepseek/deepseek-r1-0528",
@@ -8930,7 +8789,7 @@
         "task_fit": 4.81
       },
       "value_score": 82.85,
-      "rank": 57
+      "rank": 56
     },
     {
       "model": "~google/gemini-pro-latest",
@@ -9077,7 +8936,7 @@
         "task_fit": 5.08
       },
       "value_score": 82.84,
-      "rank": 58
+      "rank": 57
     },
     {
       "model": "openai/gpt-4o:batch",
@@ -9225,7 +9084,7 @@
         "task_fit": 5.29
       },
       "value_score": 82.83,
-      "rank": 59
+      "rank": 58
     },
     {
       "model": "qwen/qwen3-next-80b-a3b-thinking",
@@ -9384,7 +9243,7 @@
         "task_fit": 4.67
       },
       "value_score": 82.75,
-      "rank": 60
+      "rank": 59
     },
     {
       "model": "openai/gpt-5.1-codex-max",
@@ -9531,7 +9390,7 @@
         "task_fit": 5.04
       },
       "value_score": 82.71,
-      "rank": 61
+      "rank": 60
     },
     {
       "model": "openai/gpt-5.2-codex",
@@ -9678,7 +9537,7 @@
         "task_fit": 5.06
       },
       "value_score": 82.67,
-      "rank": 62
+      "rank": 61
     },
     {
       "model": "google/gemma-4-31b-it",
@@ -9838,7 +9697,7 @@
         "task_fit": 4.97
       },
       "value_score": 82.61,
-      "rank": 63
+      "rank": 62
     },
     {
       "model": "openai/gpt-5.6-sol-pro:batch",
@@ -9984,7 +9843,7 @@
         "task_fit": 4.64
       },
       "value_score": 82.49,
-      "rank": 64
+      "rank": 63
     },
     {
       "model": "openai/gpt-6-sol-pro",
@@ -10130,7 +9989,7 @@
         "task_fit": 4.64
       },
       "value_score": 82.49,
-      "rank": 65
+      "rank": 64
     },
     {
       "model": "openai/gpt-6.1-sol-pro",
@@ -10276,7 +10135,7 @@
         "task_fit": 4.64
       },
       "value_score": 82.49,
-      "rank": 66
+      "rank": 65
     },
     {
       "model": "qwen/qwen3-30b-a3b-instruct-2507",
@@ -10435,7 +10294,7 @@
         "task_fit": 4.58
       },
       "value_score": 82.45,
-      "rank": 67
+      "rank": 66
     },
     {
       "model": "anthropic/claude-opus-5.5:batch",
@@ -10581,7 +10440,7 @@
         "task_fit": 4.64
       },
       "value_score": 82.44,
-      "rank": 68
+      "rank": 67
     },
     {
       "model": "deepseek/deepseek-v4-pro-0813",
@@ -10725,7 +10584,7 @@
         "task_fit": 4.36
       },
       "value_score": 82.41,
-      "rank": 69
+      "rank": 68
     },
     {
       "model": "x-ai/grok-4.20-multi-agent",
@@ -10866,7 +10725,7 @@
         "task_fit": 3.52
       },
       "value_score": 82.33,
-      "rank": 70
+      "rank": 69
     },
     {
       "model": "openai/gpt-5.6-terra-pro",
@@ -11012,7 +10871,7 @@
         "task_fit": 4.64
       },
       "value_score": 82.32,
-      "rank": 71
+      "rank": 70
     },
     {
       "model": "anthropic/claude-sonnet-5.5:batch",
@@ -11158,7 +11017,7 @@
         "task_fit": 4.65
       },
       "value_score": 82.05,
-      "rank": 72
+      "rank": 71
     },
     {
       "model": "meta-llama/llama-guard-4-12b",
@@ -11317,7 +11176,7 @@
         "task_fit": 4.69
       },
       "value_score": 81.89,
-      "rank": 73
+      "rank": 72
     },
     {
       "model": "qwen/qwen3-vl-30b-a3b-thinking",
@@ -11477,7 +11336,7 @@
         "task_fit": 4.99
       },
       "value_score": 81.88,
-      "rank": 74
+      "rank": 73
     },
     {
       "model": "openai/gpt-5:batch",
@@ -11622,7 +11481,7 @@
         "task_fit": 4.13
       },
       "value_score": 81.88,
-      "rank": 75
+      "rank": 74
     },
     {
       "model": "openai/gpt-5.6-sol-pro",
@@ -11768,7 +11627,7 @@
         "task_fit": 4.64
       },
       "value_score": 81.56,
-      "rank": 76
+      "rank": 75
     },
     {
       "model": "anthropic/claude-sonnet-4.5:batch",
@@ -11914,7 +11773,7 @@
         "task_fit": 4.65
       },
       "value_score": 81.52,
-      "rank": 77
+      "rank": 76
     },
     {
       "model": "anthropic/claude-opus-5.5",
@@ -12060,7 +11919,7 @@
         "task_fit": 4.64
       },
       "value_score": 81.51,
-      "rank": 78
+      "rank": 77
     },
     {
       "model": "mistralai/mistral-large-4-0",
@@ -12204,7 +12063,7 @@
         "task_fit": 4.36
       },
       "value_score": 81.45,
-      "rank": 79
+      "rank": 78
     },
     {
       "model": "openai/gpt-5",
@@ -12349,7 +12208,7 @@
         "task_fit": 4.13
       },
       "value_score": 81.4,
-      "rank": 80
+      "rank": 79
     },
     {
       "model": "qwen/qwen3-235b-a22b-thinking-2507",
@@ -12508,7 +12367,7 @@
         "task_fit": 4.72
       },
       "value_score": 81.36,
-      "rank": 81
+      "rank": 80
     },
     {
       "model": "qwen/qwen-plus",
@@ -12653,7 +12512,7 @@
         "task_fit": 4.42
       },
       "value_score": 81.36,
-      "rank": 82
+      "rank": 81
     },
     {
       "model": "cohere/command-r-plus-08-2024",
@@ -12799,7 +12658,7 @@
         "task_fit": 4.54
       },
       "value_score": 81.25,
-      "rank": 83
+      "rank": 82
     },
     {
       "model": "deepseek/deepseek-chat",
@@ -12945,7 +12804,7 @@
         "task_fit": 4.61
       },
       "value_score": 81.13,
-      "rank": 84
+      "rank": 83
     },
     {
       "model": "openai/gpt-6-astra-pro:batch",
@@ -13091,7 +12950,7 @@
         "task_fit": 4.64
       },
       "value_score": 81.13,
-      "rank": 85
+      "rank": 84
     },
     {
       "model": "~deepseek/deepseek-v4-flash-latest",
@@ -13132,9 +12991,9 @@
       "raw_metrics": {
         "intelligence_base": 80,
         "context_length": 1048576,
-        "prompt_cost": 4.75e-08,
-        "completion_cost": 1.568e-07,
-        "average_cost": 1.0215e-07,
+        "prompt_cost": 4.22e-08,
+        "completion_cost": 1.729e-07,
+        "average_cost": 1.0755e-07,
         "aa_quality": null,
         "aa_speed": null,
         "lmsys_elo": null,
@@ -13220,7 +13079,7 @@
         "context": 90,
         "task_fit": 69,
         "cost_efficiency": 100,
-        "cost": 1e-07
+        "cost": 1.1e-07
       },
       "tier": "HEAVY_HITTER",
       "task_label": "LONG-CONTEXT",
@@ -13235,7 +13094,7 @@
         "task_fit": 4.13
       },
       "value_score": 81.13,
-      "rank": 86
+      "rank": 85
     },
     {
       "model": "~z-ai/glm-flash-latest",
@@ -13276,9 +13135,9 @@
       "raw_metrics": {
         "intelligence_base": 80,
         "context_length": 1048576,
-        "prompt_cost": 1.62e-08,
-        "completion_cost": 1.443e-07,
-        "average_cost": 8.025e-08,
+        "prompt_cost": 5.2e-09,
+        "completion_cost": 1.985e-07,
+        "average_cost": 1.0185e-07,
         "aa_quality": null,
         "aa_speed": null,
         "lmsys_elo": null,
@@ -13354,7 +13213,7 @@
         "availability": 75.0,
         "context": 89.57,
         "task_fit": 68.88,
-        "cost_efficiency": 99.92
+        "cost_efficiency": 99.89
       },
       "metrics": {
         "intelligence": 80,
@@ -13364,7 +13223,7 @@
         "context": 90,
         "task_fit": 69,
         "cost_efficiency": 100,
-        "cost": 8e-08
+        "cost": 1e-07
       },
       "tier": "HEAVY_HITTER",
       "task_label": "LONG-CONTEXT",
@@ -13373,13 +13232,13 @@
         "intelligence": 24.0,
         "speed": 9.67,
         "stability": 12.48,
-        "cost_efficiency": 17.99,
+        "cost_efficiency": 17.98,
         "availability": 7.5,
         "context": 5.37,
         "task_fit": 4.13
       },
       "value_score": 81.13,
-      "rank": 87
+      "rank": 86
     },
     {
       "model": "~deepseek/deepseek-flash-latest",
@@ -13523,7 +13382,7 @@
         "task_fit": 4.13
       },
       "value_score": 81.09,
-      "rank": 88
+      "rank": 87
     },
     {
       "model": "qwen/qwen2.5-vl-72b-instruct",
@@ -13683,7 +13542,7 @@
         "task_fit": 4.93
       },
       "value_score": 80.82,
-      "rank": 89
+      "rank": 88
     },
     {
       "model": "anthropic/claude-sonnet-4.5",
@@ -13829,7 +13688,7 @@
         "task_fit": 4.65
       },
       "value_score": 80.79,
-      "rank": 90
+      "rank": 89
     },
     {
       "model": "google/gemini-2.5-pro-preview",
@@ -13976,7 +13835,7 @@
         "task_fit": 5.08
       },
       "value_score": 80.7,
-      "rank": 91
+      "rank": 90
     },
     {
       "model": "minimax/minimax-01",
@@ -14120,7 +13979,7 @@
         "task_fit": 4.13
       },
       "value_score": 80.7,
-      "rank": 92
+      "rank": 91
     },
     {
       "model": "deepseek/deepseek-v4.1-flash-1017",
@@ -14264,7 +14123,7 @@
         "task_fit": 4.25
       },
       "value_score": 80.68,
-      "rank": 93
+      "rank": 92
     },
     {
       "model": "meta-llama/llama-3.3-70b-instruct",
@@ -14424,7 +14283,7 @@
         "task_fit": 4.58
       },
       "value_score": 80.65,
-      "rank": 94
+      "rank": 93
     },
     {
       "model": "openai/gpt-5-nano:batch",
@@ -14570,7 +14429,7 @@
         "task_fit": 4.42
       },
       "value_score": 80.56,
-      "rank": 95
+      "rank": 94
     },
     {
       "model": "openai/gpt-5-nano",
@@ -14716,7 +14575,7 @@
         "task_fit": 4.42
       },
       "value_score": 80.54,
-      "rank": 96
+      "rank": 95
     },
     {
       "model": "openai/gpt-5.4-nano:batch",
@@ -14862,7 +14721,7 @@
         "task_fit": 4.42
       },
       "value_score": 80.51,
-      "rank": 97
+      "rank": 96
     },
     {
       "model": "google/gemini-3.1-pro-preview-customtools",
@@ -15009,7 +14868,7 @@
         "task_fit": 5.08
       },
       "value_score": 80.48,
-      "rank": 98
+      "rank": 97
     },
     {
       "model": "openai/gpt-5.4-nano",
@@ -15155,7 +15014,7 @@
         "task_fit": 4.42
       },
       "value_score": 80.44,
-      "rank": 99
+      "rank": 98
     },
     {
       "model": "mistralai/mistral-large-2407",
@@ -15301,7 +15160,7 @@
         "task_fit": 4.58
       },
       "value_score": 80.4,
-      "rank": 100
+      "rank": 99
     },
     {
       "model": "thedrummer/unslopnemo-12b",
@@ -15445,7 +15304,7 @@
         "task_fit": 4.13
       },
       "value_score": 80.35,
-      "rank": 101
+      "rank": 100
     },
     {
       "model": "deepseek/deepseek-v4-flash-vision-exp",
@@ -15590,7 +15449,7 @@
         "task_fit": 4.57
       },
       "value_score": 80.28,
-      "rank": 102
+      "rank": 101
     },
     {
       "model": "mistralai/mistral-large-2512:batch",
@@ -15734,7 +15593,7 @@
         "task_fit": 4.36
       },
       "value_score": 80.23,
-      "rank": 103
+      "rank": 102
     },
     {
       "model": "openai/gpt-5-image-mini",
@@ -15880,7 +15739,7 @@
         "task_fit": 4.42
       },
       "value_score": 80.17,
-      "rank": 104
+      "rank": 103
     },
     {
       "model": "mistralai/mistral-large-2512",
@@ -16024,7 +15883,7 @@
         "task_fit": 4.36
       },
       "value_score": 80.14,
-      "rank": 105
+      "rank": 104
     },
     {
       "model": "meta-llama/llama-3.1-70b-instruct",
@@ -16184,7 +16043,7 @@
         "task_fit": 4.5
       },
       "value_score": 79.94,
-      "rank": 106
+      "rank": 105
     },
     {
       "model": "openai/gpt-4.1-nano:batch",
@@ -16331,7 +16190,7 @@
         "task_fit": 4.4
       },
       "value_score": 79.85,
-      "rank": 107
+      "rank": 106
     },
     {
       "model": "openai/gpt-4.1-nano",
@@ -16478,7 +16337,7 @@
         "task_fit": 4.4
       },
       "value_score": 79.83,
-      "rank": 108
+      "rank": 107
     },
     {
       "model": "qwen/qwen3.5-plus-02-15",
@@ -16622,7 +16481,7 @@
         "task_fit": 4.25
       },
       "value_score": 79.74,
-      "rank": 109
+      "rank": 108
     },
     {
       "model": "qwen/qwen3.5-plus-20260420",
@@ -16766,7 +16625,7 @@
         "task_fit": 4.25
       },
       "value_score": 79.72,
-      "rank": 110
+      "rank": 109
     },
     {
       "model": "~deepseek/deepseek-pro-latest",
@@ -16807,9 +16666,9 @@
       "raw_metrics": {
         "intelligence_base": 86,
         "context_length": 1048576,
-        "prompt_cost": 2.235e-07,
+        "prompt_cost": 1.307e-07,
         "completion_cost": 8e-06,
-        "average_cost": 4.11175e-06,
+        "average_cost": 4.06535e-06,
         "aa_quality": null,
         "aa_speed": null,
         "lmsys_elo": null,
@@ -16885,7 +16744,7 @@
         "availability": 75.0,
         "context": 89.57,
         "task_fit": 72.62,
-        "cost_efficiency": 95.91
+        "cost_efficiency": 95.96
       },
       "metrics": {
         "intelligence": 86,
@@ -16895,7 +16754,7 @@
         "context": 90,
         "task_fit": 73,
         "cost_efficiency": 96,
-        "cost": 4.11e-06
+        "cost": 4.07e-06
       },
       "tier": "HEAVY_HITTER",
       "task_label": "LONG-CONTEXT",
@@ -16904,13 +16763,13 @@
         "intelligence": 25.8,
         "speed": 6.89,
         "stability": 12.48,
-        "cost_efficiency": 17.26,
+        "cost_efficiency": 17.27,
         "availability": 7.5,
         "context": 5.37,
         "task_fit": 4.36
       },
       "value_score": 79.64,
-      "rank": 111
+      "rank": 110
     },
     {
       "model": "anthropic/claude-opus-4.6:batch",
@@ -17054,7 +16913,7 @@
         "task_fit": 3.88
       },
       "value_score": 79.63,
-      "rank": 112
+      "rank": 111
     },
     {
       "model": "nousresearch/hermes-4-405b",
@@ -17199,7 +17058,7 @@
         "task_fit": 4.69
       },
       "value_score": 79.62,
-      "rank": 113
+      "rank": 112
     },
     {
       "model": "google/gemini-2.5-flash-lite",
@@ -17346,7 +17205,7 @@
         "task_fit": 4.85
       },
       "value_score": 79.62,
-      "rank": 114
+      "rank": 113
     },
     {
       "model": "google/gemini-3.1-flash-lite:batch",
@@ -17493,7 +17352,7 @@
         "task_fit": 4.85
       },
       "value_score": 79.59,
-      "rank": 115
+      "rank": 114
     },
     {
       "model": "anthropic/claude-sonnet-5.5",
@@ -17639,7 +17498,7 @@
         "task_fit": 4.65
       },
       "value_score": 79.55,
-      "rank": 116
+      "rank": 115
     },
     {
       "model": "google/gemini-3.5-flash-lite:batch",
@@ -17786,7 +17645,7 @@
         "task_fit": 4.85
       },
       "value_score": 79.54,
-      "rank": 117
+      "rank": 116
     },
     {
       "model": "google/gemini-3.1-flash-lite",
@@ -17933,7 +17792,7 @@
         "task_fit": 4.85
       },
       "value_score": 79.5,
-      "rank": 118
+      "rank": 117
     },
     {
       "model": "google/gemini-3.1-flash-lite-preview",
@@ -18080,7 +17939,7 @@
         "task_fit": 4.85
       },
       "value_score": 79.5,
-      "rank": 119
+      "rank": 118
     },
     {
       "model": "google/gemini-3.5-flash-lite",
@@ -18227,7 +18086,7 @@
         "task_fit": 4.85
       },
       "value_score": 79.41,
-      "rank": 120
+      "rank": 119
     },
     {
       "model": "openai/gpt-4o-mini:batch",
@@ -18374,7 +18233,7 @@
         "task_fit": 4.85
       },
       "value_score": 79.31,
-      "rank": 121
+      "rank": 120
     },
     {
       "model": "openai/gpt-4o-mini",
@@ -18521,7 +18380,7 @@
         "task_fit": 4.85
       },
       "value_score": 79.28,
-      "rank": 122
+      "rank": 121
     },
     {
       "model": "openai/gpt-4o-mini-2024-07-18",
@@ -18668,7 +18527,7 @@
         "task_fit": 4.85
       },
       "value_score": 79.28,
-      "rank": 123
+      "rank": 122
     },
     {
       "model": "~anthropic/claude-opus-latest",
@@ -18814,6 +18673,150 @@
         "task_fit": 4.64
       },
       "value_score": 79.23,
+      "rank": 123
+    },
+    {
+      "model": "deepseek/deepseek-v4-flash-0731",
+      "family_id": "deepseek/deepseek-v4-flash-0731",
+      "provider": "Deepseek",
+      "display_name": "DeepSeek: DeepSeek V4 Flash 0731",
+      "source_attribution": {
+        "catalog": [
+          "openrouter"
+        ],
+        "intelligence": "heuristic",
+        "speed": "openrouter",
+        "pricing": "openrouter",
+        "context_length": "openrouter",
+        "merge_priority": {
+          "intelligence": [
+            "benchmark",
+            "artificial_analysis",
+            "lmsys",
+            "helper",
+            "heuristic"
+          ],
+          "speed": [
+            "artificial_analysis",
+            "openrouter",
+            "heuristic"
+          ],
+          "context_length": [
+            "openrouter",
+            "bridge"
+          ],
+          "pricing": [
+            "openrouter",
+            "bridge"
+          ]
+        }
+      },
+      "raw_metrics": {
+        "intelligence_base": 80,
+        "context_length": 1048576,
+        "prompt_cost": 4.444e-08,
+        "completion_cost": 1.3332e-07,
+        "average_cost": 8.888e-08,
+        "aa_quality": null,
+        "aa_speed": null,
+        "lmsys_elo": null,
+        "openrouter_speed_hint": 131072.0,
+        "source_count": 1,
+        "availability_hint": 85,
+        "stability_hint": 86
+      },
+      "task_metadata": {
+        "quality_by_task": {
+          "coding": 76,
+          "reasoning": 80,
+          "vision": 18,
+          "long_context": 100,
+          "extraction": 83,
+          "structured_output": 54,
+          "general_chat": 76,
+          "tool_agent_compatibility": 64
+        },
+        "taxonomy_scores": {
+          "chat_casual": 76,
+          "creative_writing": 77,
+          "knowledge": 78,
+          "legal_formal": 81,
+          "coding": 76,
+          "agentic_tool_use": 64,
+          "vision_ocr": 31,
+          "vision_reasoning": 37,
+          "math_logic": 80,
+          "translation_language": 78
+        },
+        "supported": [
+          "coding",
+          "extraction",
+          "general_chat",
+          "long_context",
+          "reasoning"
+        ],
+        "primary": [
+          "long_context",
+          "extraction",
+          "reasoning"
+        ],
+        "coverage_score": 68.88,
+        "confidence": 0.68,
+        "helper_enriched": false,
+        "provider_family": "Deepseek"
+      },
+      "helper_metadata": {
+        "helper_tasks_applied": []
+      },
+      "self_hosting": {
+        "self_hostable": false,
+        "open_weight": false,
+        "family": null,
+        "hosting_modes": [
+          "cloud_api"
+        ],
+        "download_sources": [],
+        "preferred_runtimes": [],
+        "quantizations_known": [],
+        "parameter_scale_billions": null,
+        "hardware_profile_hint": null,
+        "self_hosting_notes": null,
+        "benchmark_evidence_sources": [
+          "openrouter_catalog"
+        ]
+      },
+      "normalized_metrics": {
+        "intelligence": 80.0,
+        "speed": 39.73,
+        "stability": 86.0,
+        "availability": 85.0,
+        "context": 89.57,
+        "task_fit": 68.88,
+        "cost_efficiency": 99.91
+      },
+      "metrics": {
+        "intelligence": 80,
+        "speed": 40,
+        "stability": 86,
+        "availability": 85,
+        "context": 90,
+        "task_fit": 69,
+        "cost_efficiency": 100,
+        "cost": 9e-08
+      },
+      "tier": "HEAVY_HITTER",
+      "task_label": "LONG-CONTEXT",
+      "geopolitical_risk": "HIGH",
+      "score_breakdown": {
+        "intelligence": 24.0,
+        "speed": 5.56,
+        "stability": 13.76,
+        "cost_efficiency": 17.98,
+        "availability": 8.5,
+        "context": 5.37,
+        "task_fit": 4.13
+      },
+      "value_score": 79.21,
       "rank": 124
     },
     {
@@ -19388,150 +19391,6 @@
       "rank": 128
     },
     {
-      "model": "deepseek/deepseek-v4-flash-0731",
-      "family_id": "deepseek/deepseek-v4-flash-0731",
-      "provider": "Deepseek",
-      "display_name": "DeepSeek: DeepSeek V4 Flash 0731",
-      "source_attribution": {
-        "catalog": [
-          "openrouter"
-        ],
-        "intelligence": "heuristic",
-        "speed": "openrouter",
-        "pricing": "openrouter",
-        "context_length": "openrouter",
-        "merge_priority": {
-          "intelligence": [
-            "benchmark",
-            "artificial_analysis",
-            "lmsys",
-            "helper",
-            "heuristic"
-          ],
-          "speed": [
-            "artificial_analysis",
-            "openrouter",
-            "heuristic"
-          ],
-          "context_length": [
-            "openrouter",
-            "bridge"
-          ],
-          "pricing": [
-            "openrouter",
-            "bridge"
-          ]
-        }
-      },
-      "raw_metrics": {
-        "intelligence_base": 80,
-        "context_length": 1048576,
-        "prompt_cost": 4.4e-07,
-        "completion_cost": 1.32e-06,
-        "average_cost": 8.8e-07,
-        "aa_quality": null,
-        "aa_speed": null,
-        "lmsys_elo": null,
-        "openrouter_speed_hint": 131072.0,
-        "source_count": 1,
-        "availability_hint": 85,
-        "stability_hint": 86
-      },
-      "task_metadata": {
-        "quality_by_task": {
-          "coding": 76,
-          "reasoning": 80,
-          "vision": 18,
-          "long_context": 100,
-          "extraction": 83,
-          "structured_output": 54,
-          "general_chat": 76,
-          "tool_agent_compatibility": 64
-        },
-        "taxonomy_scores": {
-          "chat_casual": 76,
-          "creative_writing": 77,
-          "knowledge": 78,
-          "legal_formal": 81,
-          "coding": 76,
-          "agentic_tool_use": 64,
-          "vision_ocr": 31,
-          "vision_reasoning": 37,
-          "math_logic": 80,
-          "translation_language": 78
-        },
-        "supported": [
-          "coding",
-          "extraction",
-          "general_chat",
-          "long_context",
-          "reasoning"
-        ],
-        "primary": [
-          "long_context",
-          "extraction",
-          "reasoning"
-        ],
-        "coverage_score": 68.88,
-        "confidence": 0.68,
-        "helper_enriched": false,
-        "provider_family": "Deepseek"
-      },
-      "helper_metadata": {
-        "helper_tasks_applied": []
-      },
-      "self_hosting": {
-        "self_hostable": false,
-        "open_weight": false,
-        "family": null,
-        "hosting_modes": [
-          "cloud_api"
-        ],
-        "download_sources": [],
-        "preferred_runtimes": [],
-        "quantizations_known": [],
-        "parameter_scale_billions": null,
-        "hardware_profile_hint": null,
-        "self_hosting_notes": null,
-        "benchmark_evidence_sources": [
-          "openrouter_catalog"
-        ]
-      },
-      "normalized_metrics": {
-        "intelligence": 80.0,
-        "speed": 39.73,
-        "stability": 86.0,
-        "availability": 85.0,
-        "context": 89.57,
-        "task_fit": 68.88,
-        "cost_efficiency": 99.09
-      },
-      "metrics": {
-        "intelligence": 80,
-        "speed": 40,
-        "stability": 86,
-        "availability": 85,
-        "context": 90,
-        "task_fit": 69,
-        "cost_efficiency": 99,
-        "cost": 8.8e-07
-      },
-      "tier": "HEAVY_HITTER",
-      "task_label": "LONG-CONTEXT",
-      "geopolitical_risk": "HIGH",
-      "score_breakdown": {
-        "intelligence": 24.0,
-        "speed": 5.56,
-        "stability": 13.76,
-        "cost_efficiency": 17.84,
-        "availability": 8.5,
-        "context": 5.37,
-        "task_fit": 4.13
-      },
-      "value_score": 79.06,
-      "rank": 129
-    },
-    {
       "model": "qwen/qwen3-coder-flash",
       "family_id": "qwen/qwen3-coder-flash",
       "provider": "Qwen",
@@ -19686,7 +19545,7 @@
         "task_fit": 4.25
       },
       "value_score": 78.91,
-      "rank": 130
+      "rank": 129
     },
     {
       "model": "mistralai/mistral-medium-3-5:batch",
@@ -19830,7 +19689,7 @@
         "task_fit": 4.25
       },
       "value_score": 78.9,
-      "rank": 131
+      "rank": 130
     },
     {
       "model": "qwen/qwen3.7-flash",
@@ -19974,7 +19833,7 @@
         "task_fit": 4.13
       },
       "value_score": 78.89,
-      "rank": 132
+      "rank": 131
     },
     {
       "model": "qwen/qwen3.5-flash-02-23",
@@ -20118,7 +19977,7 @@
         "task_fit": 4.13
       },
       "value_score": 78.87,
-      "rank": 133
+      "rank": 132
     },
     {
       "model": "qwen/qwen3.6-flash",
@@ -20262,7 +20121,7 @@
         "task_fit": 4.13
       },
       "value_score": 78.78,
-      "rank": 134
+      "rank": 133
     },
     {
       "model": "sao10k/l3.1-euryale-70b",
@@ -20407,7 +20266,7 @@
         "task_fit": 4.67
       },
       "value_score": 78.65,
-      "rank": 135
+      "rank": 134
     },
     {
       "model": "openai/gpt-audio-mini",
@@ -20553,7 +20412,7 @@
         "task_fit": 4.42
       },
       "value_score": 78.64,
-      "rank": 136
+      "rank": 135
     },
     {
       "model": "anthropic/claude-opus-4.6",
@@ -20697,7 +20556,7 @@
         "task_fit": 3.88
       },
       "value_score": 78.52,
-      "rank": 137
+      "rank": 136
     },
     {
       "model": "mistralai/mistral-medium-3-5",
@@ -20841,7 +20700,7 @@
         "task_fit": 4.25
       },
       "value_score": 78.51,
-      "rank": 138
+      "rank": 137
     },
     {
       "model": "openai/gpt-5.1-codex-mini",
@@ -20987,7 +20846,7 @@
         "task_fit": 4.54
       },
       "value_score": 78.49,
-      "rank": 139
+      "rank": 138
     },
     {
       "model": "google/gemma-3-27b-it",
@@ -21148,7 +21007,7 @@
         "task_fit": 4.53
       },
       "value_score": 78.47,
-      "rank": 140
+      "rank": 139
     },
     {
       "model": "amazon/nova-2-lite-v1",
@@ -21292,7 +21151,7 @@
         "task_fit": 4.13
       },
       "value_score": 78.36,
-      "rank": 141
+      "rank": 140
     },
     {
       "model": "google/gemini-3-pro-image",
@@ -21439,7 +21298,7 @@
         "task_fit": 5.08
       },
       "value_score": 78.32,
-      "rank": 142
+      "rank": 141
     },
     {
       "model": "mistralai/mistral-small-2603:batch",
@@ -21583,7 +21442,7 @@
         "task_fit": 4.13
       },
       "value_score": 78.27,
-      "rank": 143
+      "rank": 142
     },
     {
       "model": "anthropic/claude-opus-4.1:batch",
@@ -21729,7 +21588,7 @@
         "task_fit": 4.76
       },
       "value_score": 78.26,
-      "rank": 144
+      "rank": 143
     },
     {
       "model": "mistralai/mistral-small-2603",
@@ -21873,7 +21732,7 @@
         "task_fit": 4.13
       },
       "value_score": 78.23,
-      "rank": 145
+      "rank": 144
     },
     {
       "model": "sakana/fugu-max",
@@ -22017,7 +21876,7 @@
         "task_fit": 4.36
       },
       "value_score": 78.21,
-      "rank": 146
+      "rank": 145
     },
     {
       "model": "nex-agi/nex-n2.5-pro",
@@ -22161,7 +22020,7 @@
         "task_fit": 4.36
       },
       "value_score": 78.16,
-      "rank": 147
+      "rank": 146
     },
     {
       "model": "openai/gpt-5-pro:batch",
@@ -22307,7 +22166,7 @@
         "task_fit": 4.64
       },
       "value_score": 77.96,
-      "rank": 148
+      "rank": 147
     },
     {
       "model": "xiaomi/mimo-v2.6-pro-ultraspeed",
@@ -22451,7 +22310,7 @@
         "task_fit": 4.36
       },
       "value_score": 77.83,
-      "rank": 149
+      "rank": 148
     },
     {
       "model": "openai/gpt-6-luna:batch",
@@ -22593,7 +22452,7 @@
         "task_fit": 3.98
       },
       "value_score": 77.45,
-      "rank": 150
+      "rank": 149
     },
     {
       "model": "openai/gpt-6-luna",
@@ -22735,7 +22594,7 @@
         "task_fit": 3.98
       },
       "value_score": 77.42,
-      "rank": 151
+      "rank": 150
     },
     {
       "model": "openai/gpt-5.6-luna:batch",
@@ -22877,7 +22736,7 @@
         "task_fit": 3.98
       },
       "value_score": 77.41,
-      "rank": 152
+      "rank": 151
     },
     {
       "model": "morph/morph-v3-large",
@@ -23021,7 +22880,7 @@
         "task_fit": 4.36
       },
       "value_score": 77.37,
-      "rank": 153
+      "rank": 152
     },
     {
       "model": "openai/gpt-5.6-luna",
@@ -23163,7 +23022,7 @@
         "task_fit": 3.98
       },
       "value_score": 77.35,
-      "rank": 154
+      "rank": 153
     },
     {
       "model": "openai/gpt-6-astra-pro",
@@ -23309,7 +23168,7 @@
         "task_fit": 4.64
       },
       "value_score": 77.3,
-      "rank": 155
+      "rank": 154
     },
     {
       "model": "cohere/command-r7b-12-2024",
@@ -23453,7 +23312,7 @@
         "task_fit": 4.0
       },
       "value_score": 77.28,
-      "rank": 156
+      "rank": 155
     },
     {
       "model": "~anthropic/claude-sonnet-latest",
@@ -23599,7 +23458,7 @@
         "task_fit": 4.65
       },
       "value_score": 77.27,
-      "rank": 157
+      "rank": 156
     },
     {
       "model": "google/gemini-3.1-flash-image",
@@ -23746,7 +23605,7 @@
         "task_fit": 4.85
       },
       "value_score": 77.19,
-      "rank": 158
+      "rank": 157
     },
     {
       "model": "openai/gpt-5.4-pro:batch",
@@ -23892,7 +23751,7 @@
         "task_fit": 4.64
       },
       "value_score": 77.16,
-      "rank": 159
+      "rank": 158
     },
     {
       "model": "openai/gpt-5.5-pro:batch",
@@ -24038,7 +23897,7 @@
         "task_fit": 4.64
       },
       "value_score": 77.16,
-      "rank": 160
+      "rank": 159
     },
     {
       "model": "~anthropic/claude-haiku-latest",
@@ -24184,7 +24043,7 @@
         "task_fit": 4.42
       },
       "value_score": 77.13,
-      "rank": 161
+      "rank": 160
     },
     {
       "model": "~google/gemini-flash-latest",
@@ -24331,148 +24190,7 @@
         "task_fit": 4.85
       },
       "value_score": 76.98,
-      "rank": 162
-    },
-    {
-      "model": "z-ai/glm-5.3",
-      "family_id": "z-ai/glm-5.3",
-      "provider": "Z Ai",
-      "display_name": "Z.ai: GLM 5.3",
-      "source_attribution": {
-        "catalog": [
-          "openrouter"
-        ],
-        "intelligence": "heuristic",
-        "speed": "openrouter",
-        "pricing": "openrouter",
-        "context_length": "openrouter",
-        "merge_priority": {
-          "intelligence": [
-            "benchmark",
-            "artificial_analysis",
-            "lmsys",
-            "helper",
-            "heuristic"
-          ],
-          "speed": [
-            "artificial_analysis",
-            "openrouter",
-            "heuristic"
-          ],
-          "context_length": [
-            "openrouter",
-            "bridge"
-          ],
-          "pricing": [
-            "openrouter",
-            "bridge"
-          ]
-        }
-      },
-      "raw_metrics": {
-        "intelligence_base": 68,
-        "context_length": 1048576,
-        "prompt_cost": 7.9e-08,
-        "completion_cost": 1.4e-06,
-        "average_cost": 7.395e-07,
-        "aa_quality": null,
-        "aa_speed": null,
-        "lmsys_elo": null,
-        "openrouter_speed_hint": 943718.0,
-        "source_count": 1,
-        "availability_hint": 75,
-        "stability_hint": 78
-      },
-      "task_metadata": {
-        "quality_by_task": {
-          "coding": 64,
-          "reasoning": 68,
-          "vision": 18,
-          "long_context": 100,
-          "extraction": 74,
-          "structured_output": 46,
-          "general_chat": 66,
-          "tool_agent_compatibility": 57
-        },
-        "taxonomy_scores": {
-          "chat_casual": 66,
-          "creative_writing": 66,
-          "knowledge": 67,
-          "legal_formal": 70,
-          "coding": 64,
-          "agentic_tool_use": 57,
-          "vision_ocr": 29,
-          "vision_reasoning": 33,
-          "math_logic": 68,
-          "translation_language": 68
-        },
-        "supported": [
-          "extraction",
-          "long_context"
-        ],
-        "primary": [
-          "long_context",
-          "extraction",
-          "reasoning"
-        ],
-        "coverage_score": 61.62,
-        "confidence": 0.68,
-        "helper_enriched": false,
-        "provider_family": "Z Ai"
-      },
-      "helper_metadata": {
-        "helper_tasks_applied": []
-      },
-      "self_hosting": {
-        "self_hostable": false,
-        "open_weight": false,
-        "family": null,
-        "hosting_modes": [
-          "cloud_api"
-        ],
-        "download_sources": [],
-        "preferred_runtimes": [],
-        "quantizations_known": [],
-        "parameter_scale_billions": null,
-        "hardware_profile_hint": null,
-        "self_hosting_notes": null,
-        "benchmark_evidence_sources": [
-          "openrouter_catalog"
-        ]
-      },
-      "normalized_metrics": {
-        "intelligence": 68.0,
-        "speed": 69.08,
-        "stability": 78.0,
-        "availability": 75.0,
-        "context": 89.57,
-        "task_fit": 61.62,
-        "cost_efficiency": 99.24
-      },
-      "metrics": {
-        "intelligence": 68,
-        "speed": 69,
-        "stability": 78,
-        "availability": 75,
-        "context": 90,
-        "task_fit": 62,
-        "cost_efficiency": 99,
-        "cost": 7.4e-07
-      },
-      "tier": "HEAVY_HITTER",
-      "task_label": "LONG-CONTEXT",
-      "geopolitical_risk": "LOW",
-      "score_breakdown": {
-        "intelligence": 20.4,
-        "speed": 9.67,
-        "stability": 12.48,
-        "cost_efficiency": 17.86,
-        "availability": 7.5,
-        "context": 5.37,
-        "task_fit": 3.7
-      },
-      "value_score": 76.97,
-      "rank": 163
+      "rank": 161
     },
     {
       "model": "~z-ai/glm-latest",
@@ -24613,7 +24331,7 @@
         "task_fit": 3.7
       },
       "value_score": 76.97,
-      "rank": 164
+      "rank": 162
     },
     {
       "model": "openai/gpt-4.1:batch",
@@ -24755,7 +24473,7 @@
         "task_fit": 3.6
       },
       "value_score": 76.94,
-      "rank": 165
+      "rank": 163
     },
     {
       "model": "openai/gpt-6-sol:batch",
@@ -24897,7 +24615,7 @@
         "task_fit": 3.98
       },
       "value_score": 76.93,
-      "rank": 166
+      "rank": 164
     },
     {
       "model": "openai/gpt-6.1-sol:batch",
@@ -25039,7 +24757,7 @@
         "task_fit": 3.98
       },
       "value_score": 76.93,
-      "rank": 167
+      "rank": 165
     },
     {
       "model": "openai/gpt-5.6-terra:batch",
@@ -25181,7 +24899,7 @@
         "task_fit": 3.98
       },
       "value_score": 76.85,
-      "rank": 168
+      "rank": 166
     },
     {
       "model": "z-ai/glm-5.3-flashx",
@@ -25325,7 +25043,7 @@
         "task_fit": 4.13
       },
       "value_score": 76.8,
-      "rank": 169
+      "rank": 167
     },
     {
       "model": "scaledown/extract",
@@ -25466,7 +25184,7 @@
         "task_fit": 3.7
       },
       "value_score": 76.78,
-      "rank": 170
+      "rank": 168
     },
     {
       "model": "google/gemini-3-pro-image-preview",
@@ -25613,7 +25331,7 @@
         "task_fit": 4.96
       },
       "value_score": 76.73,
-      "rank": 171
+      "rank": 169
     },
     {
       "model": "openai/gpt-5.4:batch",
@@ -25755,7 +25473,7 @@
         "task_fit": 3.98
       },
       "value_score": 76.7,
-      "rank": 172
+      "rank": 170
     },
     {
       "model": "openai/gpt-5.2-pro:batch",
@@ -25901,7 +25619,7 @@
         "task_fit": 4.64
       },
       "value_score": 76.68,
-      "rank": 173
+      "rank": 171
     },
     {
       "model": "openai/gpt-5.4-mini:batch",
@@ -26043,7 +25761,7 @@
         "task_fit": 4.03
       },
       "value_score": 76.64,
-      "rank": 174
+      "rank": 172
     },
     {
       "model": "z-ai/glm-5.2",
@@ -26184,7 +25902,7 @@
         "task_fit": 3.7
       },
       "value_score": 76.48,
-      "rank": 175
+      "rank": 173
     },
     {
       "model": "openai/gpt-5.6-sol:batch",
@@ -26326,7 +26044,7 @@
         "task_fit": 3.98
       },
       "value_score": 76.43,
-      "rank": 176
+      "rank": 174
     },
     {
       "model": "openai/gpt-6-sol",
@@ -26468,7 +26186,7 @@
         "task_fit": 3.98
       },
       "value_score": 76.43,
-      "rank": 177
+      "rank": 175
     },
     {
       "model": "openai/gpt-6.1-sol",
@@ -26610,7 +26328,7 @@
         "task_fit": 3.98
       },
       "value_score": 76.43,
-      "rank": 178
+      "rank": 176
     },
     {
       "model": "openai/gpt-5.4-mini",
@@ -26752,7 +26470,7 @@
         "task_fit": 4.03
       },
       "value_score": 76.41,
-      "rank": 179
+      "rank": 177
     },
     {
       "model": "qwen/qwen-2.5-coder-32b-instruct",
@@ -26896,7 +26614,7 @@
         "task_fit": 4.17
       },
       "value_score": 76.33,
-      "rank": 180
+      "rank": 178
     },
     {
       "model": "anthracite-org/magnum-v4-72b",
@@ -27040,7 +26758,7 @@
         "task_fit": 4.38
       },
       "value_score": 76.3,
-      "rank": 181
+      "rank": 179
     },
     {
       "model": "meta/muse-glimmer-30b",
@@ -27184,7 +26902,7 @@
         "task_fit": 4.36
       },
       "value_score": 76.26,
-      "rank": 182
+      "rank": 180
     },
     {
       "model": "openai/gpt-5.6-terra",
@@ -27326,7 +27044,7 @@
         "task_fit": 3.98
       },
       "value_score": 76.26,
-      "rank": 183
+      "rank": 181
     },
     {
       "model": "mistralai/voxtral-small-24b-2507",
@@ -27470,7 +27188,7 @@
         "task_fit": 4.05
       },
       "value_score": 76.19,
-      "rank": 184
+      "rank": 182
     },
     {
       "model": "openai/gpt-5.1:batch",
@@ -27612,7 +27330,7 @@
         "task_fit": 3.98
       },
       "value_score": 76.03,
-      "rank": 185
+      "rank": 183
     },
     {
       "model": "openai/gpt-5.4",
@@ -27754,7 +27472,7 @@
         "task_fit": 3.98
       },
       "value_score": 75.99,
-      "rank": 186
+      "rank": 184
     },
     {
       "model": "openai/gpt-5.5:batch",
@@ -27896,7 +27614,7 @@
         "task_fit": 3.98
       },
       "value_score": 75.99,
-      "rank": 187
+      "rank": 185
     },
     {
       "model": "anthropic/claude-opus-4.1",
@@ -28042,7 +27760,7 @@
         "task_fit": 4.76
       },
       "value_score": 75.91,
-      "rank": 188
+      "rank": 186
     },
     {
       "model": "google/gemini-3.1-flash-lite-image",
@@ -28189,7 +27907,7 @@
         "task_fit": 4.73
       },
       "value_score": 75.9,
-      "rank": 189
+      "rank": 187
     },
     {
       "model": "meta-llama/llama-3.1-8b-instruct",
@@ -28349,7 +28067,7 @@
         "task_fit": 4.0
       },
       "value_score": 75.86,
-      "rank": 190
+      "rank": 188
     },
     {
       "model": "openai/o4-mini:batch",
@@ -28492,7 +28210,7 @@
         "task_fit": 3.63
       },
       "value_score": 75.86,
-      "rank": 191
+      "rank": 189
     },
     {
       "model": "openai/gpt-5.2:batch",
@@ -28634,7 +28352,7 @@
         "task_fit": 3.98
       },
       "value_score": 75.84,
-      "rank": 192
+      "rank": 190
     },
     {
       "model": "~openai/gpt-mini-latest",
@@ -28780,7 +28498,150 @@
         "task_fit": 4.42
       },
       "value_score": 75.82,
-      "rank": 193
+      "rank": 191
+    },
+    {
+      "model": "deepseek/deepseek-v4-pro",
+      "family_id": "deepseek/deepseek-v4-pro",
+      "provider": "Deepseek",
+      "display_name": "DeepSeek: DeepSeek V4 Pro 0423",
+      "source_attribution": {
+        "catalog": [
+          "openrouter"
+        ],
+        "intelligence": "benchmark",
+        "speed": "artificial_analysis",
+        "pricing": "openrouter",
+        "context_length": "openrouter",
+        "merge_priority": {
+          "intelligence": [
+            "benchmark",
+            "artificial_analysis",
+            "lmsys",
+            "helper",
+            "heuristic"
+          ],
+          "speed": [
+            "artificial_analysis",
+            "openrouter",
+            "heuristic"
+          ],
+          "context_length": [
+            "openrouter",
+            "bridge"
+          ],
+          "pricing": [
+            "openrouter",
+            "bridge"
+          ]
+        }
+      },
+      "raw_metrics": {
+        "intelligence_base": 67,
+        "context_length": 1048576,
+        "prompt_cost": 4.42656e-07,
+        "completion_cost": 8.85312e-07,
+        "average_cost": 6.63984e-07,
+        "aa_quality": 36.0,
+        "aa_speed": 88.137,
+        "lmsys_elo": null,
+        "openrouter_speed_hint": 384000.0,
+        "source_count": 2,
+        "availability_hint": 93,
+        "stability_hint": 91
+      },
+      "task_metadata": {
+        "quality_by_task": {
+          "coding": 63,
+          "reasoning": 67,
+          "vision": 18,
+          "long_context": 100,
+          "extraction": 73,
+          "structured_output": 46,
+          "general_chat": 65,
+          "tool_agent_compatibility": 57
+        },
+        "taxonomy_scores": {
+          "chat_casual": 65,
+          "creative_writing": 65,
+          "knowledge": 66,
+          "legal_formal": 69,
+          "coding": 63,
+          "agentic_tool_use": 57,
+          "vision_ocr": 29,
+          "vision_reasoning": 33,
+          "math_logic": 67,
+          "translation_language": 67
+        },
+        "supported": [
+          "extraction",
+          "long_context"
+        ],
+        "primary": [
+          "long_context",
+          "extraction",
+          "reasoning"
+        ],
+        "coverage_score": 61.12,
+        "confidence": 0.68,
+        "helper_enriched": false,
+        "provider_family": "Deepseek"
+      },
+      "helper_metadata": {
+        "helper_tasks_applied": []
+      },
+      "self_hosting": {
+        "self_hostable": false,
+        "open_weight": false,
+        "family": null,
+        "hosting_modes": [
+          "cloud_api"
+        ],
+        "download_sources": [],
+        "preferred_runtimes": [],
+        "quantizations_known": [],
+        "parameter_scale_billions": null,
+        "hardware_profile_hint": null,
+        "self_hosting_notes": null,
+        "benchmark_evidence_sources": [
+          "openrouter_catalog",
+          "curated_benchmark_map",
+          "artificial_analysis"
+        ]
+      },
+      "normalized_metrics": {
+        "intelligence": 67.0,
+        "speed": 35.0,
+        "stability": 91.0,
+        "availability": 93.0,
+        "context": 89.57,
+        "task_fit": 61.12,
+        "cost_efficiency": 99.31
+      },
+      "metrics": {
+        "intelligence": 67,
+        "speed": 35,
+        "stability": 91,
+        "availability": 93,
+        "context": 90,
+        "task_fit": 61,
+        "cost_efficiency": 99,
+        "cost": 6.6e-07
+      },
+      "tier": "HEAVY_HITTER",
+      "task_label": "LONG-CONTEXT",
+      "geopolitical_risk": "HIGH",
+      "score_breakdown": {
+        "intelligence": 20.1,
+        "speed": 4.9,
+        "stability": 14.56,
+        "cost_efficiency": 17.88,
+        "availability": 9.3,
+        "context": 5.37,
+        "task_fit": 3.67
+      },
+      "value_score": 75.78,
+      "rank": 192
     },
     {
       "model": "google/gemini-3.1-flash-image-preview",
@@ -28927,19 +28788,19 @@
         "task_fit": 4.73
       },
       "value_score": 75.74,
-      "rank": 194
+      "rank": 193
     },
     {
-      "model": "deepseek/deepseek-v4-pro",
-      "family_id": "deepseek/deepseek-v4-pro",
-      "provider": "Deepseek",
-      "display_name": "DeepSeek: DeepSeek V4 Pro 0423",
+      "model": "~moonshotai/kimi-latest",
+      "family_id": "~moonshotai/kimi-latest",
+      "provider": "~Moonshotai",
+      "display_name": "MoonshotAI: Kimi Latest",
       "source_attribution": {
         "catalog": [
           "openrouter"
         ],
-        "intelligence": "benchmark",
-        "speed": "artificial_analysis",
+        "intelligence": "heuristic",
+        "speed": "openrouter",
         "pricing": "openrouter",
         "context_length": "openrouter",
         "merge_priority": {
@@ -28966,41 +28827,41 @@
         }
       },
       "raw_metrics": {
-        "intelligence_base": 67,
+        "intelligence_base": 68,
         "context_length": 1048576,
-        "prompt_cost": 9.5526e-07,
-        "completion_cost": 1.91052e-06,
-        "average_cost": 1.43289e-06,
-        "aa_quality": 36.0,
-        "aa_speed": 91.369,
+        "prompt_cost": 2.38e-07,
+        "completion_cost": 1.6e-05,
+        "average_cost": 8.119e-06,
+        "aa_quality": null,
+        "aa_speed": null,
         "lmsys_elo": null,
-        "openrouter_speed_hint": 384000.0,
-        "source_count": 2,
-        "availability_hint": 93,
-        "stability_hint": 91
+        "openrouter_speed_hint": 943718.0,
+        "source_count": 1,
+        "availability_hint": 75,
+        "stability_hint": 78
       },
       "task_metadata": {
         "quality_by_task": {
-          "coding": 63,
-          "reasoning": 67,
+          "coding": 64,
+          "reasoning": 68,
           "vision": 18,
           "long_context": 100,
-          "extraction": 73,
+          "extraction": 74,
           "structured_output": 46,
-          "general_chat": 65,
+          "general_chat": 66,
           "tool_agent_compatibility": 57
         },
         "taxonomy_scores": {
-          "chat_casual": 65,
-          "creative_writing": 65,
-          "knowledge": 66,
-          "legal_formal": 69,
-          "coding": 63,
+          "chat_casual": 66,
+          "creative_writing": 66,
+          "knowledge": 67,
+          "legal_formal": 70,
+          "coding": 64,
           "agentic_tool_use": 57,
           "vision_ocr": 29,
           "vision_reasoning": 33,
-          "math_logic": 67,
-          "translation_language": 67
+          "math_logic": 68,
+          "translation_language": 68
         },
         "supported": [
           "extraction",
@@ -29011,10 +28872,10 @@
           "extraction",
           "reasoning"
         ],
-        "coverage_score": 61.12,
+        "coverage_score": 61.62,
         "confidence": 0.68,
         "helper_enriched": false,
-        "provider_family": "Deepseek"
+        "provider_family": "~Moonshotai"
       },
       "helper_metadata": {
         "helper_tasks_applied": []
@@ -29033,44 +28894,42 @@
         "hardware_profile_hint": null,
         "self_hosting_notes": null,
         "benchmark_evidence_sources": [
-          "openrouter_catalog",
-          "curated_benchmark_map",
-          "artificial_analysis"
+          "openrouter_catalog"
         ]
       },
       "normalized_metrics": {
-        "intelligence": 67.0,
-        "speed": 35.0,
-        "stability": 91.0,
-        "availability": 93.0,
+        "intelligence": 68.0,
+        "speed": 69.08,
+        "stability": 78.0,
+        "availability": 75.0,
         "context": 89.57,
-        "task_fit": 61.12,
-        "cost_efficiency": 98.53
+        "task_fit": 61.62,
+        "cost_efficiency": 92.27
       },
       "metrics": {
-        "intelligence": 67,
-        "speed": 35,
-        "stability": 91,
-        "availability": 93,
+        "intelligence": 68,
+        "speed": 69,
+        "stability": 78,
+        "availability": 75,
         "context": 90,
-        "task_fit": 61,
-        "cost_efficiency": 99,
-        "cost": 1.43e-06
+        "task_fit": 62,
+        "cost_efficiency": 92,
+        "cost": 8.12e-06
       },
       "tier": "HEAVY_HITTER",
       "task_label": "LONG-CONTEXT",
       "geopolitical_risk": "HIGH",
       "score_breakdown": {
-        "intelligence": 20.1,
-        "speed": 4.9,
-        "stability": 14.56,
-        "cost_efficiency": 17.74,
-        "availability": 9.3,
+        "intelligence": 20.4,
+        "speed": 9.67,
+        "stability": 12.48,
+        "cost_efficiency": 16.61,
+        "availability": 7.5,
         "context": 5.37,
-        "task_fit": 3.67
+        "task_fit": 3.7
       },
-      "value_score": 75.64,
-      "rank": 195
+      "value_score": 75.72,
+      "rank": 194
     },
     {
       "model": "google/gemma-3-12b-it",
@@ -29231,7 +29090,7 @@
         "task_fit": 4.28
       },
       "value_score": 75.58,
-      "rank": 196
+      "rank": 195
     },
     {
       "model": "fireworks/ember-1",
@@ -29372,7 +29231,7 @@
         "task_fit": 3.7
       },
       "value_score": 75.58,
-      "rank": 197
+      "rank": 196
     },
     {
       "model": "openai/gpt-5.1",
@@ -29514,7 +29373,7 @@
         "task_fit": 3.98
       },
       "value_score": 75.55,
-      "rank": 198
+      "rank": 197
     },
     {
       "model": "openai/gpt-5.6-sol",
@@ -29656,7 +29515,7 @@
         "task_fit": 3.98
       },
       "value_score": 75.5,
-      "rank": 199
+      "rank": 198
     },
     {
       "model": "bytedance-seed/seed-2.0-lite",
@@ -29800,7 +29659,7 @@
         "task_fit": 4.13
       },
       "value_score": 75.4,
-      "rank": 200
+      "rank": 199
     },
     {
       "model": "z-ai/glm-4.7-flash",
@@ -29944,7 +29803,7 @@
         "task_fit": 4.13
       },
       "value_score": 75.3,
-      "rank": 201
+      "rank": 200
     },
     {
       "model": "perplexity/sonar-pro-search",
@@ -30088,7 +29947,7 @@
         "task_fit": 4.36
       },
       "value_score": 75.28,
-      "rank": 202
+      "rank": 201
     },
     {
       "model": "google/gemini-nano-banana-2.1",
@@ -30235,7 +30094,7 @@
         "task_fit": 4.73
       },
       "value_score": 75.26,
-      "rank": 203
+      "rank": 202
     },
     {
       "model": "deepseek/deepseek-v4-flash",
@@ -30280,7 +30139,7 @@
         "completion_cost": 1.82e-07,
         "average_cost": 1.3649999999999998e-07,
         "aa_quality": 34.8,
-        "aa_speed": 203.96,
+        "aa_speed": 202.669,
         "lmsys_elo": null,
         "openrouter_speed_hint": 943717.0,
         "source_count": 2,
@@ -30378,7 +30237,7 @@
         "task_fit": 3.59
       },
       "value_score": 75.2,
-      "rank": 204
+      "rank": 203
     },
     {
       "model": "openai/gpt-5.2",
@@ -30520,7 +30379,7 @@
         "task_fit": 3.98
       },
       "value_score": 75.19,
-      "rank": 205
+      "rank": 204
     },
     {
       "model": "bytedance-seed/seed-1.6-flash",
@@ -30664,7 +30523,7 @@
         "task_fit": 4.13
       },
       "value_score": 75.15,
-      "rank": 206
+      "rank": 205
     },
     {
       "model": "~openai/gpt-luna-latest",
@@ -30806,7 +30665,7 @@
         "task_fit": 3.98
       },
       "value_score": 75.14,
-      "rank": 207
+      "rank": 206
     },
     {
       "model": "qwen/qwen3.8-max-prime",
@@ -30948,148 +30807,7 @@
         "task_fit": 3.85
       },
       "value_score": 75.12,
-      "rank": 208
-    },
-    {
-      "model": "~moonshotai/kimi-latest",
-      "family_id": "~moonshotai/kimi-latest",
-      "provider": "~Moonshotai",
-      "display_name": "MoonshotAI: Kimi Latest",
-      "source_attribution": {
-        "catalog": [
-          "openrouter"
-        ],
-        "intelligence": "heuristic",
-        "speed": "openrouter",
-        "pricing": "openrouter",
-        "context_length": "openrouter",
-        "merge_priority": {
-          "intelligence": [
-            "benchmark",
-            "artificial_analysis",
-            "lmsys",
-            "helper",
-            "heuristic"
-          ],
-          "speed": [
-            "artificial_analysis",
-            "openrouter",
-            "heuristic"
-          ],
-          "context_length": [
-            "openrouter",
-            "bridge"
-          ],
-          "pricing": [
-            "openrouter",
-            "bridge"
-          ]
-        }
-      },
-      "raw_metrics": {
-        "intelligence_base": 68,
-        "context_length": 1048576,
-        "prompt_cost": 2.38e-07,
-        "completion_cost": 2.4e-05,
-        "average_cost": 1.2119e-05,
-        "aa_quality": null,
-        "aa_speed": null,
-        "lmsys_elo": null,
-        "openrouter_speed_hint": 943718.0,
-        "source_count": 1,
-        "availability_hint": 75,
-        "stability_hint": 78
-      },
-      "task_metadata": {
-        "quality_by_task": {
-          "coding": 64,
-          "reasoning": 68,
-          "vision": 18,
-          "long_context": 100,
-          "extraction": 74,
-          "structured_output": 46,
-          "general_chat": 66,
-          "tool_agent_compatibility": 57
-        },
-        "taxonomy_scores": {
-          "chat_casual": 66,
-          "creative_writing": 66,
-          "knowledge": 67,
-          "legal_formal": 70,
-          "coding": 64,
-          "agentic_tool_use": 57,
-          "vision_ocr": 29,
-          "vision_reasoning": 33,
-          "math_logic": 68,
-          "translation_language": 68
-        },
-        "supported": [
-          "extraction",
-          "long_context"
-        ],
-        "primary": [
-          "long_context",
-          "extraction",
-          "reasoning"
-        ],
-        "coverage_score": 61.62,
-        "confidence": 0.68,
-        "helper_enriched": false,
-        "provider_family": "~Moonshotai"
-      },
-      "helper_metadata": {
-        "helper_tasks_applied": []
-      },
-      "self_hosting": {
-        "self_hostable": false,
-        "open_weight": false,
-        "family": null,
-        "hosting_modes": [
-          "cloud_api"
-        ],
-        "download_sources": [],
-        "preferred_runtimes": [],
-        "quantizations_known": [],
-        "parameter_scale_billions": null,
-        "hardware_profile_hint": null,
-        "self_hosting_notes": null,
-        "benchmark_evidence_sources": [
-          "openrouter_catalog"
-        ]
-      },
-      "normalized_metrics": {
-        "intelligence": 68.0,
-        "speed": 69.08,
-        "stability": 78.0,
-        "availability": 75.0,
-        "context": 89.57,
-        "task_fit": 61.62,
-        "cost_efficiency": 88.91
-      },
-      "metrics": {
-        "intelligence": 68,
-        "speed": 69,
-        "stability": 78,
-        "availability": 75,
-        "context": 90,
-        "task_fit": 62,
-        "cost_efficiency": 89,
-        "cost": 1.212e-05
-      },
-      "tier": "HEAVY_HITTER",
-      "task_label": "LONG-CONTEXT",
-      "geopolitical_risk": "HIGH",
-      "score_breakdown": {
-        "intelligence": 20.4,
-        "speed": 9.67,
-        "stability": 12.48,
-        "cost_efficiency": 16.0,
-        "availability": 7.5,
-        "context": 5.37,
-        "task_fit": 3.7
-      },
-      "value_score": 75.12,
-      "rank": 209
+      "rank": 207
     },
     {
       "model": "openai/gpt-5-pro",
@@ -31235,7 +30953,7 @@
         "task_fit": 4.64
       },
       "value_score": 75.07,
-      "rank": 210
+      "rank": 208
     },
     {
       "model": "openai/gpt-6-astra:batch",
@@ -31377,7 +31095,7 @@
         "task_fit": 3.98
       },
       "value_score": 75.07,
-      "rank": 211
+      "rank": 209
     },
     {
       "model": "anthropic/claude-fable-5.1:batch",
@@ -31519,7 +31237,7 @@
         "task_fit": 3.98
       },
       "value_score": 75.03,
-      "rank": 212
+      "rank": 210
     },
     {
       "model": "thedrummer/cydonia-24b-v4.1",
@@ -31663,7 +31381,7 @@
         "task_fit": 4.25
       },
       "value_score": 74.98,
-      "rank": 213
+      "rank": 211
     },
     {
       "model": "tencent/hunyuan-a13b-instruct",
@@ -31807,7 +31525,7 @@
         "task_fit": 4.13
       },
       "value_score": 74.87,
-      "rank": 214
+      "rank": 212
     },
     {
       "model": "openai/gpt-5-image",
@@ -31949,7 +31667,7 @@
         "task_fit": 3.98
       },
       "value_score": 74.86,
-      "rank": 215
+      "rank": 213
     },
     {
       "model": "openai/gpt-5.5",
@@ -32091,7 +31809,7 @@
         "task_fit": 3.98
       },
       "value_score": 74.74,
-      "rank": 216
+      "rank": 214
     },
     {
       "model": "google/gemini-2.5-flash-image",
@@ -32238,7 +31956,7 @@
         "task_fit": 4.54
       },
       "value_score": 74.65,
-      "rank": 217
+      "rank": 215
     },
     {
       "model": "cohere/command-r-08-2024",
@@ -32379,7 +32097,7 @@
         "task_fit": 3.7
       },
       "value_score": 74.52,
-      "rank": 218
+      "rank": 216
     },
     {
       "model": "openai/o3-mini:batch",
@@ -32521,7 +32239,7 @@
         "task_fit": 3.46
       },
       "value_score": 74.5,
-      "rank": 219
+      "rank": 217
     },
     {
       "model": "inference-net/schematron-v2-small",
@@ -32665,7 +32383,7 @@
         "task_fit": 4.13
       },
       "value_score": 74.32,
-      "rank": 220
+      "rank": 218
     },
     {
       "model": "mistralai/codestral-2508:batch",
@@ -32807,7 +32525,7 @@
         "task_fit": 3.82
       },
       "value_score": 74.31,
-      "rank": 221
+      "rank": 219
     },
     {
       "model": "openai/gpt-5.4-image-2",
@@ -32949,7 +32667,7 @@
         "task_fit": 3.98
       },
       "value_score": 74.26,
-      "rank": 222
+      "rank": 220
     },
     {
       "model": "cognitivecomputations/dolphin-mistral-24b-venice-edition",
@@ -33093,7 +32811,7 @@
         "task_fit": 4.13
       },
       "value_score": 74.25,
-      "rank": 223
+      "rank": 221
     },
     {
       "model": "mistralai/codestral-2508",
@@ -33235,7 +32953,7 @@
         "task_fit": 3.82
       },
       "value_score": 74.25,
-      "rank": 224
+      "rank": 222
     },
     {
       "model": "openai/o3-mini",
@@ -33377,7 +33095,7 @@
         "task_fit": 3.46
       },
       "value_score": 74.25,
-      "rank": 225
+      "rank": 223
     },
     {
       "model": "openai/gpt-4o-2024-08-06",
@@ -33520,7 +33238,7 @@
         "task_fit": 4.42
       },
       "value_score": 74.22,
-      "rank": 226
+      "rank": 224
     },
     {
       "model": "openai/gpt-4o-2024-11-20",
@@ -33663,7 +33381,7 @@
         "task_fit": 4.42
       },
       "value_score": 74.22,
-      "rank": 227
+      "rank": 225
     },
     {
       "model": "thedrummer/skyfall-36b-v2",
@@ -33807,7 +33525,7 @@
         "task_fit": 4.05
       },
       "value_score": 73.96,
-      "rank": 228
+      "rank": 226
     },
     {
       "model": "openai/gpt-chat-latest",
@@ -33949,7 +33667,7 @@
         "task_fit": 3.98
       },
       "value_score": 73.8,
-      "rank": 229
+      "rank": 227
     },
     {
       "model": "openai/gpt-audio",
@@ -34091,7 +33809,7 @@
         "task_fit": 3.98
       },
       "value_score": 73.79,
-      "rank": 230
+      "rank": 228
     },
     {
       "model": "writer/palmyra-x5",
@@ -34232,7 +33950,7 @@
         "task_fit": 3.7
       },
       "value_score": 73.75,
-      "rank": 231
+      "rank": 229
     },
     {
       "model": "openai/gpt-5.4-pro",
@@ -34378,7 +34096,7 @@
         "task_fit": 4.64
       },
       "value_score": 73.7,
-      "rank": 232
+      "rank": 230
     },
     {
       "model": "openai/gpt-5.5-pro",
@@ -34524,7 +34242,7 @@
         "task_fit": 4.64
       },
       "value_score": 73.7,
-      "rank": 233
+      "rank": 231
     },
     {
       "model": "anthropic/claude-sonnet-5:batch",
@@ -34569,7 +34287,7 @@
         "completion_cost": 5e-06,
         "average_cost": 3e-06,
         "aa_quality": 56.0,
-        "aa_speed": 139.814,
+        "aa_speed": 138.559,
         "lmsys_elo": null,
         "openrouter_speed_hint": 128000.0,
         "source_count": 2,
@@ -34666,7 +34384,7 @@
         "task_fit": 3.66
       },
       "value_score": 73.68,
-      "rank": 234
+      "rank": 232
     },
     {
       "model": "openai/gpt-5.1-codex",
@@ -34809,7 +34527,7 @@
         "task_fit": 4.1
       },
       "value_score": 73.67,
-      "rank": 235
+      "rank": 233
     },
     {
       "model": "openai/gpt-3.5-turbo-0613",
@@ -34954,7 +34672,7 @@
         "task_fit": 3.83
       },
       "value_score": 73.62,
-      "rank": 236
+      "rank": 234
     },
     {
       "model": "deepseek/deepseek-v3.2-exp",
@@ -35108,7 +34826,7 @@
         "task_fit": 3.7
       },
       "value_score": 73.47,
-      "rank": 237
+      "rank": 235
     },
     {
       "model": "google/gemma-3-4b-it",
@@ -35265,7 +34983,7 @@
         "task_fit": 3.98
       },
       "value_score": 73.45,
-      "rank": 238
+      "rank": 236
     },
     {
       "model": "meta/muse-wonder",
@@ -35406,7 +35124,7 @@
         "task_fit": 3.23
       },
       "value_score": 73.38,
-      "rank": 239
+      "rank": 237
     },
     {
       "model": "openai/gpt-5.2-pro",
@@ -35552,7 +35270,148 @@
         "task_fit": 4.64
       },
       "value_score": 73.35,
-      "rank": 240
+      "rank": 238
+    },
+    {
+      "model": "z-ai/glm-5.3",
+      "family_id": "z-ai/glm-5.3",
+      "provider": "Z Ai",
+      "display_name": "Z.ai: GLM 5.3",
+      "source_attribution": {
+        "catalog": [
+          "openrouter"
+        ],
+        "intelligence": "heuristic",
+        "speed": "openrouter",
+        "pricing": "openrouter",
+        "context_length": "openrouter",
+        "merge_priority": {
+          "intelligence": [
+            "benchmark",
+            "artificial_analysis",
+            "lmsys",
+            "helper",
+            "heuristic"
+          ],
+          "speed": [
+            "artificial_analysis",
+            "openrouter",
+            "heuristic"
+          ],
+          "context_length": [
+            "openrouter",
+            "bridge"
+          ],
+          "pricing": [
+            "openrouter",
+            "bridge"
+          ]
+        }
+      },
+      "raw_metrics": {
+        "intelligence_base": 68,
+        "context_length": 1048576,
+        "prompt_cost": 7e-07,
+        "completion_cost": 2.2e-06,
+        "average_cost": 1.45e-06,
+        "aa_quality": null,
+        "aa_speed": null,
+        "lmsys_elo": null,
+        "openrouter_speed_hint": 262144.0,
+        "source_count": 1,
+        "availability_hint": 75,
+        "stability_hint": 78
+      },
+      "task_metadata": {
+        "quality_by_task": {
+          "coding": 64,
+          "reasoning": 68,
+          "vision": 18,
+          "long_context": 100,
+          "extraction": 74,
+          "structured_output": 46,
+          "general_chat": 66,
+          "tool_agent_compatibility": 57
+        },
+        "taxonomy_scores": {
+          "chat_casual": 66,
+          "creative_writing": 66,
+          "knowledge": 67,
+          "legal_formal": 70,
+          "coding": 64,
+          "agentic_tool_use": 57,
+          "vision_ocr": 29,
+          "vision_reasoning": 33,
+          "math_logic": 68,
+          "translation_language": 68
+        },
+        "supported": [
+          "extraction",
+          "long_context"
+        ],
+        "primary": [
+          "long_context",
+          "extraction",
+          "reasoning"
+        ],
+        "coverage_score": 61.62,
+        "confidence": 0.68,
+        "helper_enriched": false,
+        "provider_family": "Z Ai"
+      },
+      "helper_metadata": {
+        "helper_tasks_applied": []
+      },
+      "self_hosting": {
+        "self_hostable": false,
+        "open_weight": false,
+        "family": null,
+        "hosting_modes": [
+          "cloud_api"
+        ],
+        "download_sources": [],
+        "preferred_runtimes": [],
+        "quantizations_known": [],
+        "parameter_scale_billions": null,
+        "hardware_profile_hint": null,
+        "self_hosting_notes": null,
+        "benchmark_evidence_sources": [
+          "openrouter_catalog"
+        ]
+      },
+      "normalized_metrics": {
+        "intelligence": 68.0,
+        "speed": 44.47,
+        "stability": 78.0,
+        "availability": 75.0,
+        "context": 89.57,
+        "task_fit": 61.62,
+        "cost_efficiency": 98.51
+      },
+      "metrics": {
+        "intelligence": 68,
+        "speed": 44,
+        "stability": 78,
+        "availability": 75,
+        "context": 90,
+        "task_fit": 62,
+        "cost_efficiency": 99,
+        "cost": 1.45e-06
+      },
+      "tier": "HEAVY_HITTER",
+      "task_label": "LONG-CONTEXT",
+      "geopolitical_risk": "LOW",
+      "score_breakdown": {
+        "intelligence": 20.4,
+        "speed": 6.23,
+        "stability": 12.48,
+        "cost_efficiency": 17.73,
+        "availability": 7.5,
+        "context": 5.37,
+        "task_fit": 3.7
+      },
+      "value_score": 73.34,
+      "rank": 239
     },
     {
       "model": "openai/gpt-6-astra",
@@ -35694,7 +35553,7 @@
         "task_fit": 3.98
       },
       "value_score": 73.24,
-      "rank": 241
+      "rank": 240
     },
     {
       "model": "openai/gpt-4-turbo:batch",
@@ -35836,7 +35695,7 @@
         "task_fit": 3.98
       },
       "value_score": 73.2,
-      "rank": 242
+      "rank": 241
     },
     {
       "model": "anthropic/claude-fable-5.1",
@@ -35978,7 +35837,7 @@
         "task_fit": 3.98
       },
       "value_score": 73.19,
-      "rank": 243
+      "rank": 242
     },
     {
       "model": "anthropic/claude-sonnet-5",
@@ -36023,7 +35882,7 @@
         "completion_cost": 1e-05,
         "average_cost": 6e-06,
         "aa_quality": 56.0,
-        "aa_speed": 139.814,
+        "aa_speed": 138.559,
         "lmsys_elo": null,
         "openrouter_speed_hint": 128000.0,
         "source_count": 2,
@@ -36120,7 +35979,7 @@
         "task_fit": 3.66
       },
       "value_score": 73.18,
-      "rank": 244
+      "rank": 243
     },
     {
       "model": "~x-ai/grok-latest",
@@ -36261,7 +36120,7 @@
         "task_fit": 3.7
       },
       "value_score": 73.16,
-      "rank": 245
+      "rank": 244
     },
     {
       "model": "anthropic/claude-opus-5:batch",
@@ -36306,7 +36165,7 @@
         "completion_cost": 1.25e-05,
         "average_cost": 7.5e-06,
         "aa_quality": 57.6,
-        "aa_speed": 97.295,
+        "aa_speed": 97.799,
         "lmsys_elo": null,
         "openrouter_speed_hint": 128000.0,
         "source_count": 2,
@@ -36403,7 +36262,7 @@
         "task_fit": 3.58
       },
       "value_score": 73.16,
-      "rank": 246
+      "rank": 245
     },
     {
       "model": "poolside/laguna-s-2.1",
@@ -36544,7 +36403,7 @@
         "task_fit": 3.7
       },
       "value_score": 72.89,
-      "rank": 247
+      "rank": 246
     },
     {
       "model": "deepseek/deepseek-chat-v3.1",
@@ -36685,7 +36544,7 @@
         "task_fit": 3.7
       },
       "value_score": 72.86,
-      "rank": 248
+      "rank": 247
     },
     {
       "model": "inception/mercury-3",
@@ -36826,7 +36685,7 @@
         "task_fit": 3.7
       },
       "value_score": 72.82,
-      "rank": 249
+      "rank": 248
     },
     {
       "model": "gryphe/mythomax-l2-13b",
@@ -36969,7 +36828,7 @@
         "task_fit": 3.8
       },
       "value_score": 72.74,
-      "rank": 250
+      "rank": 249
     },
     {
       "model": "tencent/hy-mt2-30b-a3b",
@@ -37112,7 +36971,7 @@
         "task_fit": 3.8
       },
       "value_score": 72.72,
-      "rank": 251
+      "rank": 250
     },
     {
       "model": "z-ai/glm-5.3:batch",
@@ -37253,7 +37112,7 @@
         "task_fit": 3.7
       },
       "value_score": 72.68,
-      "rank": 252
+      "rank": 251
     },
     {
       "model": "minimax/minimax-m2-her",
@@ -37397,7 +37256,7 @@
         "task_fit": 4.01
       },
       "value_score": 72.64,
-      "rank": 253
+      "rank": 252
     },
     {
       "model": "mistralai/mistral-nemo",
@@ -37538,7 +37397,7 @@
         "task_fit": 3.7
       },
       "value_score": 72.61,
-      "rank": 254
+      "rank": 253
     },
     {
       "model": "unbiased/pareto-26.10",
@@ -37679,7 +37538,7 @@
         "task_fit": 3.7
       },
       "value_score": 72.54,
-      "rank": 255
+      "rank": 254
     },
     {
       "model": "~unbiased/pareto-latest",
@@ -37820,7 +37679,7 @@
         "task_fit": 3.7
       },
       "value_score": 72.54,
-      "rank": 256
+      "rank": 255
     },
     {
       "model": "nex-agi/nex-n2.5-mini",
@@ -37961,7 +37820,7 @@
         "task_fit": 3.74
       },
       "value_score": 72.46,
-      "rank": 257
+      "rank": 256
     },
     {
       "model": "tencent/hy4-preview",
@@ -38002,9 +37861,9 @@
       "raw_metrics": {
         "intelligence_base": 68,
         "context_length": 1048576,
-        "prompt_cost": 8.34e-07,
-        "completion_cost": 2.501e-06,
-        "average_cost": 1.6675e-06,
+        "prompt_cost": 7.506e-07,
+        "completion_cost": 2.2509e-06,
+        "average_cost": 1.50075e-06,
         "aa_quality": null,
         "aa_speed": null,
         "lmsys_elo": null,
@@ -38077,7 +37936,7 @@
         "availability": 75.0,
         "context": 89.57,
         "task_fit": 61.62,
-        "cost_efficiency": 98.3
+        "cost_efficiency": 98.46
       },
       "metrics": {
         "intelligence": 68,
@@ -38087,7 +37946,7 @@
         "context": 90,
         "task_fit": 62,
         "cost_efficiency": 98,
-        "cost": 1.67e-06
+        "cost": 1.5e-06
       },
       "tier": "HEAVY_HITTER",
       "task_label": "LONG-CONTEXT",
@@ -38096,13 +37955,13 @@
         "intelligence": 20.4,
         "speed": 5.22,
         "stability": 12.48,
-        "cost_efficiency": 17.69,
+        "cost_efficiency": 17.72,
         "availability": 7.5,
         "context": 5.37,
         "task_fit": 3.7
       },
-      "value_score": 72.32,
-      "rank": 258
+      "value_score": 72.35,
+      "rank": 257
     },
     {
       "model": "scaledown/summarize",
@@ -38243,7 +38102,7 @@
         "task_fit": 3.7
       },
       "value_score": 72.3,
-      "rank": 259
+      "rank": 258
     },
     {
       "model": "google/gemma-2-27b-it",
@@ -38402,7 +38261,7 @@
         "task_fit": 3.76
       },
       "value_score": 72.17,
-      "rank": 260
+      "rank": 259
     },
     {
       "model": "~openai/gpt-sol-latest",
@@ -38544,7 +38403,7 @@
         "task_fit": 3.98
       },
       "value_score": 72.15,
-      "rank": 261
+      "rank": 260
     },
     {
       "model": "mistralai/mistral-large",
@@ -38589,7 +38448,7 @@
         "completion_cost": 6e-06,
         "average_cost": 4e-06,
         "aa_quality": 38.4,
-        "aa_speed": 62.877,
+        "aa_speed": 75.059,
         "lmsys_elo": null,
         "openrouter_speed_hint": 102400.0,
         "source_count": 2,
@@ -38687,7 +38546,7 @@
         "task_fit": 3.55
       },
       "value_score": 72.13,
-      "rank": 262
+      "rank": 261
     },
     {
       "model": "tencent/hy3-preview",
@@ -38828,7 +38687,7 @@
         "task_fit": 3.7
       },
       "value_score": 72.06,
-      "rank": 263
+      "rank": 262
     },
     {
       "model": "undi95/remm-slerp-l2-13b",
@@ -38971,7 +38830,7 @@
         "task_fit": 3.77
       },
       "value_score": 72.05,
-      "rank": 264
+      "rank": 263
     },
     {
       "model": "anthropic/claude-opus-5",
@@ -39016,7 +38875,7 @@
         "completion_cost": 2.5e-05,
         "average_cost": 1.5e-05,
         "aa_quality": 57.6,
-        "aa_speed": 97.295,
+        "aa_speed": 97.799,
         "lmsys_elo": null,
         "openrouter_speed_hint": 128000.0,
         "source_count": 2,
@@ -39113,7 +38972,7 @@
         "task_fit": 3.58
       },
       "value_score": 72.05,
-      "rank": 265
+      "rank": 264
     },
     {
       "model": "~openai/gpt-terra-latest",
@@ -39255,7 +39114,7 @@
         "task_fit": 3.98
       },
       "value_score": 71.98,
-      "rank": 266
+      "rank": 265
     },
     {
       "model": "elorian/glimpse",
@@ -39396,7 +39255,7 @@
         "task_fit": 3.7
       },
       "value_score": 71.94,
-      "rank": 267
+      "rank": 266
     },
     {
       "model": "bytedance-seed/seed-2.0-mini",
@@ -39537,7 +39396,7 @@
         "task_fit": 3.74
       },
       "value_score": 71.87,
-      "rank": 268
+      "rank": 267
     },
     {
       "model": "meta-llama/llama-3.2-3b-instruct",
@@ -39693,7 +39552,7 @@
         "task_fit": 3.59
       },
       "value_score": 71.86,
-      "rank": 269
+      "rank": 268
     },
     {
       "model": "bytedance-seed/seed-2-1-turbo",
@@ -39834,7 +39693,7 @@
         "task_fit": 3.7
       },
       "value_score": 71.85,
-      "rank": 270
+      "rank": 269
     },
     {
       "model": "moonshotai/kimi-k2.5",
@@ -39975,7 +39834,7 @@
         "task_fit": 3.7
       },
       "value_score": 71.85,
-      "rank": 271
+      "rank": 270
     },
     {
       "model": "z-ai/glm-5.3-prime",
@@ -40116,7 +39975,7 @@
         "task_fit": 3.7
       },
       "value_score": 71.85,
-      "rank": 272
+      "rank": 271
     },
     {
       "model": "openai/gpt-4-turbo",
@@ -40258,7 +40117,7 @@
         "task_fit": 3.98
       },
       "value_score": 71.81,
-      "rank": 273
+      "rank": 272
     },
     {
       "model": "moonshotai/kimi-k2.6",
@@ -40399,7 +40258,7 @@
         "task_fit": 3.7
       },
       "value_score": 71.76,
-      "rank": 274
+      "rank": 273
     },
     {
       "model": "openai/gpt-5.2-chat",
@@ -40541,7 +40400,7 @@
         "task_fit": 3.98
       },
       "value_score": 71.67,
-      "rank": 275
+      "rank": 274
     },
     {
       "model": "openai/gpt-4o-2024-05-13",
@@ -40684,7 +40543,7 @@
         "task_fit": 4.42
       },
       "value_score": 71.63,
-      "rank": 276
+      "rank": 275
     },
     {
       "model": "anthropic/claude-opus-4.8:batch",
@@ -40825,7 +40684,7 @@
         "task_fit": 3.01
       },
       "value_score": 71.56,
-      "rank": 277
+      "rank": 276
     },
     {
       "model": "morph/morph-v3-fast",
@@ -40966,7 +40825,7 @@
         "task_fit": 3.7
       },
       "value_score": 71.38,
-      "rank": 278
+      "rank": 277
     },
     {
       "model": "bytedance-seed/seed-2.0-code",
@@ -41108,7 +40967,7 @@
         "task_fit": 3.82
       },
       "value_score": 71.37,
-      "rank": 279
+      "rank": 278
     },
     {
       "model": "relace/relace-apply-3",
@@ -41249,7 +41108,7 @@
         "task_fit": 3.7
       },
       "value_score": 71.35,
-      "rank": 280
+      "rank": 279
     },
     {
       "model": "aion-labs/aion-3.5-mini",
@@ -41390,7 +41249,7 @@
         "task_fit": 3.74
       },
       "value_score": 71.3,
-      "rank": 281
+      "rank": 280
     },
     {
       "model": "anthropic/claude-opus-4.7:batch",
@@ -41531,7 +41390,7 @@
         "task_fit": 2.96
       },
       "value_score": 71.22,
-      "rank": 282
+      "rank": 281
     },
     {
       "model": "relace/relace-search",
@@ -41672,7 +41531,7 @@
         "task_fit": 3.7
       },
       "value_score": 71.18,
-      "rank": 283
+      "rank": 282
     },
     {
       "model": "poolside/laguna-xs-2.1",
@@ -41813,7 +41672,7 @@
         "task_fit": 3.7
       },
       "value_score": 71.13,
-      "rank": 284
+      "rank": 283
     },
     {
       "model": "google/gemini-4-argon:batch",
@@ -41858,7 +41717,7 @@
         "completion_cost": 5e-06,
         "average_cost": 3e-06,
         "aa_quality": 52.6,
-        "aa_speed": 80.34,
+        "aa_speed": 80.393,
         "lmsys_elo": null,
         "openrouter_speed_hint": 943718.0,
         "source_count": 2,
@@ -41955,7 +41814,7 @@
         "task_fit": 3.83
       },
       "value_score": 71.02,
-      "rank": 285
+      "rank": 284
     },
     {
       "model": "bytedance-seed/seed-1.6",
@@ -42096,7 +41955,7 @@
         "task_fit": 3.7
       },
       "value_score": 70.94,
-      "rank": 286
+      "rank": 285
     },
     {
       "model": "nvidia/nemotron-3.5-content-safety",
@@ -42247,7 +42106,7 @@
         "task_fit": 3.7
       },
       "value_score": 70.86,
-      "rank": 287
+      "rank": 286
     },
     {
       "model": "z-ai/glm-5v-turbo",
@@ -42388,7 +42247,7 @@
         "task_fit": 3.7
       },
       "value_score": 70.85,
-      "rank": 288
+      "rank": 287
     },
     {
       "model": "sakana/sakana-namazu",
@@ -42529,7 +42388,7 @@
         "task_fit": 3.7
       },
       "value_score": 70.84,
-      "rank": 289
+      "rank": 288
     },
     {
       "model": "z-ai/glm-5.1",
@@ -42670,7 +42529,7 @@
         "task_fit": 3.7
       },
       "value_score": 70.8,
-      "rank": 290
+      "rank": 289
     },
     {
       "model": "google/gemini-3.7-flash:batch",
@@ -42812,7 +42671,7 @@
         "task_fit": 3.37
       },
       "value_score": 70.77,
-      "rank": 291
+      "rank": 290
     },
     {
       "model": "anthropic/claude-fable-5:batch",
@@ -42857,7 +42716,7 @@
         "completion_cost": 2.5e-05,
         "average_cost": 1.5e-05,
         "aa_quality": 53.4,
-        "aa_speed": 69.923,
+        "aa_speed": 71.09,
         "lmsys_elo": null,
         "openrouter_speed_hint": 128000.0,
         "source_count": 2,
@@ -42953,7 +42812,7 @@
         "task_fit": 3.44
       },
       "value_score": 70.71,
-      "rank": 292
+      "rank": 291
     },
     {
       "model": "unbiased/pareto-26.9",
@@ -43094,7 +42953,7 @@
         "task_fit": 3.7
       },
       "value_score": 70.68,
-      "rank": 293
+      "rank": 292
     },
     {
       "model": "aion-labs/aion-3.0-mini",
@@ -43235,7 +43094,7 @@
         "task_fit": 3.74
       },
       "value_score": 70.63,
-      "rank": 294
+      "rank": 293
     },
     {
       "model": "google/gemini-3.7-flash",
@@ -43377,7 +43236,7 @@
         "task_fit": 3.37
       },
       "value_score": 70.57,
-      "rank": 295
+      "rank": 294
     },
     {
       "model": "nousresearch/hermes-3-llama-3.1-70b",
@@ -43518,7 +43377,7 @@
         "task_fit": 3.74
       },
       "value_score": 70.55,
-      "rank": 296
+      "rank": 295
     },
     {
       "model": "google/gemini-4-argon",
@@ -43563,7 +43422,7 @@
         "completion_cost": 1e-05,
         "average_cost": 6e-06,
         "aa_quality": 52.6,
-        "aa_speed": 80.34,
+        "aa_speed": 80.393,
         "lmsys_elo": null,
         "openrouter_speed_hint": 943718.0,
         "source_count": 2,
@@ -43660,7 +43519,7 @@
         "task_fit": 3.83
       },
       "value_score": 70.52,
-      "rank": 297
+      "rank": 296
     },
     {
       "model": "x-ai/grok-4.6",
@@ -43801,7 +43660,7 @@
         "task_fit": 2.83
       },
       "value_score": 70.52,
-      "rank": 298
+      "rank": 297
     },
     {
       "model": "nousresearch/hermes-3-llama-3.1-405b",
@@ -43942,7 +43801,7 @@
         "task_fit": 3.74
       },
       "value_score": 70.5,
-      "rank": 299
+      "rank": 298
     },
     {
       "model": "anthropic/claude-opus-4.8",
@@ -44083,7 +43942,7 @@
         "task_fit": 3.01
       },
       "value_score": 70.45,
-      "rank": 300
+      "rank": 299
     },
     {
       "model": "z-ai/glm-4.6v",
@@ -44224,7 +44083,7 @@
         "task_fit": 3.7
       },
       "value_score": 70.36,
-      "rank": 301
+      "rank": 300
     },
     {
       "model": "aion-labs/aion-3.5",
@@ -44365,7 +44224,7 @@
         "task_fit": 3.7
       },
       "value_score": 70.35,
-      "rank": 302
+      "rank": 301
     },
     {
       "model": "inference-net/schematron-v2-turbo",
@@ -44506,7 +44365,7 @@
         "task_fit": 3.7
       },
       "value_score": 70.3,
-      "rank": 303
+      "rank": 302
     },
     {
       "model": "aion-labs/aion-2.0",
@@ -44647,7 +44506,7 @@
         "task_fit": 3.7
       },
       "value_score": 70.25,
-      "rank": 304
+      "rank": 303
     },
     {
       "model": "sakana/fugu-ultra",
@@ -44788,7 +44647,7 @@
         "task_fit": 3.7
       },
       "value_score": 70.12,
-      "rank": 305
+      "rank": 304
     },
     {
       "model": "sakana/fugu-ultra-v2",
@@ -44929,7 +44788,7 @@
         "task_fit": 3.7
       },
       "value_score": 70.12,
-      "rank": 306
+      "rank": 305
     },
     {
       "model": "anthropic/claude-opus-4.7",
@@ -45070,7 +44929,7 @@
         "task_fit": 2.96
       },
       "value_score": 70.11,
-      "rank": 307
+      "rank": 306
     },
     {
       "model": "perplexity/sonar-deep-research",
@@ -45212,7 +45071,7 @@
         "task_fit": 3.79
       },
       "value_score": 70.08,
-      "rank": 308
+      "rank": 307
     },
     {
       "model": "mistralai/mistral-small-3.1-24b-instruct",
@@ -45354,7 +45213,7 @@
         "task_fit": 2.83
       },
       "value_score": 69.83,
-      "rank": 309
+      "rank": 308
     },
     {
       "model": "anthropic/claude-haiku-5.5:batch",
@@ -45399,7 +45258,7 @@
         "completion_cost": 2.5e-07,
         "average_cost": 1.5e-07,
         "aa_quality": 43.4,
-        "aa_speed": 238.96,
+        "aa_speed": 240.204,
         "lmsys_elo": null,
         "openrouter_speed_hint": 128000.0,
         "source_count": 2,
@@ -45495,7 +45354,7 @@
         "task_fit": 3.07
       },
       "value_score": 69.71,
-      "rank": 310
+      "rank": 309
     },
     {
       "model": "anthropic/claude-haiku-5.5",
@@ -45540,7 +45399,7 @@
         "completion_cost": 5e-07,
         "average_cost": 3e-07,
         "aa_quality": 43.4,
-        "aa_speed": 238.96,
+        "aa_speed": 240.204,
         "lmsys_elo": null,
         "openrouter_speed_hint": 128000.0,
         "source_count": 2,
@@ -45636,7 +45495,7 @@
         "task_fit": 3.07
       },
       "value_score": 69.69,
-      "rank": 311
+      "rank": 310
     },
     {
       "model": "aion-labs/aion-3.0",
@@ -45777,7 +45636,7 @@
         "task_fit": 3.7
       },
       "value_score": 69.67,
-      "rank": 312
+      "rank": 311
     },
     {
       "model": "meta/muse-spark-1.2",
@@ -45918,7 +45777,7 @@
         "task_fit": 2.65
       },
       "value_score": 69.48,
-      "rank": 313
+      "rank": 312
     },
     {
       "model": "google/gemini-3.6-flash:batch",
@@ -46060,7 +45919,7 @@
         "task_fit": 3.18
       },
       "value_score": 69.09,
-      "rank": 314
+      "rank": 313
     },
     {
       "model": "~openai/gpt-astra-latest",
@@ -46202,7 +46061,7 @@
         "task_fit": 3.98
       },
       "value_score": 68.96,
-      "rank": 315
+      "rank": 314
     },
     {
       "model": "~anthropic/claude-fable-latest",
@@ -46344,7 +46203,7 @@
         "task_fit": 3.98
       },
       "value_score": 68.91,
-      "rank": 316
+      "rank": 315
     },
     {
       "model": "google/gemini-3.6-flash",
@@ -46486,7 +46345,7 @@
         "task_fit": 3.18
       },
       "value_score": 68.88,
-      "rank": 317
+      "rank": 316
     },
     {
       "model": "anthropic/claude-fable-5",
@@ -46531,7 +46390,7 @@
         "completion_cost": 5e-05,
         "average_cost": 3e-05,
         "aa_quality": 53.4,
-        "aa_speed": 69.923,
+        "aa_speed": 71.09,
         "lmsys_elo": null,
         "openrouter_speed_hint": 128000.0,
         "source_count": 2,
@@ -46627,7 +46486,7 @@
         "task_fit": 3.44
       },
       "value_score": 68.87,
-      "rank": 318
+      "rank": 317
     },
     {
       "model": "meta-llama/llama-4-maverick",
@@ -46672,7 +46531,7 @@
         "completion_cost": 6.525e-07,
         "average_cost": 4.2e-07,
         "aa_quality": 9.3,
-        "aa_speed": 50.278,
+        "aa_speed": 52.106,
         "lmsys_elo": null,
         "openrouter_speed_hint": 16384.0,
         "source_count": 2,
@@ -46782,7 +46641,7 @@
         "task_fit": 2.98
       },
       "value_score": 68.76,
-      "rank": 319
+      "rank": 318
     },
     {
       "model": "meta/muse-spark-1.3",
@@ -46923,7 +46782,7 @@
         "task_fit": 2.98
       },
       "value_score": 68.73,
-      "rank": 320
+      "rank": 319
     },
     {
       "model": "tencent/hy-mt2-1.8b",
@@ -47065,7 +46924,7 @@
         "task_fit": 3.38
       },
       "value_score": 68.71,
-      "rank": 321
+      "rank": 320
     },
     {
       "model": "qwen/qwen3-30b-a3b",
@@ -47221,7 +47080,7 @@
         "task_fit": 2.69
       },
       "value_score": 68.7,
-      "rank": 322
+      "rank": 321
     },
     {
       "model": "tencent/hy-mt2-7b",
@@ -47363,7 +47222,7 @@
         "task_fit": 3.38
       },
       "value_score": 68.69,
-      "rank": 323
+      "rank": 322
     },
     {
       "model": "meta-llama/llama-4-scout",
@@ -47408,7 +47267,7 @@
         "completion_cost": 3e-07,
         "average_cost": 2e-07,
         "aa_quality": 6.5,
-        "aa_speed": 107.688,
+        "aa_speed": 99.383,
         "lmsys_elo": null,
         "openrouter_speed_hint": 16384.0,
         "source_count": 2,
@@ -47518,7 +47377,7 @@
         "task_fit": 2.86
       },
       "value_score": 68.68,
-      "rank": 324
+      "rank": 323
     },
     {
       "model": "bytedance/ui-tars-1.5-7b",
@@ -47659,7 +47518,7 @@
         "task_fit": 3.52
       },
       "value_score": 68.61,
-      "rank": 325
+      "rank": 324
     },
     {
       "model": "deepseek/deepseek-v4.1-flash:batch",
@@ -47800,7 +47659,7 @@
         "task_fit": 2.98
       },
       "value_score": 68.6,
-      "rank": 326
+      "rank": 325
     },
     {
       "model": "qwen/qwen-2.5-7b-instruct",
@@ -47940,7 +47799,7 @@
         "task_fit": 3.2
       },
       "value_score": 68.59,
-      "rank": 327
+      "rank": 326
     },
     {
       "model": "liquid/lfm-2.5-24b-a2b",
@@ -48081,7 +47940,7 @@
         "task_fit": 3.52
       },
       "value_score": 68.56,
-      "rank": 328
+      "rank": 327
     },
     {
       "model": "z-ai/glm-4.5v",
@@ -48222,7 +48081,7 @@
         "task_fit": 3.58
       },
       "value_score": 68.52,
-      "rank": 329
+      "rank": 328
     },
     {
       "model": "deepseek/deepseek-v4.1-flash",
@@ -48363,7 +48222,7 @@
         "task_fit": 2.98
       },
       "value_score": 68.48,
-      "rank": 330
+      "rank": 329
     },
     {
       "model": "x-ai/grok-4.5",
@@ -48504,7 +48363,7 @@
         "task_fit": 2.6
       },
       "value_score": 68.48,
-      "rank": 331
+      "rank": 330
     },
     {
       "model": "google/gemini-3.5-flash:batch",
@@ -48646,7 +48505,7 @@
         "task_fit": 3.14
       },
       "value_score": 68.48,
-      "rank": 332
+      "rank": 331
     },
     {
       "model": "sao10k/l3-lunaris-8b",
@@ -48788,7 +48647,7 @@
         "task_fit": 3.42
       },
       "value_score": 68.46,
-      "rank": 333
+      "rank": 332
     },
     {
       "model": "qwen/qwen-2.5-72b-instruct",
@@ -48928,7 +48787,7 @@
         "task_fit": 3.2
       },
       "value_score": 68.41,
-      "rank": 334
+      "rank": 333
     },
     {
       "model": "aion-labs/aion-rp-llama-3.1-8b",
@@ -49068,7 +48927,7 @@
         "task_fit": 3.43
       },
       "value_score": 68.14,
-      "rank": 335
+      "rank": 334
     },
     {
       "model": "google/gemini-3.5-flash",
@@ -49210,7 +49069,7 @@
         "task_fit": 3.14
       },
       "value_score": 68.03,
-      "rank": 336
+      "rank": 335
     },
     {
       "model": "openai/gpt-3.5-turbo:batch",
@@ -49350,6 +49209,147 @@
         "task_fit": 2.61
       },
       "value_score": 68.0,
+      "rank": 336
+    },
+    {
+      "model": "inclusionai/ling-3.1-flash",
+      "family_id": "inclusionai/ling-3.1-flash",
+      "provider": "Inclusionai",
+      "display_name": "inclusionAI: Ling 3.1 Flash",
+      "source_attribution": {
+        "catalog": [
+          "openrouter"
+        ],
+        "intelligence": "artificial_analysis",
+        "speed": "artificial_analysis",
+        "pricing": "openrouter",
+        "context_length": "openrouter",
+        "merge_priority": {
+          "intelligence": [
+            "benchmark",
+            "artificial_analysis",
+            "lmsys",
+            "helper",
+            "heuristic"
+          ],
+          "speed": [
+            "artificial_analysis",
+            "openrouter",
+            "heuristic"
+          ],
+          "context_length": [
+            "openrouter",
+            "bridge"
+          ],
+          "pricing": [
+            "openrouter",
+            "bridge"
+          ]
+        }
+      },
+      "raw_metrics": {
+        "intelligence_base": 43,
+        "context_length": 262144,
+        "prompt_cost": 7.5e-08,
+        "completion_cost": 2.25e-07,
+        "average_cost": 1.5e-07,
+        "aa_quality": 43.9,
+        "aa_speed": 0.0,
+        "lmsys_elo": null,
+        "openrouter_speed_hint": 235929.0,
+        "source_count": 2,
+        "availability_hint": 83,
+        "stability_hint": 83
+      },
+      "task_metadata": {
+        "quality_by_task": {
+          "coding": 39,
+          "reasoning": 43,
+          "vision": 18,
+          "long_context": 100,
+          "extraction": 56,
+          "structured_output": 29,
+          "general_chat": 44,
+          "tool_agent_compatibility": 43
+        },
+        "taxonomy_scores": {
+          "chat_casual": 44,
+          "creative_writing": 44,
+          "knowledge": 44,
+          "legal_formal": 47,
+          "coding": 39,
+          "agentic_tool_use": 43,
+          "vision_ocr": 26,
+          "vision_reasoning": 26,
+          "math_logic": 43,
+          "translation_language": 48
+        },
+        "supported": [
+          "long_context"
+        ],
+        "primary": [
+          "long_context",
+          "extraction",
+          "general_chat"
+        ],
+        "coverage_score": 46.5,
+        "confidence": 0.68,
+        "helper_enriched": false,
+        "provider_family": "Inclusionai"
+      },
+      "helper_metadata": {
+        "helper_tasks_applied": []
+      },
+      "self_hosting": {
+        "self_hostable": false,
+        "open_weight": false,
+        "family": null,
+        "hosting_modes": [
+          "cloud_api"
+        ],
+        "download_sources": [],
+        "preferred_runtimes": [],
+        "quantizations_known": [],
+        "parameter_scale_billions": null,
+        "hardware_profile_hint": null,
+        "self_hosting_notes": null,
+        "benchmark_evidence_sources": [
+          "openrouter_catalog",
+          "artificial_analysis"
+        ]
+      },
+      "normalized_metrics": {
+        "intelligence": 43.0,
+        "speed": 62.0,
+        "stability": 83.0,
+        "availability": 83.0,
+        "context": 67.18,
+        "task_fit": 46.5,
+        "cost_efficiency": 99.84
+      },
+      "metrics": {
+        "intelligence": 43,
+        "speed": 62,
+        "stability": 83,
+        "availability": 83,
+        "context": 67,
+        "task_fit": 46,
+        "cost_efficiency": 100,
+        "cost": 1.5e-07
+      },
+      "tier": "HEAVY_HITTER",
+      "task_label": "LONG-CONTEXT",
+      "geopolitical_risk": "LOW",
+      "score_breakdown": {
+        "intelligence": 12.9,
+        "speed": 8.68,
+        "stability": 13.28,
+        "cost_efficiency": 17.97,
+        "availability": 8.3,
+        "context": 4.03,
+        "task_fit": 2.79
+      },
+      "value_score": 67.95,
       "rank": 337
     },
     {
@@ -49395,7 +49395,7 @@
         "completion_cost": 2e-06,
         "average_cost": 1.2e-06,
         "aa_quality": 14.2,
-        "aa_speed": 151.463,
+        "aa_speed": 154.197,
         "lmsys_elo": 1316.6,
         "openrouter_speed_hint": 104857.0,
         "source_count": 3,
@@ -50093,7 +50093,7 @@
         "completion_cost": 6e-06,
         "average_cost": 4e-06,
         "aa_quality": 45.4,
-        "aa_speed": 38.905,
+        "aa_speed": 40.321,
         "lmsys_elo": null,
         "openrouter_speed_hint": 131072.0,
         "source_count": 2,
@@ -50810,7 +50810,7 @@
         "completion_cost": 6e-06,
         "average_cost": 4e-06,
         "aa_quality": 46.4,
-        "aa_speed": 85.916,
+        "aa_speed": 87.433,
         "lmsys_elo": null,
         "openrouter_speed_hint": 450000.0,
         "source_count": 2,
@@ -51658,7 +51658,7 @@
         "completion_cost": 4.7e-07,
         "average_cost": 3.1e-07,
         "aa_quality": 39.8,
-        "aa_speed": 54.96,
+        "aa_speed": 54.702,
         "lmsys_elo": null,
         "openrouter_speed_hint": 131072.0,
         "source_count": 2,
@@ -52643,7 +52643,7 @@
         "completion_cost": 6e-06,
         "average_cost": 4e-06,
         "aa_quality": 39.9,
-        "aa_speed": 38.811,
+        "aa_speed": 38.859,
         "lmsys_elo": null,
         "openrouter_speed_hint": 909000.0,
         "source_count": 2,
@@ -52784,7 +52784,7 @@
         "completion_cost": 2.7e-06,
         "average_cost": 1.85e-06,
         "aa_quality": 43.7,
-        "aa_speed": 93.885,
+        "aa_speed": 102.267,
         "lmsys_elo": null,
         "openrouter_speed_hint": 64000.0,
         "source_count": 2,
@@ -52881,6 +52881,147 @@
       },
       "value_score": 65.2,
       "rank": 362
+    },
+    {
+      "model": "minimax/minimax-m3.1-flash",
+      "family_id": "minimax/minimax-m3.1-flash",
+      "provider": "Minimax",
+      "display_name": "MiniMax: MiniMax M3.1 Flash",
+      "source_attribution": {
+        "catalog": [
+          "openrouter"
+        ],
+        "intelligence": "artificial_analysis",
+        "speed": "artificial_analysis",
+        "pricing": "openrouter",
+        "context_length": "openrouter",
+        "merge_priority": {
+          "intelligence": [
+            "benchmark",
+            "artificial_analysis",
+            "lmsys",
+            "helper",
+            "heuristic"
+          ],
+          "speed": [
+            "artificial_analysis",
+            "openrouter",
+            "heuristic"
+          ],
+          "context_length": [
+            "openrouter",
+            "bridge"
+          ],
+          "pricing": [
+            "openrouter",
+            "bridge"
+          ]
+        }
+      },
+      "raw_metrics": {
+        "intelligence_base": 42,
+        "context_length": 1000000,
+        "prompt_cost": 1.5e-07,
+        "completion_cost": 6e-07,
+        "average_cost": 3.75e-07,
+        "aa_quality": 42.7,
+        "aa_speed": 81.133,
+        "lmsys_elo": null,
+        "openrouter_speed_hint": 524288.0,
+        "source_count": 2,
+        "availability_hint": 83,
+        "stability_hint": 83
+      },
+      "task_metadata": {
+        "quality_by_task": {
+          "coding": 38,
+          "reasoning": 42,
+          "vision": 18,
+          "long_context": 100,
+          "extraction": 55,
+          "structured_output": 29,
+          "general_chat": 43,
+          "tool_agent_compatibility": 42
+        },
+        "taxonomy_scores": {
+          "chat_casual": 43,
+          "creative_writing": 43,
+          "knowledge": 43,
+          "legal_formal": 46,
+          "coding": 38,
+          "agentic_tool_use": 42,
+          "vision_ocr": 25,
+          "vision_reasoning": 25,
+          "math_logic": 42,
+          "translation_language": 47
+        },
+        "supported": [
+          "long_context"
+        ],
+        "primary": [
+          "long_context",
+          "extraction",
+          "general_chat"
+        ],
+        "coverage_score": 45.88,
+        "confidence": 0.68,
+        "helper_enriched": false,
+        "provider_family": "Minimax"
+      },
+      "helper_metadata": {
+        "helper_tasks_applied": []
+      },
+      "self_hosting": {
+        "self_hostable": false,
+        "open_weight": false,
+        "family": null,
+        "hosting_modes": [
+          "cloud_api"
+        ],
+        "download_sources": [],
+        "preferred_runtimes": [],
+        "quantizations_known": [],
+        "parameter_scale_billions": null,
+        "hardware_profile_hint": null,
+        "self_hosting_notes": null,
+        "benchmark_evidence_sources": [
+          "openrouter_catalog",
+          "artificial_analysis"
+        ]
+      },
+      "normalized_metrics": {
+        "intelligence": 42.0,
+        "speed": 35.0,
+        "stability": 83.0,
+        "availability": 83.0,
+        "context": 88.8,
+        "task_fit": 45.88,
+        "cost_efficiency": 99.61
+      },
+      "metrics": {
+        "intelligence": 42,
+        "speed": 35,
+        "stability": 83,
+        "availability": 83,
+        "context": 89,
+        "task_fit": 46,
+        "cost_efficiency": 100,
+        "cost": 3.8e-07
+      },
+      "tier": "HEAVY_HITTER",
+      "task_label": "LONG-CONTEXT",
+      "geopolitical_risk": "LOW",
+      "score_breakdown": {
+        "intelligence": 12.6,
+        "speed": 4.9,
+        "stability": 13.28,
+        "cost_efficiency": 17.93,
+        "availability": 8.3,
+        "context": 5.33,
+        "task_fit": 2.75
+      },
+      "value_score": 65.09,
+      "rank": 363
     },
     {
       "model": "x-ai/grok-4.3:batch",
@@ -53021,7 +53162,7 @@
         "task_fit": 2.09
       },
       "value_score": 64.88,
-      "rank": 363
+      "rank": 364
     },
     {
       "model": "z-ai/glm-5.3-flash",
@@ -53062,9 +53203,9 @@
       "raw_metrics": {
         "intelligence_base": 41,
         "context_length": 1048576,
-        "prompt_cost": 1.62e-08,
-        "completion_cost": 1.443e-07,
-        "average_cost": 8.025e-08,
+        "prompt_cost": 5.2e-09,
+        "completion_cost": 1.985e-07,
+        "average_cost": 1.0185e-07,
         "aa_quality": 41.8,
         "aa_speed": 74.631,
         "lmsys_elo": null,
@@ -53137,7 +53278,7 @@
         "availability": 83.0,
         "context": 89.57,
         "task_fit": 45.38,
-        "cost_efficiency": 99.92
+        "cost_efficiency": 99.89
       },
       "metrics": {
         "intelligence": 41,
@@ -53147,7 +53288,7 @@
         "context": 90,
         "task_fit": 45,
         "cost_efficiency": 100,
-        "cost": 8e-08
+        "cost": 1e-07
       },
       "tier": "HEAVY_HITTER",
       "task_label": "LONG-CONTEXT",
@@ -53156,13 +53297,13 @@
         "intelligence": 12.3,
         "speed": 4.9,
         "stability": 13.28,
-        "cost_efficiency": 17.99,
+        "cost_efficiency": 17.98,
         "availability": 8.3,
         "context": 5.37,
         "task_fit": 2.72
       },
       "value_score": 64.86,
-      "rank": 364
+      "rank": 365
     },
     {
       "model": "z-ai/glm-5.3-flash:batch",
@@ -53303,7 +53444,7 @@
         "task_fit": 2.72
       },
       "value_score": 64.86,
-      "rank": 365
+      "rank": 366
     },
     {
       "model": "anthropic/claude-opus-4.5",
@@ -53444,7 +53585,7 @@
         "task_fit": 2.57
       },
       "value_score": 64.86,
-      "rank": 366
+      "rank": 367
     },
     {
       "model": "qwen/qwen3.5-397b-a17b",
@@ -53585,7 +53726,7 @@
         "task_fit": 2.24
       },
       "value_score": 64.84,
-      "rank": 367
+      "rank": 368
     },
     {
       "model": "x-ai/grok-4.3",
@@ -53726,7 +53867,7 @@
         "task_fit": 2.09
       },
       "value_score": 64.82,
-      "rank": 368
+      "rank": 369
     },
     {
       "model": "x-ai/grok-build-0.1",
@@ -53867,7 +54008,7 @@
         "task_fit": 2.21
       },
       "value_score": 64.58,
-      "rank": 369
+      "rank": 370
     },
     {
       "model": "moonshotai/kimi-k3",
@@ -54008,7 +54149,7 @@
         "task_fit": 2.79
       },
       "value_score": 64.48,
-      "rank": 370
+      "rank": 371
     },
     {
       "model": "moonshotai/kimi-k3:batch",
@@ -54149,7 +54290,7 @@
         "task_fit": 2.79
       },
       "value_score": 64.36,
-      "rank": 371
+      "rank": 372
     },
     {
       "model": "qwen/qwen3.8-27b",
@@ -54194,7 +54335,7 @@
         "completion_cost": 1.35e-06,
         "average_cost": 6.95e-07,
         "aa_quality": 33.7,
-        "aa_speed": 38.527,
+        "aa_speed": 37.707,
         "lmsys_elo": null,
         "openrouter_speed_hint": 65536.0,
         "source_count": 2,
@@ -54290,7 +54431,7 @@
         "task_fit": 2.42
       },
       "value_score": 64.28,
-      "rank": 372
+      "rank": 373
     },
     {
       "model": "mancer/weaver",
@@ -54428,7 +54569,7 @@
         "task_fit": 2.9
       },
       "value_score": 64.22,
-      "rank": 373
+      "rank": 374
     },
     {
       "model": "z-ai/glm-5",
@@ -54569,7 +54710,7 @@
         "task_fit": 2.83
       },
       "value_score": 63.92,
-      "rank": 374
+      "rank": 375
     },
     {
       "model": "xiaomi/mimo-v2.5",
@@ -54710,147 +54851,6 @@
         "task_fit": 2.17
       },
       "value_score": 63.58,
-      "rank": 375
-    },
-    {
-      "model": "inclusionai/ling-3.1-flash",
-      "family_id": "inclusionai/ling-3.1-flash",
-      "provider": "Inclusionai",
-      "display_name": "inclusionAI: Ling 3.1 Flash",
-      "source_attribution": {
-        "catalog": [
-          "openrouter"
-        ],
-        "intelligence": "artificial_analysis",
-        "speed": "artificial_analysis",
-        "pricing": "openrouter",
-        "context_length": "openrouter",
-        "merge_priority": {
-          "intelligence": [
-            "benchmark",
-            "artificial_analysis",
-            "lmsys",
-            "helper",
-            "heuristic"
-          ],
-          "speed": [
-            "artificial_analysis",
-            "openrouter",
-            "heuristic"
-          ],
-          "context_length": [
-            "openrouter",
-            "bridge"
-          ],
-          "pricing": [
-            "openrouter",
-            "bridge"
-          ]
-        }
-      },
-      "raw_metrics": {
-        "intelligence_base": 41,
-        "context_length": 262144,
-        "prompt_cost": 7.5e-08,
-        "completion_cost": 2.25e-07,
-        "average_cost": 1.5e-07,
-        "aa_quality": 41.1,
-        "aa_speed": 218.119,
-        "lmsys_elo": null,
-        "openrouter_speed_hint": 235929.0,
-        "source_count": 2,
-        "availability_hint": 83,
-        "stability_hint": 83
-      },
-      "task_metadata": {
-        "quality_by_task": {
-          "coding": 37,
-          "reasoning": 41,
-          "vision": 18,
-          "long_context": 100,
-          "extraction": 55,
-          "structured_output": 28,
-          "general_chat": 42,
-          "tool_agent_compatibility": 42
-        },
-        "taxonomy_scores": {
-          "chat_casual": 42,
-          "creative_writing": 42,
-          "knowledge": 42,
-          "legal_formal": 45,
-          "coding": 37,
-          "agentic_tool_use": 42,
-          "vision_ocr": 25,
-          "vision_reasoning": 25,
-          "math_logic": 41,
-          "translation_language": 46
-        },
-        "supported": [
-          "long_context"
-        ],
-        "primary": [
-          "long_context",
-          "extraction",
-          "general_chat"
-        ],
-        "coverage_score": 45.38,
-        "confidence": 0.68,
-        "helper_enriched": false,
-        "provider_family": "Inclusionai"
-      },
-      "helper_metadata": {
-        "helper_tasks_applied": []
-      },
-      "self_hosting": {
-        "self_hostable": false,
-        "open_weight": false,
-        "family": null,
-        "hosting_modes": [
-          "cloud_api"
-        ],
-        "download_sources": [],
-        "preferred_runtimes": [],
-        "quantizations_known": [],
-        "parameter_scale_billions": null,
-        "hardware_profile_hint": null,
-        "self_hosting_notes": null,
-        "benchmark_evidence_sources": [
-          "openrouter_catalog",
-          "artificial_analysis"
-        ]
-      },
-      "normalized_metrics": {
-        "intelligence": 41.0,
-        "speed": 35.01,
-        "stability": 83.0,
-        "availability": 83.0,
-        "context": 67.18,
-        "task_fit": 45.38,
-        "cost_efficiency": 99.84
-      },
-      "metrics": {
-        "intelligence": 41,
-        "speed": 35,
-        "stability": 83,
-        "availability": 83,
-        "context": 67,
-        "task_fit": 45,
-        "cost_efficiency": 100,
-        "cost": 1.5e-07
-      },
-      "tier": "HEAVY_HITTER",
-      "task_label": "LONG-CONTEXT",
-      "geopolitical_risk": "LOW",
-      "score_breakdown": {
-        "intelligence": 12.3,
-        "speed": 4.9,
-        "stability": 13.28,
-        "cost_efficiency": 17.97,
-        "availability": 8.3,
-        "context": 4.03,
-        "task_fit": 2.72
-      },
-      "value_score": 63.51,
       "rank": 376
     },
     {
@@ -55037,7 +55037,7 @@
         "completion_cost": 4.25e-06,
         "average_cost": 2.75e-06,
         "aa_quality": 38.9,
-        "aa_speed": 134.738,
+        "aa_speed": 141.409,
         "lmsys_elo": null,
         "openrouter_speed_hint": 943718.0,
         "source_count": 2,
@@ -55103,7 +55103,7 @@
       },
       "normalized_metrics": {
         "intelligence": 38.0,
-        "speed": 35.0,
+        "speed": 35.01,
         "stability": 83.0,
         "availability": 83.0,
         "context": 89.57,
@@ -55178,7 +55178,7 @@
         "completion_cost": 6e-06,
         "average_cost": 3.5e-06,
         "aa_quality": 29.7,
-        "aa_speed": 130.347,
+        "aa_speed": 132.616,
         "lmsys_elo": null,
         "openrouter_speed_hint": 65536.0,
         "source_count": 2,
@@ -55602,7 +55602,7 @@
         "completion_cost": 1.2e-05,
         "average_cost": 7e-06,
         "aa_quality": 29.7,
-        "aa_speed": 130.347,
+        "aa_speed": 132.616,
         "lmsys_elo": null,
         "openrouter_speed_hint": 65536.0,
         "source_count": 2,
@@ -56320,7 +56320,7 @@
         "completion_cost": 1.28e-06,
         "average_cost": 8e-07,
         "aa_quality": 25.2,
-        "aa_speed": 55.447,
+        "aa_speed": 56.268,
         "lmsys_elo": null,
         "openrouter_speed_hint": 131072.0,
         "source_count": 2,
@@ -56740,13 +56740,13 @@
       "raw_metrics": {
         "intelligence_base": 30,
         "context_length": 1048576,
-        "prompt_cost": 3e-07,
+        "prompt_cost": 2.5e-07,
         "completion_cost": 1e-06,
-        "average_cost": 6.499999999999999e-07,
+        "average_cost": 6.249999999999999e-07,
         "aa_quality": 30.3,
-        "aa_speed": 332.777,
+        "aa_speed": 335.436,
         "lmsys_elo": null,
-        "openrouter_speed_hint": 943718.0,
+        "openrouter_speed_hint": 131072.0,
         "source_count": 2,
         "availability_hint": 83,
         "stability_hint": 83
@@ -56815,7 +56815,7 @@
         "availability": 83.0,
         "context": 89.57,
         "task_fit": 38.5,
-        "cost_efficiency": 99.33
+        "cost_efficiency": 99.35
       },
       "metrics": {
         "intelligence": 30,
@@ -56825,7 +56825,7 @@
         "context": 90,
         "task_fit": 38,
         "cost_efficiency": 99,
-        "cost": 6.5e-07
+        "cost": 6.2e-07
       },
       "tier": "HEAVY_HITTER",
       "task_label": "LONG-CONTEXT",
@@ -56839,8 +56839,149 @@
         "context": 5.37,
         "task_fit": 2.31
       },
-      "value_score": 61.04,
+      "value_score": 61.05,
       "rank": 390
+    },
+    {
+      "model": "inclusionai/ling-3.0-flash",
+      "family_id": "inclusionai/ling-3.0-flash",
+      "provider": "Inclusionai",
+      "display_name": "inclusionAI: Ling 3.0 Flash",
+      "source_attribution": {
+        "catalog": [
+          "openrouter"
+        ],
+        "intelligence": "artificial_analysis",
+        "speed": "artificial_analysis",
+        "pricing": "openrouter",
+        "context_length": "openrouter",
+        "merge_priority": {
+          "intelligence": [
+            "benchmark",
+            "artificial_analysis",
+            "lmsys",
+            "helper",
+            "heuristic"
+          ],
+          "speed": [
+            "artificial_analysis",
+            "openrouter",
+            "heuristic"
+          ],
+          "context_length": [
+            "openrouter",
+            "bridge"
+          ],
+          "pricing": [
+            "openrouter",
+            "bridge"
+          ]
+        }
+      },
+      "raw_metrics": {
+        "intelligence_base": 22,
+        "context_length": 262144,
+        "prompt_cost": 2.1e-08,
+        "completion_cost": 6.3e-08,
+        "average_cost": 4.2e-08,
+        "aa_quality": 22.6,
+        "aa_speed": 0.0,
+        "lmsys_elo": null,
+        "openrouter_speed_hint": 32768.0,
+        "source_count": 2,
+        "availability_hint": 83,
+        "stability_hint": 83
+      },
+      "task_metadata": {
+        "quality_by_task": {
+          "coding": 18,
+          "reasoning": 22,
+          "vision": 18,
+          "long_context": 100,
+          "extraction": 41,
+          "structured_output": 15,
+          "general_chat": 25,
+          "tool_agent_compatibility": 31
+        },
+        "taxonomy_scores": {
+          "chat_casual": 25,
+          "creative_writing": 25,
+          "knowledge": 24,
+          "legal_formal": 28,
+          "coding": 18,
+          "agentic_tool_use": 31,
+          "vision_ocr": 23,
+          "vision_reasoning": 19,
+          "math_logic": 22,
+          "translation_language": 30
+        },
+        "supported": [
+          "long_context"
+        ],
+        "primary": [
+          "long_context",
+          "extraction",
+          "tool_agent_compatibility"
+        ],
+        "coverage_score": 33.75,
+        "confidence": 0.68,
+        "helper_enriched": false,
+        "provider_family": "Inclusionai"
+      },
+      "helper_metadata": {
+        "helper_tasks_applied": []
+      },
+      "self_hosting": {
+        "self_hostable": false,
+        "open_weight": false,
+        "family": null,
+        "hosting_modes": [
+          "cloud_api"
+        ],
+        "download_sources": [],
+        "preferred_runtimes": [],
+        "quantizations_known": [],
+        "parameter_scale_billions": null,
+        "hardware_profile_hint": null,
+        "self_hosting_notes": null,
+        "benchmark_evidence_sources": [
+          "openrouter_catalog",
+          "artificial_analysis"
+        ]
+      },
+      "normalized_metrics": {
+        "intelligence": 22.0,
+        "speed": 62.0,
+        "stability": 83.0,
+        "availability": 83.0,
+        "context": 67.18,
+        "task_fit": 33.75,
+        "cost_efficiency": 99.96
+      },
+      "metrics": {
+        "intelligence": 22,
+        "speed": 62,
+        "stability": 83,
+        "availability": 83,
+        "context": 67,
+        "task_fit": 34,
+        "cost_efficiency": 100,
+        "cost": 4e-08
+      },
+      "tier": "HEAVY_HITTER",
+      "task_label": "LONG-CONTEXT",
+      "geopolitical_risk": "LOW",
+      "score_breakdown": {
+        "intelligence": 6.6,
+        "speed": 8.68,
+        "stability": 13.28,
+        "cost_efficiency": 17.99,
+        "availability": 8.3,
+        "context": 4.03,
+        "task_fit": 2.02
+      },
+      "value_score": 60.91,
+      "rank": 391
     },
     {
       "model": "moonshotai/kimi-k2-thinking",
@@ -56981,7 +57122,7 @@
         "task_fit": 2.11
       },
       "value_score": 60.72,
-      "rank": 391
+      "rank": 392
     },
     {
       "model": "minimax/minimax-m3",
@@ -57122,7 +57263,7 @@
         "task_fit": 2.29
       },
       "value_score": 60.7,
-      "rank": 392
+      "rank": 393
     },
     {
       "model": "minimax/minimax-m2.5",
@@ -57263,7 +57404,7 @@
         "task_fit": 2.02
       },
       "value_score": 60.56,
-      "rank": 393
+      "rank": 394
     },
     {
       "model": "minimax/minimax-m2.7",
@@ -57404,7 +57545,7 @@
         "task_fit": 2.02
       },
       "value_score": 60.54,
-      "rank": 394
+      "rank": 395
     },
     {
       "model": "z-ai/glm-4.7",
@@ -57545,7 +57686,7 @@
         "task_fit": 2.02
       },
       "value_score": 60.44,
-      "rank": 395
+      "rank": 396
     },
     {
       "model": "qwen/qwen3.7-plus:batch",
@@ -57590,7 +57731,7 @@
         "completion_cost": 9.2e-07,
         "average_cost": 5.75e-07,
         "aa_quality": 25.2,
-        "aa_speed": 55.447,
+        "aa_speed": 56.268,
         "lmsys_elo": null,
         "openrouter_speed_hint": 131072.0,
         "source_count": 2,
@@ -57686,7 +57827,7 @@
         "task_fit": 2.13
       },
       "value_score": 60.31,
-      "rank": 396
+      "rank": 397
     },
     {
       "model": "nvidia/nemotron-3.5-super-vl",
@@ -57731,7 +57872,7 @@
         "completion_cost": 5e-07,
         "average_cost": 3.2499999999999996e-07,
         "aa_quality": 26.5,
-        "aa_speed": 428.228,
+        "aa_speed": 431.397,
         "lmsys_elo": null,
         "openrouter_speed_hint": 235929.0,
         "source_count": 2,
@@ -57838,7 +57979,7 @@
         "task_fit": 2.61
       },
       "value_score": 60.2,
-      "rank": 397
+      "rank": 398
     },
     {
       "model": "openai/o3:batch",
@@ -57883,7 +58024,7 @@
         "completion_cost": 4e-06,
         "average_cost": 2.4999999999999998e-06,
         "aa_quality": 20.2,
-        "aa_speed": 117.32,
+        "aa_speed": 117.961,
         "lmsys_elo": null,
         "openrouter_speed_hint": 100000.0,
         "source_count": 2,
@@ -57979,7 +58120,7 @@
         "task_fit": 2.33
       },
       "value_score": 60.09,
-      "rank": 398
+      "rank": 399
     },
     {
       "model": "deepseek/deepseek-v3.1-terminus",
@@ -58133,7 +58274,7 @@
         "task_fit": 1.73
       },
       "value_score": 59.93,
-      "rank": 399
+      "rank": 400
     },
     {
       "model": "minimax/minimax-m2.1",
@@ -58274,7 +58415,7 @@
         "task_fit": 1.96
       },
       "value_score": 59.87,
-      "rank": 400
+      "rank": 401
     },
     {
       "model": "stepfun/step-3.7-flash",
@@ -58415,7 +58556,7 @@
         "task_fit": 1.92
       },
       "value_score": 59.79,
-      "rank": 401
+      "rank": 402
     },
     {
       "model": "qwen/qwen3-235b-a22b-2507",
@@ -58570,7 +58711,7 @@
         "task_fit": 1.67
       },
       "value_score": 59.78,
-      "rank": 402
+      "rank": 403
     },
     {
       "model": "openai/o3",
@@ -58615,7 +58756,7 @@
         "completion_cost": 8e-06,
         "average_cost": 4.9999999999999996e-06,
         "aa_quality": 20.2,
-        "aa_speed": 117.32,
+        "aa_speed": 117.961,
         "lmsys_elo": null,
         "openrouter_speed_hint": 100000.0,
         "source_count": 2,
@@ -58711,7 +58852,7 @@
         "task_fit": 2.33
       },
       "value_score": 59.66,
-      "rank": 403
+      "rank": 404
     },
     {
       "model": "qwen/qwen3-coder",
@@ -58865,7 +59006,7 @@
         "task_fit": 1.74
       },
       "value_score": 59.49,
-      "rank": 404
+      "rank": 405
     },
     {
       "model": "minimax/minimax-m2",
@@ -59006,7 +59147,7 @@
         "task_fit": 1.88
       },
       "value_score": 59.21,
-      "rank": 405
+      "rank": 406
     },
     {
       "model": "stepfun/step-3.5-flash",
@@ -59147,7 +59288,7 @@
         "task_fit": 1.84
       },
       "value_score": 59.2,
-      "rank": 406
+      "rank": 407
     },
     {
       "model": "upstage/solar-pro4",
@@ -59192,7 +59333,7 @@
         "completion_cost": 6e-07,
         "average_cost": 3.75e-07,
         "aa_quality": 26.6,
-        "aa_speed": 116.715,
+        "aa_speed": 116.692,
         "lmsys_elo": null,
         "openrouter_speed_hint": 131072.0,
         "source_count": 2,
@@ -59288,7 +59429,7 @@
         "task_fit": 2.17
       },
       "value_score": 59.09,
-      "rank": 407
+      "rank": 408
     },
     {
       "model": "z-ai/glm-4.6",
@@ -59429,7 +59570,7 @@
         "task_fit": 1.88
       },
       "value_score": 59.07,
-      "rank": 408
+      "rank": 409
     },
     {
       "model": "qwen/qwen3-vl-235b-a22b-instruct",
@@ -59585,7 +59726,7 @@
         "task_fit": 1.98
       },
       "value_score": 59.06,
-      "rank": 409
+      "rank": 410
     },
     {
       "model": "qwen/qwen3-coder-30b-a3b-instruct",
@@ -59740,7 +59881,7 @@
         "task_fit": 1.67
       },
       "value_score": 58.9,
-      "rank": 410
+      "rank": 411
     },
     {
       "model": "thinkingmachines/inkling-small",
@@ -59785,7 +59926,7 @@
         "completion_cost": 1.2e-06,
         "average_cost": 8.249999999999999e-07,
         "aa_quality": 25.7,
-        "aa_speed": 203.57,
+        "aa_speed": 218.052,
         "lmsys_elo": null,
         "openrouter_speed_hint": 262144.0,
         "source_count": 2,
@@ -59881,7 +60022,7 @@
         "task_fit": 2.22
       },
       "value_score": 58.75,
-      "rank": 411
+      "rank": 412
     },
     {
       "model": "amazon/nova-premier-v1",
@@ -60022,7 +60163,7 @@
         "task_fit": 1.54
       },
       "value_score": 58.54,
-      "rank": 412
+      "rank": 413
     },
     {
       "model": "qwen/qwen3-vl-30b-a3b-instruct",
@@ -60178,7 +60319,7 @@
         "task_fit": 1.91
       },
       "value_score": 58.51,
-      "rank": 413
+      "rank": 414
     },
     {
       "model": "qwen/qwen3-vl-8b-instruct",
@@ -60335,7 +60476,7 @@
         "task_fit": 1.91
       },
       "value_score": 58.49,
-      "rank": 414
+      "rank": 415
     },
     {
       "model": "upstage/solar-mini4",
@@ -60380,7 +60521,7 @@
         "completion_cost": 2e-07,
         "average_cost": 1.25e-07,
         "aa_quality": 24.1,
-        "aa_speed": 116.92,
+        "aa_speed": 103.238,
         "lmsys_elo": null,
         "openrouter_speed_hint": 131072.0,
         "source_count": 2,
@@ -60476,7 +60617,7 @@
         "task_fit": 2.09
       },
       "value_score": 58.45,
-      "rank": 415
+      "rank": 416
     },
     {
       "model": "thinkingmachines/inkling",
@@ -60521,7 +60662,7 @@
         "completion_cost": 4.05e-06,
         "average_cost": 2.525e-06,
         "aa_quality": 25.0,
-        "aa_speed": 193.924,
+        "aa_speed": 194.738,
         "lmsys_elo": null,
         "openrouter_speed_hint": 471859.0,
         "source_count": 2,
@@ -60617,7 +60758,7 @@
         "task_fit": 2.22
       },
       "value_score": 58.44,
-      "rank": 416
+      "rank": 417
     },
     {
       "model": "mistralai/devstral-2512",
@@ -60758,7 +60899,7 @@
         "task_fit": 1.64
       },
       "value_score": 58.38,
-      "rank": 417
+      "rank": 418
     },
     {
       "model": "moonshotai/kimi-k2-0905",
@@ -60899,7 +61040,7 @@
         "task_fit": 1.77
       },
       "value_score": 58.28,
-      "rank": 418
+      "rank": 419
     },
     {
       "model": "minimax/minimax-m1",
@@ -61040,7 +61181,7 @@
         "task_fit": 1.62
       },
       "value_score": 58.25,
-      "rank": 419
+      "rank": 420
     },
     {
       "model": "deepseek/deepseek-chat-v3-0324",
@@ -61181,7 +61322,148 @@
         "task_fit": 1.54
       },
       "value_score": 58.23,
-      "rank": 420
+      "rank": 421
+    },
+    {
+      "model": "tencent/hy3",
+      "family_id": "tencent/hy3",
+      "provider": "Tencent",
+      "display_name": "Tencent: Hy3",
+      "source_attribution": {
+        "catalog": [
+          "openrouter"
+        ],
+        "intelligence": "artificial_analysis",
+        "speed": "artificial_analysis",
+        "pricing": "openrouter",
+        "context_length": "openrouter",
+        "merge_priority": {
+          "intelligence": [
+            "benchmark",
+            "artificial_analysis",
+            "lmsys",
+            "helper",
+            "heuristic"
+          ],
+          "speed": [
+            "artificial_analysis",
+            "openrouter",
+            "heuristic"
+          ],
+          "context_length": [
+            "openrouter",
+            "bridge"
+          ],
+          "pricing": [
+            "openrouter",
+            "bridge"
+          ]
+        }
+      },
+      "raw_metrics": {
+        "intelligence_base": 25,
+        "context_length": 262144,
+        "prompt_cost": 8.25e-08,
+        "completion_cost": 3.3e-07,
+        "average_cost": 2.0625e-07,
+        "aa_quality": 25.3,
+        "aa_speed": 90.006,
+        "lmsys_elo": null,
+        "openrouter_speed_hint": 128000.0,
+        "source_count": 2,
+        "availability_hint": 83,
+        "stability_hint": 83
+      },
+      "task_metadata": {
+        "quality_by_task": {
+          "coding": 21,
+          "reasoning": 25,
+          "vision": 18,
+          "long_context": 100,
+          "extraction": 43,
+          "structured_output": 17,
+          "general_chat": 28,
+          "tool_agent_compatibility": 32
+        },
+        "taxonomy_scores": {
+          "chat_casual": 28,
+          "creative_writing": 28,
+          "knowledge": 27,
+          "legal_formal": 30,
+          "coding": 21,
+          "agentic_tool_use": 32,
+          "vision_ocr": 23,
+          "vision_reasoning": 20,
+          "math_logic": 25,
+          "translation_language": 32
+        },
+        "supported": [
+          "long_context"
+        ],
+        "primary": [
+          "long_context",
+          "extraction",
+          "tool_agent_compatibility"
+        ],
+        "coverage_score": 35.5,
+        "confidence": 0.68,
+        "helper_enriched": false,
+        "provider_family": "Tencent"
+      },
+      "helper_metadata": {
+        "helper_tasks_applied": []
+      },
+      "self_hosting": {
+        "self_hostable": false,
+        "open_weight": false,
+        "family": null,
+        "hosting_modes": [
+          "cloud_api"
+        ],
+        "download_sources": [],
+        "preferred_runtimes": [],
+        "quantizations_known": [],
+        "parameter_scale_billions": null,
+        "hardware_profile_hint": null,
+        "self_hosting_notes": null,
+        "benchmark_evidence_sources": [
+          "openrouter_catalog",
+          "artificial_analysis"
+        ]
+      },
+      "normalized_metrics": {
+        "intelligence": 25.0,
+        "speed": 35.0,
+        "stability": 83.0,
+        "availability": 83.0,
+        "context": 67.18,
+        "task_fit": 35.5,
+        "cost_efficiency": 99.79
+      },
+      "metrics": {
+        "intelligence": 25,
+        "speed": 35,
+        "stability": 83,
+        "availability": 83,
+        "context": 67,
+        "task_fit": 36,
+        "cost_efficiency": 100,
+        "cost": 2.1e-07
+      },
+      "tier": "HEAVY_HITTER",
+      "task_label": "LONG-CONTEXT",
+      "geopolitical_risk": "LOW",
+      "score_breakdown": {
+        "intelligence": 7.5,
+        "speed": 4.9,
+        "stability": 13.28,
+        "cost_efficiency": 17.96,
+        "availability": 8.3,
+        "context": 4.03,
+        "task_fit": 2.13
+      },
+      "value_score": 58.1,
+      "rank": 422
     },
     {
       "model": "mistralai/mistral-small-3.2-24b-instruct",
@@ -61322,148 +61604,7 @@
         "task_fit": 1.48
       },
       "value_score": 58.09,
-      "rank": 421
-    },
-    {
-      "model": "tencent/hy3",
-      "family_id": "tencent/hy3",
-      "provider": "Tencent",
-      "display_name": "Tencent: Hy3",
-      "source_attribution": {
-        "catalog": [
-          "openrouter"
-        ],
-        "intelligence": "artificial_analysis",
-        "speed": "artificial_analysis",
-        "pricing": "openrouter",
-        "context_length": "openrouter",
-        "merge_priority": {
-          "intelligence": [
-            "benchmark",
-            "artificial_analysis",
-            "lmsys",
-            "helper",
-            "heuristic"
-          ],
-          "speed": [
-            "artificial_analysis",
-            "openrouter",
-            "heuristic"
-          ],
-          "context_length": [
-            "openrouter",
-            "bridge"
-          ],
-          "pricing": [
-            "openrouter",
-            "bridge"
-          ]
-        }
-      },
-      "raw_metrics": {
-        "intelligence_base": 25,
-        "context_length": 262144,
-        "prompt_cost": 1.32e-07,
-        "completion_cost": 5.28e-07,
-        "average_cost": 3.2999999999999996e-07,
-        "aa_quality": 25.3,
-        "aa_speed": 88.556,
-        "lmsys_elo": null,
-        "openrouter_speed_hint": 128000.0,
-        "source_count": 2,
-        "availability_hint": 83,
-        "stability_hint": 83
-      },
-      "task_metadata": {
-        "quality_by_task": {
-          "coding": 21,
-          "reasoning": 25,
-          "vision": 18,
-          "long_context": 100,
-          "extraction": 43,
-          "structured_output": 17,
-          "general_chat": 28,
-          "tool_agent_compatibility": 32
-        },
-        "taxonomy_scores": {
-          "chat_casual": 28,
-          "creative_writing": 28,
-          "knowledge": 27,
-          "legal_formal": 30,
-          "coding": 21,
-          "agentic_tool_use": 32,
-          "vision_ocr": 23,
-          "vision_reasoning": 20,
-          "math_logic": 25,
-          "translation_language": 32
-        },
-        "supported": [
-          "long_context"
-        ],
-        "primary": [
-          "long_context",
-          "extraction",
-          "tool_agent_compatibility"
-        ],
-        "coverage_score": 35.5,
-        "confidence": 0.68,
-        "helper_enriched": false,
-        "provider_family": "Tencent"
-      },
-      "helper_metadata": {
-        "helper_tasks_applied": []
-      },
-      "self_hosting": {
-        "self_hostable": false,
-        "open_weight": false,
-        "family": null,
-        "hosting_modes": [
-          "cloud_api"
-        ],
-        "download_sources": [],
-        "preferred_runtimes": [],
-        "quantizations_known": [],
-        "parameter_scale_billions": null,
-        "hardware_profile_hint": null,
-        "self_hosting_notes": null,
-        "benchmark_evidence_sources": [
-          "openrouter_catalog",
-          "artificial_analysis"
-        ]
-      },
-      "normalized_metrics": {
-        "intelligence": 25.0,
-        "speed": 35.0,
-        "stability": 83.0,
-        "availability": 83.0,
-        "context": 67.18,
-        "task_fit": 35.5,
-        "cost_efficiency": 99.66
-      },
-      "metrics": {
-        "intelligence": 25,
-        "speed": 35,
-        "stability": 83,
-        "availability": 83,
-        "context": 67,
-        "task_fit": 36,
-        "cost_efficiency": 100,
-        "cost": 3.3e-07
-      },
-      "tier": "HEAVY_HITTER",
-      "task_label": "LONG-CONTEXT",
-      "geopolitical_risk": "LOW",
-      "score_breakdown": {
-        "intelligence": 7.5,
-        "speed": 4.9,
-        "stability": 13.28,
-        "cost_efficiency": 17.94,
-        "availability": 8.3,
-        "context": 4.03,
-        "task_fit": 2.13
-      },
-      "value_score": 58.08,
-      "rank": 422
+      "rank": 423
     },
     {
       "model": "mistralai/mistral-medium-3.1:batch",
@@ -61604,7 +61745,7 @@
         "task_fit": 1.54
       },
       "value_score": 58.03,
-      "rank": 423
+      "rank": 424
     },
     {
       "model": "qwen/qwen3.6-35b-a3b",
@@ -61745,7 +61886,7 @@
         "task_fit": 1.88
       },
       "value_score": 57.97,
-      "rank": 424
+      "rank": 425
     },
     {
       "model": "mistralai/mistral-medium-3.1",
@@ -61886,7 +62027,7 @@
         "task_fit": 1.54
       },
       "value_score": 57.92,
-      "rank": 425
+      "rank": 426
     },
     {
       "model": "moonshotai/kimi-k2.7-code",
@@ -62027,7 +62168,7 @@
         "task_fit": 2.25
       },
       "value_score": 57.89,
-      "rank": 426
+      "rank": 427
     },
     {
       "model": "amazon/nova-pro-v1",
@@ -62168,7 +62309,7 @@
         "task_fit": 1.48
       },
       "value_score": 57.63,
-      "rank": 427
+      "rank": 428
     },
     {
       "model": "amazon/nova-lite-v1",
@@ -62309,7 +62450,7 @@
         "task_fit": 1.43
       },
       "value_score": 57.63,
-      "rank": 428
+      "rank": 429
     },
     {
       "model": "openai/o1",
@@ -62450,7 +62591,7 @@
         "task_fit": 2.15
       },
       "value_score": 57.62,
-      "rank": 429
+      "rank": 430
     },
     {
       "model": "cohere/command-a-plus",
@@ -62495,7 +62636,7 @@
         "completion_cost": 1.5e-06,
         "average_cost": 9.000000000000001e-07,
         "aa_quality": 13.1,
-        "aa_speed": 165.588,
+        "aa_speed": 148.595,
         "lmsys_elo": null,
         "openrouter_speed_hint": 64000.0,
         "source_count": 2,
@@ -62591,7 +62732,148 @@
         "task_fit": 1.69
       },
       "value_score": 57.6,
-      "rank": 430
+      "rank": 431
+    },
+    {
+      "model": "qwen/qwen3.5-122b-a10b",
+      "family_id": "qwen/qwen3.5-122b-a10b",
+      "provider": "Qwen",
+      "display_name": "Qwen: Qwen3.5-122B-A10B",
+      "source_attribution": {
+        "catalog": [
+          "openrouter"
+        ],
+        "intelligence": "artificial_analysis",
+        "speed": "artificial_analysis",
+        "pricing": "openrouter",
+        "context_length": "openrouter",
+        "merge_priority": {
+          "intelligence": [
+            "benchmark",
+            "artificial_analysis",
+            "lmsys",
+            "helper",
+            "heuristic"
+          ],
+          "speed": [
+            "artificial_analysis",
+            "openrouter",
+            "heuristic"
+          ],
+          "context_length": [
+            "openrouter",
+            "bridge"
+          ],
+          "pricing": [
+            "openrouter",
+            "bridge"
+          ]
+        }
+      },
+      "raw_metrics": {
+        "intelligence_base": 17,
+        "context_length": 262144,
+        "prompt_cost": 2.6e-07,
+        "completion_cost": 2.08e-06,
+        "average_cost": 1.17e-06,
+        "aa_quality": 17.7,
+        "aa_speed": 150.239,
+        "lmsys_elo": null,
+        "openrouter_speed_hint": 65536.0,
+        "source_count": 2,
+        "availability_hint": 93,
+        "stability_hint": 91
+      },
+      "task_metadata": {
+        "quality_by_task": {
+          "coding": 13,
+          "reasoning": 17,
+          "vision": 18,
+          "long_context": 100,
+          "extraction": 37,
+          "structured_output": 12,
+          "general_chat": 21,
+          "tool_agent_compatibility": 28
+        },
+        "taxonomy_scores": {
+          "chat_casual": 21,
+          "creative_writing": 20,
+          "knowledge": 19,
+          "legal_formal": 23,
+          "coding": 13,
+          "agentic_tool_use": 28,
+          "vision_ocr": 22,
+          "vision_reasoning": 18,
+          "math_logic": 17,
+          "translation_language": 26
+        },
+        "supported": [
+          "long_context"
+        ],
+        "primary": [
+          "long_context",
+          "extraction",
+          "tool_agent_compatibility"
+        ],
+        "coverage_score": 30.75,
+        "confidence": 0.68,
+        "helper_enriched": false,
+        "provider_family": "Qwen"
+      },
+      "helper_metadata": {
+        "helper_tasks_applied": []
+      },
+      "self_hosting": {
+        "self_hostable": false,
+        "open_weight": false,
+        "family": null,
+        "hosting_modes": [
+          "cloud_api"
+        ],
+        "download_sources": [],
+        "preferred_runtimes": [],
+        "quantizations_known": [],
+        "parameter_scale_billions": 122.0,
+        "hardware_profile_hint": null,
+        "self_hosting_notes": null,
+        "benchmark_evidence_sources": [
+          "openrouter_catalog",
+          "artificial_analysis"
+        ]
+      },
+      "normalized_metrics": {
+        "intelligence": 17.0,
+        "speed": 35.01,
+        "stability": 91.0,
+        "availability": 93.0,
+        "context": 67.18,
+        "task_fit": 30.75,
+        "cost_efficiency": 98.8
+      },
+      "metrics": {
+        "intelligence": 17,
+        "speed": 35,
+        "stability": 91,
+        "availability": 93,
+        "context": 67,
+        "task_fit": 31,
+        "cost_efficiency": 99,
+        "cost": 1.17e-06
+      },
+      "tier": "HEAVY_HITTER",
+      "task_label": "LONG-CONTEXT",
+      "geopolitical_risk": "HIGH",
+      "score_breakdown": {
+        "intelligence": 5.1,
+        "speed": 4.9,
+        "stability": 14.56,
+        "cost_efficiency": 17.78,
+        "availability": 9.3,
+        "context": 4.03,
+        "task_fit": 1.84
+      },
+      "value_score": 57.52,
+      "rank": 432
     },
     {
       "model": "qwen/qwen3-32b",
@@ -62746,148 +63028,7 @@
         "task_fit": 1.48
       },
       "value_score": 57.44,
-      "rank": 431
-    },
-    {
-      "model": "qwen/qwen3.5-122b-a10b",
-      "family_id": "qwen/qwen3.5-122b-a10b",
-      "provider": "Qwen",
-      "display_name": "Qwen: Qwen3.5-122B-A10B",
-      "source_attribution": {
-        "catalog": [
-          "openrouter"
-        ],
-        "intelligence": "artificial_analysis",
-        "speed": "artificial_analysis",
-        "pricing": "openrouter",
-        "context_length": "openrouter",
-        "merge_priority": {
-          "intelligence": [
-            "benchmark",
-            "artificial_analysis",
-            "lmsys",
-            "helper",
-            "heuristic"
-          ],
-          "speed": [
-            "artificial_analysis",
-            "openrouter",
-            "heuristic"
-          ],
-          "context_length": [
-            "openrouter",
-            "bridge"
-          ],
-          "pricing": [
-            "openrouter",
-            "bridge"
-          ]
-        }
-      },
-      "raw_metrics": {
-        "intelligence_base": 17,
-        "context_length": 262144,
-        "prompt_cost": 4e-07,
-        "completion_cost": 3.2e-06,
-        "average_cost": 1.8e-06,
-        "aa_quality": 17.7,
-        "aa_speed": 149.87,
-        "lmsys_elo": null,
-        "openrouter_speed_hint": 65536.0,
-        "source_count": 2,
-        "availability_hint": 93,
-        "stability_hint": 91
-      },
-      "task_metadata": {
-        "quality_by_task": {
-          "coding": 13,
-          "reasoning": 17,
-          "vision": 18,
-          "long_context": 100,
-          "extraction": 37,
-          "structured_output": 12,
-          "general_chat": 21,
-          "tool_agent_compatibility": 28
-        },
-        "taxonomy_scores": {
-          "chat_casual": 21,
-          "creative_writing": 20,
-          "knowledge": 19,
-          "legal_formal": 23,
-          "coding": 13,
-          "agentic_tool_use": 28,
-          "vision_ocr": 22,
-          "vision_reasoning": 18,
-          "math_logic": 17,
-          "translation_language": 26
-        },
-        "supported": [
-          "long_context"
-        ],
-        "primary": [
-          "long_context",
-          "extraction",
-          "tool_agent_compatibility"
-        ],
-        "coverage_score": 30.75,
-        "confidence": 0.68,
-        "helper_enriched": false,
-        "provider_family": "Qwen"
-      },
-      "helper_metadata": {
-        "helper_tasks_applied": []
-      },
-      "self_hosting": {
-        "self_hostable": false,
-        "open_weight": false,
-        "family": null,
-        "hosting_modes": [
-          "cloud_api"
-        ],
-        "download_sources": [],
-        "preferred_runtimes": [],
-        "quantizations_known": [],
-        "parameter_scale_billions": 122.0,
-        "hardware_profile_hint": null,
-        "self_hosting_notes": null,
-        "benchmark_evidence_sources": [
-          "openrouter_catalog",
-          "artificial_analysis"
-        ]
-      },
-      "normalized_metrics": {
-        "intelligence": 17.0,
-        "speed": 35.01,
-        "stability": 91.0,
-        "availability": 93.0,
-        "context": 67.18,
-        "task_fit": 30.75,
-        "cost_efficiency": 98.16
-      },
-      "metrics": {
-        "intelligence": 17,
-        "speed": 35,
-        "stability": 91,
-        "availability": 93,
-        "context": 67,
-        "task_fit": 31,
-        "cost_efficiency": 98,
-        "cost": 1.8e-06
-      },
-      "tier": "HEAVY_HITTER",
-      "task_label": "LONG-CONTEXT",
-      "geopolitical_risk": "HIGH",
-      "score_breakdown": {
-        "intelligence": 5.1,
-        "speed": 4.9,
-        "stability": 14.56,
-        "cost_efficiency": 17.67,
-        "availability": 9.3,
-        "context": 4.03,
-        "task_fit": 1.84
-      },
-      "value_score": 57.41,
-      "rank": 432
+      "rank": 433
     },
     {
       "model": "meituan/longcat-2.0",
@@ -62932,7 +63073,7 @@
         "completion_cost": 1.2e-06,
         "average_cost": 7.5e-07,
         "aa_quality": 19.1,
-        "aa_speed": 65.126,
+        "aa_speed": 66.432,
         "lmsys_elo": null,
         "openrouter_speed_hint": 262144.0,
         "source_count": 2,
@@ -63028,7 +63169,7 @@
         "task_fit": 1.92
       },
       "value_score": 57.33,
-      "rank": 433
+      "rank": 434
     },
     {
       "model": "nvidia/nemotron-3-super-120b-a12b",
@@ -63180,147 +63321,6 @@
         "task_fit": 1.67
       },
       "value_score": 57.31,
-      "rank": 434
-    },
-    {
-      "model": "inclusionai/ling-3.0-flash",
-      "family_id": "inclusionai/ling-3.0-flash",
-      "provider": "Inclusionai",
-      "display_name": "inclusionAI: Ling 3.0 Flash",
-      "source_attribution": {
-        "catalog": [
-          "openrouter"
-        ],
-        "intelligence": "artificial_analysis",
-        "speed": "artificial_analysis",
-        "pricing": "openrouter",
-        "context_length": "openrouter",
-        "merge_priority": {
-          "intelligence": [
-            "benchmark",
-            "artificial_analysis",
-            "lmsys",
-            "helper",
-            "heuristic"
-          ],
-          "speed": [
-            "artificial_analysis",
-            "openrouter",
-            "heuristic"
-          ],
-          "context_length": [
-            "openrouter",
-            "bridge"
-          ],
-          "pricing": [
-            "openrouter",
-            "bridge"
-          ]
-        }
-      },
-      "raw_metrics": {
-        "intelligence_base": 22,
-        "context_length": 262144,
-        "prompt_cost": 2.1e-08,
-        "completion_cost": 6.3e-08,
-        "average_cost": 4.2e-08,
-        "aa_quality": 22.6,
-        "aa_speed": 332.558,
-        "lmsys_elo": null,
-        "openrouter_speed_hint": 32768.0,
-        "source_count": 2,
-        "availability_hint": 83,
-        "stability_hint": 83
-      },
-      "task_metadata": {
-        "quality_by_task": {
-          "coding": 18,
-          "reasoning": 22,
-          "vision": 18,
-          "long_context": 100,
-          "extraction": 41,
-          "structured_output": 15,
-          "general_chat": 25,
-          "tool_agent_compatibility": 31
-        },
-        "taxonomy_scores": {
-          "chat_casual": 25,
-          "creative_writing": 25,
-          "knowledge": 24,
-          "legal_formal": 28,
-          "coding": 18,
-          "agentic_tool_use": 31,
-          "vision_ocr": 23,
-          "vision_reasoning": 19,
-          "math_logic": 22,
-          "translation_language": 30
-        },
-        "supported": [
-          "long_context"
-        ],
-        "primary": [
-          "long_context",
-          "extraction",
-          "tool_agent_compatibility"
-        ],
-        "coverage_score": 33.75,
-        "confidence": 0.68,
-        "helper_enriched": false,
-        "provider_family": "Inclusionai"
-      },
-      "helper_metadata": {
-        "helper_tasks_applied": []
-      },
-      "self_hosting": {
-        "self_hostable": false,
-        "open_weight": false,
-        "family": null,
-        "hosting_modes": [
-          "cloud_api"
-        ],
-        "download_sources": [],
-        "preferred_runtimes": [],
-        "quantizations_known": [],
-        "parameter_scale_billions": null,
-        "hardware_profile_hint": null,
-        "self_hosting_notes": null,
-        "benchmark_evidence_sources": [
-          "openrouter_catalog",
-          "artificial_analysis"
-        ]
-      },
-      "normalized_metrics": {
-        "intelligence": 22.0,
-        "speed": 35.01,
-        "stability": 83.0,
-        "availability": 83.0,
-        "context": 67.18,
-        "task_fit": 33.75,
-        "cost_efficiency": 99.96
-      },
-      "metrics": {
-        "intelligence": 22,
-        "speed": 35,
-        "stability": 83,
-        "availability": 83,
-        "context": 67,
-        "task_fit": 34,
-        "cost_efficiency": 100,
-        "cost": 4e-08
-      },
-      "tier": "HEAVY_HITTER",
-      "task_label": "LONG-CONTEXT",
-      "geopolitical_risk": "LOW",
-      "score_breakdown": {
-        "intelligence": 6.6,
-        "speed": 4.9,
-        "stability": 13.28,
-        "cost_efficiency": 17.99,
-        "availability": 8.3,
-        "context": 4.03,
-        "task_fit": 2.02
-      },
-      "value_score": 57.13,
       "rank": 435
     },
     {
@@ -63366,7 +63366,7 @@
         "completion_cost": 2.4e-06,
         "average_cost": 1.5e-06,
         "aa_quality": 22.9,
-        "aa_speed": 159.597,
+        "aa_speed": 154.555,
         "lmsys_elo": null,
         "openrouter_speed_hint": 182520.0,
         "source_count": 2,
@@ -64364,7 +64364,7 @@
         "completion_cost": 8e-07,
         "average_cost": 4.6e-07,
         "aa_quality": 9.2,
-        "aa_speed": 68.384,
+        "aa_speed": 71.784,
         "lmsys_elo": null,
         "openrouter_speed_hint": 235929.0,
         "source_count": 2,
@@ -64518,7 +64518,7 @@
         "completion_cost": 1e-05,
         "average_cost": 6.25e-06,
         "aa_quality": 7.0,
-        "aa_speed": 57.279,
+        "aa_speed": 60.017,
         "lmsys_elo": null,
         "openrouter_speed_hint": 8192.0,
         "source_count": 2,
@@ -64814,7 +64814,7 @@
         "completion_cost": 1.1e-06,
         "average_cost": 5.95e-07,
         "aa_quality": 9.6,
-        "aa_speed": 121.295,
+        "aa_speed": 118.819,
         "lmsys_elo": null,
         "openrouter_speed_hint": 16384.0,
         "source_count": 2,
@@ -65956,7 +65956,7 @@
         "completion_cost": 1.5e-07,
         "average_cost": 9.499999999999999e-08,
         "aa_quality": 12.3,
-        "aa_speed": 559.439,
+        "aa_speed": 540.792,
         "lmsys_elo": null,
         "openrouter_speed_hint": 65536.0,
         "source_count": 2,
@@ -66097,7 +66097,7 @@
         "completion_cost": 2e-07,
         "average_cost": 1.35e-07,
         "aa_quality": 12.9,
-        "aa_speed": 293.788,
+        "aa_speed": 289.415,
         "lmsys_elo": null,
         "openrouter_speed_hint": 235929.0,
         "source_count": 2,
@@ -66248,7 +66248,7 @@
         "completion_cost": 7.5e-08,
         "average_cost": 7.5e-08,
         "aa_quality": 5.5,
-        "aa_speed": 92.93,
+        "aa_speed": 94.692,
         "lmsys_elo": null,
         "openrouter_speed_hint": 209715.0,
         "source_count": 2,
@@ -66389,7 +66389,7 @@
         "completion_cost": 1.5e-07,
         "average_cost": 1.5e-07,
         "aa_quality": 5.5,
-        "aa_speed": 92.93,
+        "aa_speed": 94.692,
         "lmsys_elo": null,
         "openrouter_speed_hint": 209715.0,
         "source_count": 2,
@@ -66530,7 +66530,7 @@
         "completion_cost": 8e-07,
         "average_cost": 5.25e-07,
         "aa_quality": 10.8,
-        "aa_speed": 375.033,
+        "aa_speed": 376.176,
         "lmsys_elo": null,
         "openrouter_speed_hint": 80000.0,
         "source_count": 2,
@@ -66671,7 +66671,7 @@
         "completion_cost": 2.5e-07,
         "average_cost": 1.55e-07,
         "aa_quality": 11.1,
-        "aa_speed": 47.072,
+        "aa_speed": 74.413,
         "lmsys_elo": null,
         "openrouter_speed_hint": 117964.0,
         "source_count": 2,
@@ -66812,7 +66812,7 @@
         "completion_cost": 1.4e-07,
         "average_cost": 8.750000000000001e-08,
         "aa_quality": 5.9,
-        "aa_speed": 264.409,
+        "aa_speed": 255.439,
         "lmsys_elo": null,
         "openrouter_speed_hint": 5120.0,
         "source_count": 2,
@@ -66953,7 +66953,7 @@
         "completion_cost": 1e-07,
         "average_cost": 1e-07,
         "aa_quality": 4.8,
-        "aa_speed": 203.179,
+        "aa_speed": 207.112,
         "lmsys_elo": null,
         "openrouter_speed_hint": 104857.0,
         "source_count": 2,
@@ -67094,7 +67094,7 @@
         "completion_cost": 2.4e-07,
         "average_cost": 1.5e-07,
         "aa_quality": 8.9,
-        "aa_speed": 233.644,
+        "aa_speed": 228.045,
         "lmsys_elo": null,
         "openrouter_speed_hint": 235929.0,
         "source_count": 2,
@@ -67246,7 +67246,7 @@
         "completion_cost": 2e-07,
         "average_cost": 1.5e-07,
         "aa_quality": 5.6,
-        "aa_speed": 88.299,
+        "aa_speed": 87.82,
         "lmsys_elo": null,
         "openrouter_speed_hint": 58982.0,
         "source_count": 2,
@@ -67387,7 +67387,7 @@
         "completion_cost": 1.4e-07,
         "average_cost": 1.05e-07,
         "aa_quality": 6.3,
-        "aa_speed": 46.741,
+        "aa_speed": 46.215,
         "lmsys_elo": null,
         "openrouter_speed_hint": 14745.0,
         "source_count": 2,
